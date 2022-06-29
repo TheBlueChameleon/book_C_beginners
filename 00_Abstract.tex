@@ -1,0 +1,94 @@
+\chapter*{Preface}
+We shall start this course with realizing and internalizing a deep and profound truth that will follow us through our coding life and have an important impact on all our projects:
+
+\begin{center}
+\begin{Huge}
+	\emph{Computers are friggin stupid.}
+\end{Huge}
+\end{center}
+
+In principle, this is well and good. If this statement would not hold, we'd have a really hard time making computers do the tasks that are too tedious for us. However, anyone who has ever tried to delegate a part of their chores to a less gifted contemporary knows how \emph{on point} the instructions for their coeval have to be. For computers, this is even only more so. In the tutorials, I've often heard the participants say things like \emph{I thought, the computer would understand that ...}, which I like to acquit with \emph{You think -- the computer does not.}
+
+In this course, I want to guide you through both, the concepts according to which a computer works and the thought processes that you as a programmer should devellop to translate your real life goals into code. In particular, we will be learning the specifics of the programming language C. This language which first appeared in ancient times\footnote{\ie in 1972} has been expanded upon ever since and influenced virtually all modern languages such as C++, C\#, Java, Python, Rust, Go, Perl, Julia, ... You may think of this course as a general introduction to programming. If you ever get to learn another programming language, you will recognize most if not all the concepts discussed here.
+
+While I'll do my best to explain what works how and why, there's no way around doing exercises on your own. I will provide a number of quizz questions at the end of each chapter that are designed to solidify and deepen your understanding of code. Of course, you'll also find solutions in the appendix. Still, I want to encourage you to do your own experiments, be it small code snippets to try your intuition or exercises from external sources. In the end, coding is a skill you can only properly learn by doing.
+
+%TODO programming is applied maths!
+
+Note also that this is an introductory course, not a complete reference of all aspects of the C programming language. As a such, I recommend the website \url{cppreference.com}, which does a good job listing all features and expected behaviours. In fact, since I regard this website an essential tool in programming, a short chapter will be dedicated to how to find your way in that encyclopedia.
+
+To go through this course, you will need a current installation of the \emph{Gnu Compiler Collection} (GCC) as well as a simple code editor on your machine. You should find a guide for how to do so on the website where you found this book, as well as alternative options. Further, you should be (superficially) familiar with using the console for invoking programs. While there are other ways of compiling code, I will show exclusively how to do so from the command line. The reason behind this is that I feel in no way capable of treating the myriad of IDEs\footnote{\emph{Integrated Development Environment}; graphical programs that help with writing code.} available ot there, nor the differences that come with the versions written for different operating systems. The somewhat antiquated command line interface, on the other hand, is way more uniform between various machines. Last but not least, you can derive the correct handling of your IDE from understanding the command line; an IDE is only a \emph{frontend} to the command line interface, \ie it will generate the same commands that I shall show you here.
+
+Since this approach means we are dealing with two different environments -- the command line and our C code -- it is only reasonable to reflect this fact graphically in this book. In- and Output on the command line will be rendered in black boxes like the following:
+\begin{cmdbox}[Command Line Interface]
+\texttt{{\color{green}blue-chameleon@blue-chameleon-HP-250-G8-Notebook-PC}:{\color{blue}\textasciitilde}\$ cd Codes} \\
+\texttt{{\color{green}blue-chameleon@blue-chameleon-HP-250-G8-Notebook-PC}:{\color{blue}\textasciitilde\textbackslash Codes}\$}
+\end{cmdbox}
+
+More often than not, the preface to the command line interface (the green and blue text) will be omitted, and only the commands themselves as well as their output are presented. To distinguish between commands and output, the former will be prefaced with a Dollar sign (\texttt{\$}):
+
+\begin{cmdbox}[Command Line Interface]
+\texttt{\$ echo hello world} \\
+\texttt{hello world}
+\end{cmdbox}
+
+C-Code, on the other hand, will be rendered in white boxes with \emph{syntax highlighted}\footnote{to make code easier readable for humans, it is custom to render the various parts in different colours. Syntax highlighting means applying these rules for colouring.} code together with line numbers:
+\begin{codebox}[C-Code]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    printf("hello world\n");
+}
+\end{minted}
+\end{codebox}
+
+Where relevant, I will also provide the output generated by a program after compiling and executing it. The invocation of the compiler and the compiled program itself will be discussed in the first chapter and omitted thereafter, unless something \enquote{non-standard} is going on.
+
+Some of the content is certainly interesting, but maybe less so for absolute beginners; at the very least, those sections are not essential for every day coding. Depending on your level and time restraints, you may want to do a deep dive or cut to the chase. To faciliate this, more advanced content is highlighted in a similar manner.
+\begin{plusbox}
+In assembly, the hello world program expands to
+\begin{codebox}
+\begin{minted}[linenos,firstnumber=4]{asm}
+        ...
+.LC0:
+        .string "hello world"
+        .text
+        .globl  main
+        .type   main, @function
+\end{minted}
+\end{codebox}
+\end{plusbox}
+%
+\begin{plusbox}[]
+\begin{codebox}
+\begin{minted}[linenos,firstnumber=last]{asm}
+main:
+.LFB0:
+        .cfi_startproc
+        endbr64
+        pushq   %rbp
+        .cfi_def_cfa_offset 16
+        .cfi_offset 6, -16
+        movq    %rsp, %rbp
+        .cfi_def_cfa_register 6
+        leaq    .LC0(%rip), %rax
+        movq    %rax, %rdi
+        call    puts@PLT
+        movl    $0, %eax
+        popq    %rbp
+        .cfi_def_cfa 7, 8
+        ret
+        .cfi_endproc
+.LFE0:
+        ...
+\end{minted}
+\end{codebox}
+\end{plusbox}
+
+This book is based on a university level course for which I was responsible from 2018 through 2022. The experience with different kinds of students and their learning styles have informed the course design in numerous ways. However, time constraints have always curbed my ambitions, and I'm thrilled to expand on my prior work. Ultimatively, of course, this is a piece of human work, and therefore likely to be flawed. I put a lot of effort into the totality of this project, but I can almost guarantee you that you can find at least some minor mistakes. If you do so, or have any questions or remarks on the provided material, feel free to contact me: \url{bluechameleoncoding@gmx.net}
+
+Without further ado, let's start coding!
+\begin{flushright}
+\myName, \myVersionTime
+\end{flushright}
