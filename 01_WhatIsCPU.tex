@@ -4,9 +4,10 @@
 In the general public, it is well known that computers effectively know only two states -- current flows or does not. These \emph{bits} of information are commonly represented by the digits 1 and 0. But how can these elementary states be assembled into complex programs?
 
 \section{Binary Representation of Numbers}
+Before we get to understand how, internally, \emph{programs} look like, let us first have a look at \emph{numbers}, ...
 
 \subsection{Binary Representation of Positive Integers} \label{sec:BinaryNumbers}
-Before we get to understand how, internally, \emph{programs} look like, let us first have a look at \emph{numbers}, and more simply, positive integers. For that, let us start in the familiar decimal system, and look at a random number, say $1725$:
+... and more simply, positive integers. For that, let us start in the familiar decimal system, and look at a random number, say $1725$:
 
 \begin{defbox}[Decomposition of a decimal integer]
 \begin{center}
@@ -281,7 +282,7 @@ In the case of pictures, we use the fact that humans have photoreceptors for red
 
 Similarly, sound can be understood as air pressure varied over time. A microphone effectively measures the air pressure over time and reports the current value back to the processing unit (\eg a stero system or a computer). Recording the air pressure every millisecond (and simply ignoring the values in between) is an apt way to store sound information.
 
-\subsection{Computer Programs}\label{sec:assembly}
+\subsection{Computer Programs} \label{sec:assembly}
 Much like characters, the various functions a CPU (\emph{central processing unit}) provides are enumerated. There is a command for \emph{load a value from memory into the processor}, another one for \emph{add two values in the processor} and another one for \emph{write a value from the processor buffer into memory}. The very first programmers really had to know (or constantly look up) the numbers of the various commands; their codes were nothing more than long columns of numbers that got fed directly into the processor.
 
 Obviously, this mode of working is rather tedious. A first improvement was to associate each processor command with a short textual representation (a so called \emph{mnemonic}) that is easier to memorize than numbers. A computer program could then \emph{parse} a text file comprising of these mnemonics and translate them into \emph{machine code}. Such a program is called an \emph{assembler}.
@@ -292,98 +293,120 @@ Compiled languages -- like C -- are also more abstract and therefore closer to t
 
 I have already hinted at the possibility to load a value from memory into the processor. Of course, for this, the processor needs to know, \emph{which value} to load. You can imagine the memory of a computer as a long row of enumerated cells. Each cell holds exactly one byte of information. Thus, providing the \emph{address}, \ie the number of a memory cell, suffices to provide just that information. In C, we will be dealing with addresses very frequently.
 
-\section{Invoking the Compiler} \label{sec:Compile}
+\section{Generating Executable Files} \label{sec:Compile}
+With all this theory behind us, we can finally get to practical matters: generating executable programs!
 
-\section{Aufruf des Compilers} 
-Für diesen Kurs benutzen wir den \emph{GNU C-Compiler} (gcc). Dieses Programm ist sowohl ein Compiler als auch ein Linker. Gehen wir davon aus, im aktuellen Arbeitsverzeichnis liegt eine Datei mit dem Namen \texttt{myCode.c} vor. Diese Datei kann kompiliert werden mit dem Kommandozeilen-Befehl:
-\begin{cmdbox}[Kommandozeilen-Befehl: Kompilieren]
-gcc myCode.c
+\subsection{Phases of Translation}
+You already know that \emph{translating code into machine language} is a fairly complex process. We have talked about \emph{compiling} (translating from a high level language like C into assembly) and \emph{assembling} (translating from assembly language into machine language). Before compilation, theres also a \emph{preprocessing step}, and at the end of the chain of translation phases, theres \emph{linking}.
+
+\emph{Preprocessing} will be discussed in detail in chapter \ref{chp:Preprocessor}. Essentially it is another translation step that allows to write code in a more convenient way.
+
+\emph{Linking} means combining multiple files of machine language instructions into a single unit of executable code -- think of it as \emph{glueing together the components of a program}.
+
+\subsection{Invoking the Compiler}
+Luckily, all these functions can be executed by a single program (which will invoke other programs to do the four discussed tasks in sequence). This program is the \texttt{gcc}. It combines a preprocessor, compiler, assembler and linker in one program. For convenience, it is usually only referred to as \emph{the compiler}; \emph{to compile} most often means the complete chain of four operations that are needed to generate an executable file.
+
+Naively attempting to start it from the command line will result in an error message:
+\begin{cmdbox}[Invoking the compiler without argument]
+\$ gcc\\
+gcc: {\color{red}fatal error}: no input files\\
+compilation terminated.
 \end{cmdbox}
 
-Der gcc kompiliert mit diesem Befehl die Datei \texttt{myCode.c} und erstellt eine ausführbare Datei mit dem Dateinamen \texttt{a.out}. Diese kann nun über den Kommandozeilen-Befehl:
-\begin{cmdbox}[Kommandozeilen-Befehl: Kompiliertes Programm ausführen]
-./a.out
-\end{cmdbox}
-ausgeführt werden. Besteht der Code aus mehreren \emph{Modulen}\footnote{\ie mehrere Dateien; im Detail steckt mehr hinter diesem Begriff, worauf wir in Kapitel \ref{chp:modules} näher eingehen werden.}, so können diese einfach beim Aufruf des gcc hintereinander durch Leerzeichen getrennt aufgelistet werden. Neben Quellcode-Dateien (Erweiterung \texttt{.c}) können auch vorkompilierte \enquote{Object Codes} (Erweiterung \texttt{.o}) aufgelistet werden.
-\begin{cmdbox}[Kommandozeilen-Befehl: Kompilieren mehrerer Module]
-gcc myCode.c otherCode.c moreCode.c objectFile.o otherObject.o
+That is because, if you want something translated into machine language, you need to tell what this something is. So, assuming we have a file called \texttt{mycode.c} in the current working directory in which there is valid C code, you can tell the gcc that you want to compile that very file by simply passing the filename as a command line argument:
+\begin{cmdbox}[Invoking the compiler with argument]
+\$ gcc mycode.c
 \end{cmdbox}
 
-In jedem Beispiel wird eine Datei \texttt{a.out} erstellt (bzw. überschrieben, falls diese bereits existiert). Möchte man, dass das kompilierte Programm einen anderen Namen erhält, so kann die Option \texttt{-o [OutputName]} angegeben werden; \texttt{[OutputName]} ist dabei der neue Dateiname. Beispiel: die zu erstellende ausführbare Datei soll den Namen \texttt{myProgram} tragen:
-\begin{cmdbox}[Kompilieren mit vorgegebenem Dateinamen für das kompilierte Programm]
-gcc -o myProgram myCode.c
-\end{cmdbox}
-Man startet dieses Programm dann mit dem Kommando
-\begin{cmdbox}[Kommandozeilen-Befehl: Kompiliertes Programm ausführen]
-./myProgram
-\end{cmdbox}
-
-Während der Entwicklung eines Programmes wird man häufig Fehler machen. Manche dieser Fehler sorgen für Code, der vom Compiler nicht interpretiert werden kann; man spricht ua von \emph{Syntaxfehlern}. Dies können beispielsweise fehlende Klammern sein. Enthält der Code solche Fehler, wird das Kompilieren abgebrochen und keine ausführbare Datei erzeugt. Stattdessen zeigt der Compiler Informationen zum Fehler in der Kommandozeile an. (Wir gehen in den folgenden Kapiteln genauer auf diese Rückmeldungen ein).
-
-Andere Code-Elemente können zwar in \enquote{validen Maschinencode} umgesetzt werden, enthalten aber evtl. logische Fehler (sog. \emph{semantische Fehler}). Standardmäßig gibt der Compiler hierzu keine Rückmeldung. Wir können aber mit den Kommandozeilenoptionen\footnote{Compiler Optionen werden oftmals auch \emph{Compiler Flags} genannt.} \texttt{-Wall}, \texttt{-Wimplicit-fallthrough} und \texttt{-Wpedantic} einstellen, dass auf solche Strukturen in der Compiler-Ausgabe ebenfalls hingewiesen werden soll. In der Compiler-Ausgabe werden diese dann als \emph{warnings} vermerkt (daher das \texttt{W} in \texttt{Wall}, \texttt{-Wimplicit-fallthrough} und \texttt{Wpedantic}). Ich empfehle sehr, diese Optionen zu nutzen und den Code zu verbessern, bis alle Warnungen beseitigt sind; in meinen Projekten haben diese Optionen einige Fehler aufgedeckt und mir viel Zeit erspart.
-
-Ein Aufruf mit diesen Optionen sieht also so aus:
-\begin{cmdbox}[Kompilieren mit Ausgabe aller Warnungen]
-gcc -Wall -Wimplicit-fallthrough -Wpedantic -o myProgram myCode.c
+\begin{warnbox}[Avoid whitespaces in filenames]
+You see that whitespaces are what separates the command (\texttt{gcc}) from its arguments (in this case, the file name \texttt{mycode.c}). There can be multiple files that go into one project, and there are also other compiler options which we'll discuss in a minute.
+\end{warnbox}
+%
+\begin{warnbox}[]
+Since all arguments are supposed to be separated by whitespaces, file names with whitespaces are a problem. You can tell the system that a filename contains whitespaces by wrapping the entire name in double quotes:
+\begin{cmdbox}[Compiler invocation on a file name with whitespaces]
+\$ gcc "my code.c"
 \end{cmdbox}
 
-Bibliotheken (\eg \texttt{.o}-Dateien) liegen in der Regel nicht im aktuellen Arbeitsverzeichnis, sondern in einem Standard-Verzeichnis, so dass alle Codes auf der Festplatte diese gleichermaßen Nutzen können. Um dem Compiler mitzuteilen, dass eine solche Bibliothek mit in den Linking-Prozess einbezogen werden soll, benutzen wir die Kommandozeilen-Option \texttt{-l[library]}, wobei \texttt{[library]} der Name der Bibliothek ist, die einbezogen werden soll. Im Kurs wollen wir \eg desöfteren mathematische Funktionen aus der Mathe-Bibliothek \texttt{libm} benutzen. Entsprechend ergänzen wir den Compiler-Aufruf um die Option \texttt{-lm}. Das voranstehende \texttt{lib} wird vom Compiler automatisch entfernt:
-\begin{cmdbox}[Kompilieren und Linken mit der math-library]
-gcc -Wall -Wimplicit-fallthrough -Wpedantic -o myProgram -lm myCode.c
+However, it is easier to avoid whitespaces in filenames alltogether.
+\end{warnbox}
+
+Provided that the code in \texttt{mycode.c} is syntactically correct (\ie can be translated at all), an output file with the name \texttt{a.out} (under Linux and MacOS) or \texttt{a.exe} will be generated. There will be no output on the console, \ie no error messages (nor success messages). To execute the final result, simply type...
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{cmdbox}[Executing a program in Linux/MacOS]
+\$ ./a.out
+\end{cmdbox}
+%
+\begin{cmdbox}[Executing a qprogram in Windows]
+\$ a
+\end{cmdbox}
+\end{tcbraster}
+
+If you want to write the compiled output into a different file, you can prepend the command line option \texttt{-o <outputname>}. So for example, to generate a file with the name \texttt{myexecutable}, type:
+\begin{cmdbox}[Setting the output filename]
+\$ gcc mycode.c -o myexecutable
 \end{cmdbox}
 
+\begin{warnbox}[Extensions matter]
+I hope you noticed the \texttt{.c} at the end of the code filename. This \emph{filename extension} is not optional. The extension specifies what kind of content can be found in the file. We will soon see that the compiler can process other types of data than C code; to distinguish between how to process different inputs it needs this file extension.
+
+Likewise, the extension of the generated output file should either be \texttt{.exe} if you work on a Windows machine, or none at all on Linux and Mac.
+\end{warnbox}
+
+The chain: preprocessing-compiling-assembling-linking can be stopped after the assembly step. The result is a file that contains machine language, but is not directly executable code. This can be useful if some part of the code is used in multiple projects; one can then translate this shared code only once and only do the last step (linkage) with these \emph{precompiled routines}. To do so, one prefixes the command line flag \texttt{-c} to the code file that should be compiled but not linked:
+\begin{cmdbox}[Compiling without linking]
+\$ gcc -c mycode.c
+\end{cmdbox}
+
+After doing so, you will find the file \texttt{mycode.o} on your hard drive. It is called an \emph{object file} and contains the precompiled routines in machine language. Of course, one can combine this with the \texttt{-o} flag to set the output name. For example, \texttt{gcc -c mycode -o myPrecompiledRoutines.o} is a valid command.
+
+These object files can be passed on to the gcc. Since the extension \texttt{.o} marks them clearly as object files, the gcc knows that they only need to parttake in the linkage step. For example, we could run the following two lines:
+\begin{cmdbox}[Generating and using object files]
+\$ gcc -c sharedRoutines.c -o routines.o \\
+\$ gcc mainProject.c routines.o -o projectExecutable
+\end{cmdbox}
+
+%TODO libraries
+\begin{cmdbox}[Linking against the math library]
+\$ gcc myCode.c -lm
+\end{cmdbox}
+
+%TODO lang standards
 Im Vorwort wurde erwähnt, dass C laufend fortentwickelt wird. Dies hat Auswirkungen auf die Interpretation des Codes; derselbe Code wird von älteren Versionen des Compilers nicht zwangsweise in derselben Art umgesetzt wie von neueren. Der gcc kann sowohl nach älteren als auch neueren Versionen der Sprache C kompilieren. Welche Version der Sprache benutzt werden soll, wird mit der Kommandozeilenoption \texttt{-std=[standard]} angegeben. Im Kurs halten wir uns an den Standard aus dem Jahr 2011, und ergänzen den Kommandozeilen-Aufruf entsprechend um \texttt{-std=c11}:
-\begin{cmdbox}[Kompilieren mit nach Standard C11]
-gcc -std=c11 -Wall -Wimplicit-fallthrough -Wpedantic -o myProgram myCode.c -lm
+\begin{cmdbox}[Compiling with the language standard from 2017]
+\$ gcc -std=c17 myCode.c -o myProgram
 \end{cmdbox}
 
-Neben den gezeigten Optionen existieren noch viele weitere Schalter, über die die Arbeitsweise des Compilers beeinflusst werden können; auf diese soll hier jedoch nicht weiter eingegangen werden. Interessierte KursteilnehmerInnen können mit dem Befehl \texttt{man} eine Übersicht aller Optionen mit Erklärungen anzeigen lassen.
-\begin{cmdbox}[man-page des gcc]
-man gcc
+%TODO Warnings
+\begin{cmdbox}[Enabling useful warnings]
+\$ gcc -Wall -Wextra -Wpedantic myCode.c
 \end{cmdbox}
 
-\begin{plusbox}
-Die hier gegebenen Erklärungen und Optionen gelten so auch für C++. Jedoch sollte der Compiler \texttt{g++} benutzt werden. Das heißt, an allen Stellen, in denen oben \texttt{gcc} stand, muss durch \texttt{g++} ersetzt werden. Außerdem muss als Standard  dann \texttt{-std=c++11} anstelle von \texttt{-std=c11} angegeben werden.
-\end{plusbox}
 
-\begin{hintbox}
-Da es lästig werden kann, wiederholt dieselben Optionen zu tippen, arbeite ich für kleinere Projekte gerne mit einem kleinen Script wie dem folgenden\footnote{Für größere Projekte gibt es Mechaniken, die hier nicht angesprochen werden können. Interessierte KursteilnehmerInnen können die DozentInnen bei Interesse auf \emph{makefiles} ansprechen.}:
-\begin{codebox}[Mini-Script \texttt{compile} zum komfortablen kompilieren]
-\begin{minted}[linenos]{bash}
-OPTIONS="-std=c11 -Wall -Wimplicit-fallthrough -Wpedantic"
-LIBS="-lm -lncurses"
-
-INFILE=$1
-OUTFILE="${INFILE%%.*}"
-
-clear
-
-rm -f $OUTFILE
-echo ==================================
-echo attempting to compile
-echo gcc $OPTIONS -o $OUTFILE $INFILE $LIBS
-echo ..................................
-echo ""
-
-gcc $OPTIONS -o $OUTFILE $INFILE $LIBS
-
-echo ""
-echo ..................................
-echo Compilation successfull.
-echo ..................................
-echo ""
-./$OUTFILE
-\end{minted}
-\end{codebox}
-
-Dieses Script kann \eg in einer Textdatei mit Namen \texttt{compile} gespeichert und als ausführbares Script markiert werden. Letzeres geschieht über einen Kommandozeilen-Befehl:
-\begin{cmdbox}[Kommandozeile: Script ausführbar machen]
-chmod +x ./compile
+\begin{cmdbox}[My standard compiler invocation]
+\$ gcc -std=c17 -Wall -Wextra -Wpedantic myCode.c -lm -o executable
 \end{cmdbox}
 
-Mit diesen Schritten reicht es, nur noch
-\begin{cmdbox}[Kommandozeile: Script ausführen]
-./compile myCode.c
-\end{cmdbox}
-einzugeben. Der Code automatisch mit den besprochenen Optionen kompiliert und direkt ausgeführt, sofern der Code erfolgreich kompiliert werden konnte.
-\end{hintbox}
+Since all of this is quite a mouthful to retain, you can look up all of these and other options in the appendix. See table \ref{tab:CompilerOptions} at the end of this book.
+
+\section{Main Takeaways} 
+\begin{itembox}[Binary Data]
+\item All information is stored as bitpatterns that have no inherent meaning. What a given sequence of bits means depends on which interpretation rules are applied
+\item All information is grouped in bytes, \ie groups of eight bits. Multiple bytes can be compounded to form a larger piece of information.
+\item There is a principal difference between integers and floating point numbers.
+\end{itembox}
+%
+\begin{itembox}[Translating Code]
+\item C code is translated into executable files in four steps: preprocessing, compiling, assembly and linkage. The gcc can do all these steps in one go.
+\item C code files need to have the extension \texttt{.c}.
+\item C code can be compiled once into object files and used in several projects. Object files have the extension \texttt{.o}
+\item Libraries are collections of object files that can parttake in the linkage process. To do so, use the option \texttt{-l<library name>}
+\item Depending on the operating system, executable files should either have no extension (Linux, Mac) or the extension \texttt{.exe}
+\item To set an output name, use the option \texttt{-o <output filename>}
+\item There are different language standards for the C programming language. A standard can be selected with the option \texttt{-std=<standard>}. We use \texttt{-std=c17} in this course.
+\item The compiler can analyze the code for suspicious lines that most likely generate undesired behaviour. To enable this feature, add the compiler options \texttt{-Wall -Wextra -Wpedantic}.
+\end{itembox}
+\section{Exercises and Solutions}
