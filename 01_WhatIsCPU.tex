@@ -325,7 +325,7 @@ You see that whitespaces are what separates the command (\texttt{gcc}) from its 
 \begin{warnbox}[]
 Since all arguments are supposed to be separated by whitespaces, file names with whitespaces are a problem. You can tell the system that a filename contains whitespaces by wrapping the entire name in double quotes:
 \begin{cmdbox}[Compiler invocation on a file name with whitespaces]
-\$ gcc "my code.c"
+\$ gcc \textbf{"}my code.\textbf{c"}
 \end{cmdbox}
 
 However, it is easier to avoid whitespaces in filenames alltogether.
@@ -347,7 +347,7 @@ Provided that the code in \texttt{mycode.c} is syntactically correct (\ie can be
 
 If you want to write the compiled output into a different file, you can prepend the command line option \texttt{-o <outputname>}. So for example, to generate a file with the name \texttt{myexecutable}, type:
 \begin{cmdbox}[Setting the output filename]
-\$ gcc mycode.c -o myexecutable
+\$ gcc mycode.c \textbf{-o myexecutable}
 \end{cmdbox}
 
 \begin{warnbox}[Extensions matter]
@@ -358,7 +358,7 @@ Likewise, the extension of the generated output file should either be \texttt{.e
 
 The chain: preprocessing-compiling-assembling-linking can be stopped after the assembly step. The result is a file that contains machine language, but is not directly executable code. This can be useful if some part of the code is used in multiple projects; one can then translate this shared code only once and only do the last step (linkage) with these \emph{precompiled routines}. To do so, one prefixes the command line flag \texttt{-c} to the code file that should be compiled but not linked:
 \begin{cmdbox}[Compiling without linking]
-\$ gcc -c mycode.c
+\$ gcc \textbf{-c} mycode.c
 \end{cmdbox}
 
 After doing so, you will find the file \texttt{mycode.o} on your hard drive. It is called an \emph{object file} and contains the precompiled routines in machine language. Of course, one can combine this with the \texttt{-o} flag to set the output name. For example, \texttt{gcc -c mycode -o myPrecompiledRoutines.o} is a valid command.
@@ -366,31 +366,35 @@ After doing so, you will find the file \texttt{mycode.o} on your hard drive. It 
 These object files can be passed on to the gcc. Since the extension \texttt{.o} marks them clearly as object files, the gcc knows that they only need to parttake in the linkage step. For example, we could run the following two lines:
 \begin{cmdbox}[Generating and using object files]
 \$ gcc -c sharedRoutines.c -o routines.o \\
-\$ gcc mainProject.c routines.o -o projectExecutable
+\$ gcc mainProject.c \textbf{routines.o} -o projectExecutable
 \end{cmdbox}
 
-%TODO libraries
+Some collections of routines are pre-installed on your computer. These collections are called \emph{libraries} and are really only object files packed together. Usually, their filenames begin with the prefix \texttt{lib} and have the extension \texttt{.a}; the name of the library itself is wedged in between. To use these routines in own programs, we can add them add them to the linkage step with the compiler option \texttt{-l<libname>}, where \texttt{<libname>} is the name of the library we want to use. For example, theres the \emph{math library}, which contains routines that help with common mathematical problems such as computing trigonometric functions or finding the square root. This library has the filename \texttt{libm.a}; the \texttt{<libname>} part hence is really only the letter \texttt{m}. It can be added to a project with:
 \begin{cmdbox}[Linking against the math library]
-\$ gcc myCode.c -lm
+\$ gcc myCode.c \textbf{-lm}
 \end{cmdbox}
+We will use this library frequently in this course.
 
-%TODO lang standards
-Im Vorwort wurde erwähnt, dass C laufend fortentwickelt wird. Dies hat Auswirkungen auf die Interpretation des Codes; derselbe Code wird von älteren Versionen des Compilers nicht zwangsweise in derselben Art umgesetzt wie von neueren. Der gcc kann sowohl nach älteren als auch neueren Versionen der Sprache C kompilieren. Welche Version der Sprache benutzt werden soll, wird mit der Kommandozeilenoption \texttt{-std=[standard]} angegeben. Im Kurs halten wir uns an den Standard aus dem Jahr 2011, und ergänzen den Kommandozeilen-Aufruf entsprechend um \texttt{-std=c11}:
+In the preface I mentioned in passing that the C programming language is still evolving. Over the last fifty years, some features have been added and also some behaviours were changed in a fundamental way. In order to be able to do both, compile old code as it was intended when it was written and use newer features at the same time, the gcc has a \enquote{switch} that allows to select one of several \emph{standards}. For this, we use the command line parameter \texttt{-std=<standard>}, where \texttt{<standard>} specifies which version of the language should be expected. In this course, we'll be using the Standard from 2017, which goes by the code \texttt{c17}. So, our invocations of the compiler will need the according option set every time:
+end um \texttt{-std=c11}:
 \begin{cmdbox}[Compiling with the language standard from 2017]
-\$ gcc -std=c17 myCode.c -o myProgram
+\$ gcc \textbf{-std=c17} myCode.c
 \end{cmdbox}
 
-%TODO Warnings
+As humans, we are prone to making errors. \emph{Very} prone. I started programming as a hobby more than twenty years ago, and still I hardly write more than some ten lines of code before I check whether I've made any mistake. And there are many mistakes one can make. Some simply render a program \enquote{nonsensical}, \ie prevent translation into machine language alltogether. Others are more subtle; they are valid instructions, but have unintended side effects. The gcc is actually capable of detecting some patterns in code files that were most likely not intended by the programmer. If such patterns are detected, a \emph{warning} is printed on the console -- at least if enabled by the appropriate command line options. Since there are different \enquote{levels of warnings}, there are multiple options: \texttt{-Wall} enables \emph{all} basic warnings; \texttt{-Wextra} adds some more warnings, and \texttt{-Wpedantic} requires the programmer to adhere to a very strict ruleset.
+
+Maybe you're much smarter than I am and don't need this sort of assistance; I for one have been very happy about these features. More often than not they prevented bugs or made me aware of problematic constructs. Therefore, I highly recommend you to compile your codes with these three options:
 \begin{cmdbox}[Enabling useful warnings]
-\$ gcc -Wall -Wextra -Wpedantic myCode.c
-\end{cmdbox}
-
-
-\begin{cmdbox}[My standard compiler invocation]
-\$ gcc -std=c17 -Wall -Wextra -Wpedantic myCode.c -lm -o executable
+\$ gcc \textbf{-Wall -Wextra -Wpedantic} myCode.c
 \end{cmdbox}
 
 Since all of this is quite a mouthful to retain, you can look up all of these and other options in the appendix. See table \ref{tab:CompilerOptions} at the end of this book.
+
+To put it in a nutshell, when writing code I recommend you to type these commands; they will soon enough become a second nature:
+\begin{cmdbox}[My standard compiler invocation]
+\$ gcc -std=c17 -Wall -Wextra -Wpedantic myCode.c -lm -o executable \\
+\$ ./executable
+\end{cmdbox}
 
 \section{Main Takeaways} 
 \begin{itembox}[Binary Data]
@@ -409,4 +413,33 @@ Since all of this is quite a mouthful to retain, you can look up all of these an
 \item There are different language standards for the C programming language. A standard can be selected with the option \texttt{-std=<standard>}. We use \texttt{-std=c17} in this course.
 \item The compiler can analyze the code for suspicious lines that most likely generate undesired behaviour. To enable this feature, add the compiler options \texttt{-Wall -Wextra -Wpedantic}.
 \end{itembox}
+
 \section{Exercises and Solutions}
+\subsubsection*{Translating Binary}
+\begin{itemize}
+\item Which positive integer corresponds to the bit sequence $101010_2$?
+\item Which bit sequence corresponds to the decimal number $21_{10}$?
+\item Which bit sequence corresponds to the string \texttt{42}?
+\end{itemize}
+
+\subsubsection*{Pitfalls in binary encoding}
+\begin{itemize}
+\item Why does it matter for a computer whether a number is given as $2.0$ or as $2$?
+\item You are given a sequence of 16 bits together with the information that they encode an unsigned integer. Why is even this information not enough to unambiguosly decode the bit sequence?
+\end{itemize}
+
+\rule{\linewidth}{0.1mm}
+
+\subsubsection*{Solution: Translating Binary}
+\begin{itemize}
+\item $101010_2 = 42_{10}$
+\item $21_{10} = 10101_2$. \\
+	Notice how $42 = 2 \times 21$ and how, in binary, you get from $21$ to $42$ by adding a zero.\\
+	Do you see how this is related to the fact that $2_{10} = 10_2$?\\
+	(Multiplying with ten in the decimal system also only adds a zero to the number representation)
+\item The \emph{string} \texttt{42} comprises of two \emph{characters}, \texttt{4} and \texttt{2}.\\
+	From the ASCII table (fig. \ref{fig:ASCII}) we find that \texttt{4} has codepoint 52 and \texttt{2} has codepoint 50.\\
+	Converting these codepoints into binary gives the bit sequence \texttt{0011 0100  0011 0010}.
+\end{itemize}
+
+\subsubsection*{Pitfalls in binary encoding}
