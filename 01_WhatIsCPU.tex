@@ -8,7 +8,7 @@ Before we get to understand how, internally, \emph{programs} look like, let us f
 
 \subsection{Binary Representation of Positive Integers} \label{sec:BinaryNumbers}
 ... and more simply, positive integers. For that, let us start in the familiar decimal system, and look at a random number, say $1725$:
-
+%
 \begin{defbox}[Decomposition of a decimal integer]
 \begin{center}
 \begin{tikzpicture}[
@@ -231,9 +231,7 @@ In the binary system, the base has only one prime factor; hence, such \enquote{p
 You see that a significant number of binary digits is necessary to store the fractional part of a number with acceptable precision. This becomes worse when dealing with very small numbers.
 
 In science, both very small and very large numbers are written down in \emph{scientific notation}: instead of writing $0.025$, one would put $2.5 \times 10^{-2}$ on the paper. This seems tedious for numbers close to 1, but very small numbers like the gravitational constant ($G \approx 6.67430 \times 10^{-11} = 0.0000000000667430$) become \emph{much nicer} to handle this way.
-\end{plusbox}
-%
-\begin{plusbox}[]
+
 We can do the same in binary: instead of storing the entire information in a singular number, we split it into a \emph{mantissa} ($6.67430$) and an \emph{exponent} part ($-11$) to the benefit of having a way more compact format for our data. Adding a sign bit to the recipe we get a number format that works well for a large range of numbers and uses the available precision as well as possible.
 
 One consequence of this is that larger numbers implicitly are represented with less precision:
@@ -243,7 +241,9 @@ Back in the decimal system, think of the mantissa as holding a fixed number of d
 While this rarely causes trouble when \emph{storing} numbers (it is rarely important whether a number is 9289347981238903 or 9289347981238904), problems arise when doing math with numbers of different orders of magnitude.
 
 For example, let's add the numbers $1$ and $0.00001$. Storing them in scientific format with a mantissa lenght of four, they can be represented with perfect precision as $1.000 \times 10^{0}$ and $1.000 \times 10^{-5}$. Let's also assume this is the maximum storage place we want to allot per number. Any number that takes more space than that will be rounded to the next number representable with four mantissa digits. For example, the value $19937$ will be stored as $1.994 \times 10^{4}$.
-
+\end{plusbox}
+%
+\begin{plusbox}[]
 Now, adding $1$ and $0.00001$ together gives $1.00001 = 1.00001 \times 10^{0}$, but would require six mantissa digits -- too much for our limited storage. Hence, the result gets rounded to $1.000 \times 10^{0}$. In other words, we have the \emph{mathematically incorrect} result that $1 + 0.00001 = 1$.
 
 Getting around this problem is non-trivial. Of course, one can always use more mantissa bits (\enquote{more precision}); however, this comes at the cost of higher memory and computation time demand. Designing algorithms with the mechanics behind floating point numbers in mind and thereby minimizing the rounding errors if often the more apt way of dealing with this issue. In this course, we will not focus on this aspect of programming; be aware, though, that it exists.
@@ -320,9 +320,7 @@ That is because, if you want something translated into machine language, you nee
 
 \begin{warnbox}[Avoid whitespaces in filenames]
 You see that whitespaces are what separates the command (\texttt{gcc}) from its arguments (in this case, the file name \texttt{mycode.c}). There can be multiple files that go into one project, and there are also other compiler options which we'll discuss in a minute.
-\end{warnbox}
-%
-\begin{warnbox}[]
+
 Since all arguments are supposed to be separated by whitespaces, file names with whitespaces are a problem. You can tell the system that a filename contains whitespaces by wrapping the entire name in double quotes:
 \begin{cmdbox}[Compiler invocation on a file name with whitespaces]
 \$ gcc \textbf{"}my code.\textbf{c"}
@@ -414,6 +412,7 @@ To put it in a nutshell, when writing code I recommend you to type these command
 \item The compiler can analyze the code for suspicious lines that most likely generate undesired behaviour. To enable this feature, add the compiler options \texttt{-Wall -Wextra -Wpedantic}.
 \end{itembox}
 
+\newpage
 \section{Exercises and Solutions}
 \subsubsection*{Translating Binary}
 \begin{itemize}

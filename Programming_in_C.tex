@@ -6,11 +6,25 @@
 	titlepage=true,
 	DIV=12,
 	final
-]{scrreprt}
+]{book}
+\usepackage[
+    a4paper,
+    bindingoffset=0.2in,
+    centering,
+    marginparwidth=2in,
+    textwidth=16cm,
+    marginparsep=2em,
+    top=2cm,
+    bottom=2.5cm,
+    %showframe
+]{geometry} 
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1ex}
+
 
 %==============================================================================%
 % PACKAGES
-%
 
 % Standard text formatting
 \usepackage[utf8]{inputenc}
@@ -23,29 +37,41 @@
 \usepackage{csquotes}
 \usepackage{xspace}
 
-\usepackage[toc,page]{appendix}
+\usepackage[
+	citecolor=black,
+	colorlinks=true,
+	linkcolor=black,
+	anchorcolor=black,
+	urlcolor=black,
+	breaklinks=true
+]{hyperref}
 
+\usepackage{scrlayer-scrpage}
+%\usepackage{setspace}
+
+% Titles and text structure
+\usepackage[explicit]{titlesec}
 \usepackage{afterpage}
 	\newcommand\blankpage{%
 		\null
 		\thispagestyle{empty}%
 		\addtocounter{page}{-1}%
 		\newpage}
-
 \usepackage{epigraph}
 	\setlength{\epigraphwidth}{.9\linewidth}
-
-\usepackage{placeins}	% FloatBarrier.
+\usepackage[toc,page]{appendix}
 
 % gfx
 \usepackage{wrapfig}
 \usepackage{graphicx}
 \usepackage[bf]{caption}
 	\captionsetup{format=plain}
-\usepackage{placeins}
+\usepackage{placeins}	% FloatBarrier.
 \usepackage[table]{xcolor}
 	\definecolor{tabhighlight}{RGB}{230,240,255}
 	\definecolor{grey}{RGB}{128,128,128}
+	\definecolor{titlebgdark}{RGB}{32,128,160}
+	\definecolor{titlebglight}{RGB}{191,233,233}
 
 \usepackage{tikz}
 	\usetikzlibrary{positioning}
@@ -57,70 +83,7 @@
 	\tikzstyle{every picture}+=[remember picture]
 \usepackage{adjustbox}
 
-% tcolorboxes
 \usepackage[most]{tcolorbox}
-	\tcbsetforeverylayer{
-		 colback=cyan!10!white,
-		 colframe=cyan!75!black,
-		 arc=0pt,
-		 outer arc=0pt,
-		 parbox=false
-		}
-	\newtcolorbox{defbox}[1][Your Title Here]
-		{colback=cyan!10!white,
-		 colframe=cyan!75!black,
-		 arc=0pt,
-		 outer arc=0pt,
-		 title=#1
-		}
-	\newtcolorbox{codebox}[1][Code]
-		{colback=white,
-		 fontupper=\ttfamily ,
-		 colframe=blue!40!black,
-		 leftupper=7mm,
-		 title=#1,
-		 arc=0pt,
-		 outer arc=0pt
-		}
-	\newtcolorbox{cmdbox}[1][Command Line Interface]
-		{colback=black,
-		 coltext=white,
-		 fontupper=\ttfamily ,
-		 colframe=blue!40!black,
-		 title=#1,
-		 arc=0pt,
-		 outer arc=0pt
-		}
-	\newtcolorbox{warnbox}[1][Attention]
-		{colback=black!5!white,
-		 colframe=red!40!black,
-		 title=#1,
-		 arc=0pt,
-		 outer arc=0pt
-		 }
-	\newtcolorbox{hintbox}[1][Hint]
-		{colback=black!5!white,
-		 colframe=green!40!black,
-		 title=#1,
-		 arc=0pt,
-		 outer arc=0pt
-		}
-	\newtcolorbox{plusbox}[1][Advanced Content]
-		{colback=yellow!5!white,
-		 colframe=yellow!90!red,
-		 fontupper=\color{black},
-		 title=#1,
-		 arc=0pt,
-		 outer arc=0pt
-		}
-	\newenvironment{itembox}[1][]
-		{
-			\begin{tcolorbox}[title=#1,arc=0pt,outer arc=0pt]
-			\begin{itemize}
-		}{
-			\end{itemize}
-			\end{tcolorbox}
-		}
 
 % tables
 \usepackage{tabularx}
@@ -137,42 +100,163 @@
 \usepackage[arrowdel]{physics}
 \usepackage{mathtools}
 
-% indexes, links, page format
-\usepackage{scrlayer-scrpage}
-\usepackage[toc,page]{appendix}
-\usepackage{setspace}
-\usepackage[
-	citecolor=black,
-	colorlinks=true,
-	linkcolor=black,
-	anchorcolor=black,
-	urlcolor=black,
-	breaklinks=true
-]{hyperref}
-%\usepackage[a4paper, total={6in, 10in}]{geometry}
-
-% bibliography
-%\usepackage[backend=bibtex]{biblatex}
-%	\bibliography{BA_Bib}
-
-% misc
-\usepackage{color}
-%\usepackage[super]{nth}
-%\usepackage[
-%	output-decimal-marker={.},
-%	input-symbols = {()},  			% do not treat "(" and ")" in any special way
-%	group-digits  = true  			% guess what.
-%]{siunitx}
 \usepackage[newfloat]{minted}
-%	\usemintedstyle{xcode}
-%	\usemintedstyle{bw}
 	\usemintedstyle{friendly}
-	%\newenvironment{code}{\captionsetup{type=listing}}{}
-	%\SetupFloatingEnvironment{listing}{name=Source Code}
+		
+%==============================================================================%
+% Headings definition
+
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {}
+  {20pt}
+  {%
+    \begin{tcolorbox}[
+      enhanced,
+      colback=titlebgdark,
+      boxrule=0.25cm,
+      colframe=titlebglight,
+      arc=0pt,
+      outer arc=0pt,
+      leftrule=0pt,
+      rightrule=0pt,
+      fontupper=\color{white}\sffamily\bfseries\huge,
+      enlarge left by=-1in-\hoffset-\oddsidemargin, 
+      enlarge right by=-\paperwidth+1in+\hoffset+\oddsidemargin+\textwidth,
+      width=\paperwidth, 
+      left=1in+\hoffset+\oddsidemargin, 
+      right=\paperwidth-1in-\hoffset-\oddsidemargin-\textwidth,
+      top=0.6cm, 
+      bottom=0.6cm,
+      overlay={
+        \node[
+          fill=titlebgdark,
+          draw=titlebglight,
+          line width=0.15cm,
+          inner sep=0pt,
+          text width=1.7cm,
+          minimum height=1.7cm,
+          align=center,
+          font=\color{white}\sffamily\bfseries\fontsize{30}{36}\selectfont
+        ] 
+        (chapname)
+        at ([xshift=-4cm]frame.north east)
+        {\thechapter};
+        \node[font=\small,anchor=south,inner sep=2pt] at (chapname.north)
+        {\MakeUppercase\chaptertitlename};  
+      } 
+    ]
+    #1
+    \end{tcolorbox}%
+  }
+\titleformat{name=\chapter,numberless}[display]
+  {\normalfont\huge\bfseries}
+  {}
+  {20pt}
+  {%
+    \begin{tcolorbox}[
+      enhanced,
+      colback=titlebgdark,
+      boxrule=0.25cm,
+      colframe=titlebglight,
+      arc=0pt,
+      outer arc=0pt,
+      remember as=title,
+      leftrule=0pt,
+      rightrule=0pt,
+      fontupper=\color{white}\sffamily\bfseries\huge,
+      enlarge left by=-1in-\hoffset-\oddsidemargin, 
+      enlarge right by=-\paperwidth+1in+\hoffset+\oddsidemargin+\textwidth,
+      width=\paperwidth, 
+      left=1in+\hoffset+\oddsidemargin, 
+      right=\paperwidth-1in-\hoffset-\oddsidemargin-\textwidth,
+      top=0.6cm, 
+      bottom=0.6cm, 
+    ]
+    #1
+    \end{tcolorbox}%
+  }
+
+%\titlespacing{<command>}{<left>}{<before-sep>}{<after-sep>}[<right>]  
+\titlespacing*{\chapter}{0pt}{0pt}{40pt}
+\titlespacing{\section}{0cm}{1.0cm}{0cm}
+\titlespacing{\subsection}{0cm}{0.3cm}{0cm}
+
+\usepackage{etoolbox}
+\patchcmd{\chapter} % <cmd>
+	{plain}         % <search>
+	{empty}         % <replace>
+	{}{}            % <success><failure>
+
+%==============================================================================%
+% tcolorboxes
+
+\tcbsetforeverylayer{
+	 colback=cyan!10!white,
+	 colframe=cyan!75!black,
+	 arc=0pt,
+	 outer arc=0pt,
+	 parbox=false
+	}
+\newtcolorbox{defbox}[1][Your Title Here]
+	{colback=cyan!10!white,
+	 colframe=cyan!75!black,
+	 arc=0pt,
+	 outer arc=0pt,
+	 title=#1
+	}
+\newtcolorbox{codebox}[1][Code]
+	{colback=white,
+	 fontupper=\ttfamily ,
+	 colframe=blue!40!black,
+	 leftupper=7mm,
+	 title=#1,
+	 arc=0pt,
+	 outer arc=0pt
+	}
+\newtcolorbox{cmdbox}[1][Command Line Interface]
+	{colback=black,
+	 coltext=white,
+	 fontupper=\ttfamily ,
+	 colframe=blue!40!black,
+	 title=#1,
+	 arc=0pt,
+	 outer arc=0pt
+	}
+\newtcolorbox{warnbox}[1][Attention]
+	{colback=black!5!white,
+	 colframe=red!40!black,
+	 title=#1,
+	 arc=0pt,
+	 outer arc=0pt
+	 }
+\newtcolorbox{hintbox}[1][Hint]
+	{colback=black!5!white,
+	 colframe=green!40!black,
+	 title=#1,
+	 arc=0pt,
+	 outer arc=0pt
+	}
+\newtcolorbox{plusbox}[1][Advanced Content]
+	{colback=yellow!5!white,
+	 colframe=yellow!90!red,
+	 fontupper=\color{black},
+	 title=#1,
+	 arc=0pt,
+	 outer arc=0pt
+	}
+\newenvironment{itembox}[1][]
+	{
+		\begin{tcolorbox}[title=#1,arc=0pt,outer arc=0pt]
+		\begin{itemize}
+	}{
+		\end{itemize}
+		\end{tcolorbox}
+	}
 
 %==============================================================================%
 % GLOBAL MACROS
-%
+
 \newcommand{\myName}{Stefan Hartinger\xspace}
 \newcommand{\myVersionTime}{June 2022}
 \newcommand{\myTitle}{Programming in C\xspace}
@@ -181,15 +265,10 @@
 \newcommand*{\ie}{i.\,e.\xspace}
 \newcommand*{\eg}{e.\,g.\xspace}
 
-\addtokomafont{labelinglabel}{\sffamily}
-
 \newcommand*{\tabcrlf}{\\ \hline}			% actually still allows for optional argument
 
 \newcommand*{\smallfrac}  [2]{\ensuremath{{}^        {#1} \!/_        {#2}}}
 \newcommand*{\smallfracrm}[2]{\ensuremath{{}^{\mathrm{#1}}\!/_{\mathrm{#2}}}}
-%\newcommand*{\abs}[1]{\left\lvert {#1} \right\rvert}		% already defined in package physics - apparently does the same there.
-
-% local abbreviations for this doc
 
 \newcommand*{\thus}{\ensuremath{\rightarrow}\xspace}
 \newcommand*{\Thus}{\ensuremath{\Rightarrow}\xspace}
@@ -198,10 +277,9 @@
 
 %==============================================================================%
 % GLOBAL PARAMTERS
-%
 
 \title{\myTitle}
-\subtitle{\mySubtitle}
+%\subtitle{\mySubtitle}
 \author{\myName}
 \date{\today}
 
@@ -221,8 +299,7 @@
 \begin{document}
 	\begin{titlepage}
 		\centering
-		\makeatletter
-		% activate some weird special mode that enables the use of \@title and other macros
+		\makeatletter 		% activate some weird special mode that enables the use of \@title and other macros
 
 		{\phantom{x}}
 		
@@ -230,7 +307,7 @@
 		\Huge \textsc{\@title}
 
 		\vspace{6\tabcolsep}
-		\LARGE \textsc{\@subtitle}
+		\LARGE \textsc{\mySubtitle}
 
 		\vspace{6\tabcolsep}
 		\large
@@ -249,18 +326,18 @@
 
 	{
 		\pagestyle{empty}
-		\renewcommand*{\chapterpagestyle}{empty}
+		%\renewcommand*{\chapterpagestyle}{empty}
 
-		\blankpage
 		\include{00_Abstract}
 		\blankpage
+		\pagestyle{empty}
 		\tableofcontents
 
 		\clearpage
 	}
 
 	\setcounter{page}{1}
-
+	
 	\include{01_WhatIsCPU}
 %	\include{02_FirstProg}
 %	\include{03_Datatypes}
