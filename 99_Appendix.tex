@@ -509,7 +509,7 @@
 \label{tab:CompilerOptions}
 }
 
-\section{Escape-Sequenzen}
+\section{Escape-Sequenzes}
 \begin{table}[h!]
 \newcolumntype{E}{>{\centering\ttfamily\arraybackslash}m{.3  \linewidth}}
 \newcolumntype{F}{>{\centering         \arraybackslash}m{.65 \textwidth}}
@@ -526,61 +526,54 @@
 	\tabcrlf
 	
 	\textbackslash a &
-	\emph{alert} -- Ausgabe eines Tons über den Beeper, sofern vorhanden
+	\emph{alert} -- ring the beeper, if present
 	\\
 	
 	\textbackslash b &
-	\emph{backspace} -- Textcursor um eine Spalte nach links verschieben
+	\emph{backspace} -- move the text cursor one column to the left
 	\\
 		
 	\textbackslash f &
-	\emph{form feed} -- Textcursor um eine Zeile nach unten verschieben
+	\emph{form feed} -- move the text cursor one row down
 	\\
 		
 	\textbackslash n &
-	\emph{newline} -- Textcursor an den Anfang der nächsten Zeile verschieben
+	\emph{newline} -- move the text cursor to the beginning of the next line
 	\\
 		
 	\textbackslash r &
-	\emph{carriage return} -- Textcursor an den Anfang der aktuellen Zeile verschieben	
+	\emph{carriage return} -- move the text cursor to the beginning of the current line
 	\\
 	
 	\textbackslash t &
-	\emph{horizontal tab} -- Textcursor auf die nächste Tabulator-Position nach rechts verschieben
+	\emph{horizontal tab} -- move the text cursor to the next tab stop to the right
 	\\
 	
 	\textbackslash v &
-	\emph{vertical tab} -- Textcursor auf die nächste \emph{vertikale} Tabulator-Position nach unten
-						   verschieben
+	\emph{vertical tab} -- move the text cursor down to the next vertical tab stop 
 	\\
 		
 	\textbackslash \textbackslash  &
-	\emph{backslash} -- das Zeichen \texttt{\textbackslash} selbst
+	\emph{backslash} -- the character \texttt{\textbackslash} itself
 	\\
 		
 	\textbackslash '' &
-	\emph{double quote} -- das Zeichen \texttt{''} selbst
+	\emph{double quote} -- the character \texttt{''} itself
 	\\
 		
 	\textbackslash x\texttt{hh} &
-	\emph{ASCII character} -- das Zeichen mit dem ASCII-Code \texttt{0xhh} einfügen, wobei \texttt{hh}
-							  ein Hexadezimalwert zwischen \texttt{00} und \texttt{FF} ist
+	\emph{ASCII character} -- inserts the character with ASCII code \texttt{0xhh}, where \texttt{hh}
+							  is a hexadecimal value between \texttt{00} and \texttt{FF}
 	\\
 		
 	\textbackslash u\texttt{hhhh} &
-	\emph{unicode character} -- das Unicode-Zeichen \texttt{0xhhhh} einfügen, wobei \texttt{hhhh} ein
-								Hexadezimalwert zwischen \texttt{00} und \texttt{FFFF} ist
+	\emph{unicode character} -- inserts the character with code point \texttt{0xhhhh}, where \texttt{hhhh}
+							  is a hexadecimal value between \texttt{0000} and \texttt{FFFF}
 	\\
 		
 	\textbackslash U\texttt{hhhhhhhh} &
-	\emph{unicode character} -- das Unicode-Zeichen \texttt{0xhhhhhhhh} einfügen, wobei
-								\texttt{hhhhhhhh} ein Hexadezimalwert zwischen \texttt{00} und
-								\texttt{FFFFFFFF} ist
-	\\
-	
-	\%\% &
-	\emph{percentage} -- das Prozentzeichen. Achtung: Hier werden tatsächlich zwei \% hintereinander
-						 gesetzt, nicht der Backslash \textbackslash.
+	\emph{unicode character} -- nserts the character with code point \texttt{0xhhhhhhhh} where \texttt{hhhhhhhh}
+							  is a hexadecimal value between \texttt{00000000} and \texttt{FFFFFFFF}
 	\\
 	
 	\bottomrule[1.5pt]
@@ -589,11 +582,90 @@
 \label{tab:Escape}
 \end{table}
 Siehe Seite 19 auf \url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf}
-
-
 \FloatBarrier
+
+\section{Data Types} \label{sec:Datatypes}
+In table \ref{tab:DatatypesStd} you'll find the data types that are always defined in C. Sometimes, the specific meaning of data types depends on the plattform (\ie the kind of machine on which your code runs); if so, the values are shown in grey. The given values refer to the usual interpretation for modern desktop computers, but can be substantially different for older machines, different microprocessors or even compiler versions.
+{
+\rowcolors{1}{tabhighlight}{white}
+\newcolumntype{T}{>{\centering\ttfamily\arraybackslash}m{.19\linewidth}}
+\newcolumntype{S}{>{\centering \arraybackslash}        p{.19\linewidth}}
+\newcolumntype{B}{>{\centering \arraybackslash}        p{.54\linewidth}}
+
+\begin{tabularx}
+	{\linewidth}
+	{TBS}
+	\toprule[1.5pt]
+	
+\textbf{\textrm{Data type}} & \textbf{Range of values}                                      & \textbf{Memory consumption}
+\tabcrlf                   
+    char                    &                               -128 \ldots              +127   & 1 Byte \\
+    short int               &                           -32\,768 \ldots          +32\,767   & 2 Byte \\
+    int                     & \textcolor{grey}{-2\,147\,483\,648 \ldots +2\,147\,483\,647}  & \textcolor{grey}{4 Byte} \\
+    long int                & \textcolor{grey}{-9\,223\,372\,036\,854\,775\,808 \ldots
+                                             +9\,223\,372\,036\,854\,775\,807}
+                                                                                            & \textcolor{grey}{8 Byte} \\
+    long long int           & -9\,223\,372\,036\,854\,775\,808 \ldots
+                              +9\,223\,372\,036\,854\,775\,807
+                                                                                            & 8 Byte
+\tabcrlf                                                                                   
+                                                                                           
+    unsigned char           & 0 \ldots 255                                                  & 1 Byte \\
+    unsigned short int      & 0 \ldots 65\,535                                              & 2 Byte \\
+    unsigned int            & \textcolor{grey}{0 \ldots 4\,294\,967\,295}
+                                                                                            & \textcolor{grey}{4 Bytes} \\
+    unsigned long int       & \textcolor{grey}{0 \ldots 1.8446744e+19}                                                  
+                                                                                            & \textcolor{grey}{8 Bytes} \\
+    unsigned long long int  & 0 \ldots 1.8446744e+19                                        & 8 Bytes
+    
+\tabcrlf
+
+    float                   & $\pm$3.4E+38, ca. 7 significant digits                        & 4 Byte \\
+    double                  & $\pm$1.7E+308, ca. 16 significant digits                      & 8 Byte \\
+    long double             & \textcolor{grey}{a damn lot}                                  & \textcolor{grey}{10 Byte} \\
+
+\bottomrule[1.5pt]
+\end{tabularx}
+\captionof{table}{Standard data types in C} \label{tab:DatatypesStd} 
+\phantom{x}\\
+
+Table \ref{tab:DatatypesExt} describes data types defined in the header \texttt{stdint.h}. They behave the same on all plattforms.
+
+\rowcolors{1}{white}{tabhighlight}
+\begin{tabularx}
+	{\linewidth}
+	{TBS}
+	\toprule[1.5pt]
+	
+\textbf{\textrm{Data type}} & \textbf{Range of values}                                      & \textbf{Memory consumption}
+\tabcrlf
+	int8\_t                 &               -128 \ldots              +127                   & 1 Byte \\
+	int16\_t                &           -32\,768 \ldots          +32\,767                   & 2 Byte \\
+	int32\_t                &  -2\,147\,483\,648 \ldots +2\,147\,483\,647                   & 4 Byte \\
+	int64\_t                & -9\,223\,372\,036\,854\,775\,808  \ldots
+	                          +9\,223\,372\,036\,854\,775\,807                              & 8 Byte
+\tabcrlf
+
+	uint8\_t                & 0 \ldots 255                                                  & 1 Byte \\
+	uint16\_t               & 0 \ldots 65\,535                                              & 2 Byte \\
+	uint32\_t               & 0 \ldots 4\,294\,967\,295                                     & 4 Byte \\
+	uint64\_t               & 0 \ldots 1.8446744e+19                                        & 8 Byte \\
+	
+\bottomrule[1.5pt]
+\end{tabularx}
+\captionof{table}{Standard-Datentypen der Sprache C} \label{tab:DatatypesExt}
+}
+
+Further details can be found online at cppreference.com: 
+\begin{itemize}
+\item Standard data types: \url{https://en.cppreference.com/w/c/language/types}
+\item integer definitions: \url{https://en.cppreference.com/w/c/types/integer} (as defined in header \texttt{stdint.h})
+\end{itemize}
+
 \section{Formatierte Textausgabe}
 Die Format-Codes in Tabellen \ref{tab:FormatOutNum} und \ref{tab:FormatOutSpc} funktionieren sowohl mit \texttt{printf}, \texttt{sprintf}, \texttt{snprintf}, als auch mit \texttt{fprintf}.
+
+%TODO add "%%" -- output the percentage sign
 
 Siehe auch \url{http://en.cppreference.com/w/c/io/fprintf}
 
@@ -1154,93 +1226,8 @@ Die Sprache C++ kennt einige weitere Operatoren, die hier nicht angesprochen wer
 
 
 \FloatBarrier
-\section{Übersicht Datentypen} \label{sec:Datatypes}
-Tabelle \ref{tab:DatatypesStd} beschreibt Datentypen, die immer zur Verfügung stehen. Grau gesetzte Werte sind plattformabhängig; hier ist jeweils die übliche Umsetzung auf modernen Rechnern angegeben.
-\begin{table}[h!]
-\rowcolors{1}{tabhighlight}{white}
-\newcolumntype{S}{>{\centering \arraybackslash} p{.19\linewidth}}
-\newcolumntype{B}{>{\centering \arraybackslash} p{.54\linewidth}}
 
-\begin{tabularx}
-	{\linewidth}
-	{SBS}
-	\toprule[1pt]
-	
-	Datentyp      & Wertebereich                                & Speicherbedarf
-\tabcrlf
-	char          &               -128 \ldots              +127 & 1 Byte\\
-	short int     &           -32\,768 \ldots          +32\,767 & 2 Byte\\
-	int           &  \textcolor{grey}{-2\,147\,483\,648 \ldots +2\,147\,483\,647}
-	                                                            & \textcolor{grey}{4 Byte}\\
-	long int      & \textcolor{grey}{
-                    -9\,223\,372\,036\,854\,775\,808 \ldots
-	                +9\,223\,372\,036\,854\,775\,807}
-	                                                            & \textcolor{grey}{8 Byte}\\
-	long long int & -9\,223\,372\,036\,854\,775\,808 \ldots
-	                +9\,223\,372\,036\,854\,775\,807
-	                                                            & 8 Byte
-\tabcrlf
 
-	unsigned char          & 0 \ldots 255           				& 1 Byte\\
-	unsigned short int     & 0 \ldots 65\,535         			& 2 Bytes\\
-	unsigned int           & \textcolor{grey}{0 \ldots 4\,294\,967\,295}
-																& \textcolor{grey}{4 Bytes}\\
-	unsigned long int      & \textcolor{grey}{0 \ldots 1.8446744e+19}
-																& \textcolor{grey}{8 Bytes}\\
-	unsigned long long int & 0 \ldots 1.8446744e+19				& 8 Bytes
-	
-\tabcrlf
-
-	float       & $\pm$3.4E+38, ca. 7 signifikante Ziffern    & 4 Byte\\	
-	double      & $\pm$1.7E+308, ca. 16 signifikante Ziffern  & 8 Byte\\
-	long double & \textcolor{grey}{sehr viel}                 & \textcolor{grey}{10 Byte}\\
-	
-\bottomrule[1pt]
-\end{tabularx}
-\caption{Standard-Datentypen der Sprache C} \label{tab:DatatypesStd}
-\end{table}
-
-Tabelle \ref{tab:DatatypesExt} beschreibt Datentypen, die zur Verfügung stehen, sobald der Header \texttt{stdint.h} eingebunden wird:
-\begin{table}[h!]
-\rowcolors{1}{white}{tabhighlight}
-\newcolumntype{S}{>{\centering \arraybackslash} p{.19\linewidth}}
-\newcolumntype{B}{>{\centering \arraybackslash} p{.54\linewidth}}
-
-\begin{tabularx}
-	{\linewidth}
-	{SBS}
-	\toprule[1pt]
-	
-	Datentyp      & Wertebereich                                & Speicherbedarf
-\tabcrlf
-	int8\_t  &               -128 \ldots              +127 & 1 Byte\\
-	int16\_t &           -32\,768 \ldots          +32\,767 & 2 Byte\\
-	int32\_t &  -2\,147\,483\,648 \ldots +2\,147\,483\,647 & 4 Byte\\
-	int64\_t & -9\,223\,372\,036\,854\,775\,808
-	                                 \ldots
-	                                        +9\,223\,372\,036\,854\,775\,807
-	                                                       & 8 Byte
-\tabcrlf
-
-	uint8\_t   & 0 \ldots 255                 & 1 Byte\\
-	uint16\_t  & 0 \ldots 65\,535             & 2 Byte\\
-	uint32\_t  & 0 \ldots 4\,294\,967\,295    & 4 Byte\\
-	uint64\_t  & 0 \ldots 1.8446744e+19       & 8 Byte\\
-	
-\bottomrule[1pt]
-\end{tabularx}
-\caption{Standard-Datentypen der Sprache C} \label{tab:DatatypesExt}
-\end{table}
-
-Weitere Details können von der CPP-Referenz entnommen werden: 
-\begin{itemize}
-\item Standard-Typen: \url{https://en.cppreference.com/w/c/language/types}.
-\item Erweiterte Ganzzahl-Typen: \url{https://en.cppreference.com/w/c/types/integer} (wie definiert in \texttt{stdint.h})
-\end{itemize}
-
-\begin{plusbox}[C++: Erweiterte Liste von Datentypen]
-Die Sprache C++ wurde gegenüber C um einige Standard-Typen erweitert, die auf dem Artikel unter \url{https://en.cppreference.com/w/cpp/language/types} beschrieben werden.
-\end{plusbox}
 
 \section{Vordefinierte Präprozessor-Symbole}
 Unter \url{https://gcc.gnu.org/onlinedocs/cpp/Predefined-Macros.html} finden Sie eine Liste von vordefinierten Macros. Für Betriebssystem-spezifische Macros, siehe \url{http://nadeausoftware.com/articles/2012/01/c_c_tip_how_use_compiler_predefined_macros_detect_operating_system}.

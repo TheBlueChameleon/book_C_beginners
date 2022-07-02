@@ -338,10 +338,28 @@ Provided that the code in \texttt{mycode.c} is syntactically correct (\ie can be
 \$ ./a.out
 \end{cmdbox}
 %
-\begin{cmdbox}[Executing a qprogram in Windows]
+\begin{cmdbox}[Executing a program in Windows]
 \$ a
 \end{cmdbox}
 \end{tcbraster}
+
+\begin{hintbox}[Pure Text Files]
+It is important that the code is stored in a \emph{pure text format}, \ie that there is no format (like font, colour or similar information) stored with the code. To ensure this, simply use the most simple text editor available to you. If you don't know which programs to use, I recommend ...
+\begin{itemize}
+\item kate, geany or gedit, if you use Linux. All of these are available from the default repositories
+\item notepad++ (available from the Windows Software Store) or notepad (pre-installed). While the latter is sufficient to write code, you'll enjoy coding way more if you use notepad++.
+	It has syntax highlighting capabilities (\ie on your screen, code will look similarly coloured as in this book) and does
+	\emph{indentation} (adding whitespaces to your code) automatically, both of which helps to grasp the overall structure of your codes.
+\item xcode if you use Mac.
+\end{itemize}
+
+You may also want to try out an IDE when you're further in your path to code enlightenment. These programs take away some of the more tedious aspects of programming, but can often only be wielded by more experienced programmers. For writing C code, I recommend...
+\begin{itemize}
+\item The Qt Creator (apt for very large projects; also supports C++, Python and QML; free to use after registration; requires some time to familiarize with, especially under Windows;
+	my personal choice. See \url{https://www.qt.io/product/development-tools})
+\item Code::Blocks (great for small and middle sized projects; also supports C++ and Fortran;  See \url{https://www.codeblocks.org/})
+\end{itemize}
+\end{hintbox}
 
 If you want to write the compiled output into a different file, you can prepend the command line option \texttt{-o <outputname>}. So for example, to generate a file with the name \texttt{myexecutable}, type:
 \begin{cmdbox}[Setting the output filename]
@@ -395,24 +413,33 @@ To put it in a nutshell, when writing code I recommend you to type these command
 \end{cmdbox}
 
 \section{Main Takeaways} 
-\begin{itembox}[Binary Data]
+\begin{defbox}[You Should Remember...]
+\textbf{Binary Data}
+\begin{itemize}
 \item All information is stored as bitpatterns that have no inherent meaning. What a given sequence of bits means depends on which interpretation rules are applied
 \item All information is grouped in bytes, \ie groups of eight bits. Multiple bytes can be compounded to form a larger piece of information.
 \item There is a principal difference between integers and floating point numbers.
-\end{itembox}
-%
-\begin{itembox}[Translating Code]
+\end{itemize}
+
+\textbf{Translating Code}
+\begin{itemize}
 \item C code is translated into executable files in four steps: preprocessing, compiling, assembly and linkage. The gcc can do all these steps in one go.
 \item C code files need to have the extension \texttt{.c}.
 \item C code can be compiled once into object files and used in several projects. Object files have the extension \texttt{.o}
 \item Libraries are collections of object files that can parttake in the linkage process. To do so, use the option \texttt{-l<library name>}
 \item Depending on the operating system, executable files should either have no extension (Linux, Mac) or the extension \texttt{.exe}
 \item To set an output name, use the option \texttt{-o <output filename>}
+\end{itemize}
+\end{defbox}
+%
+\begin{defbox}[]
+\begin{itemize}
 \item There are different language standards for the C programming language. A standard can be selected with the option \texttt{-std=<standard>}. We use \texttt{-std=c17} in this course.
 \item The compiler can analyze the code for suspicious lines that most likely generate undesired behaviour. To enable this feature, add the compiler options \texttt{-Wall -Wextra -Wpedantic}.
 \item For most of our projects, the compiler invocation should look like this:\\
 	\texttt{gcc -std=c17 -Wall -Wextra -Wpedantic myCode.c -lm -o executable}
-\end{itembox}
+\end{itemize}
+\end{defbox}
 
 \newpage
 \section{Exercises and Solutions}
@@ -431,6 +458,36 @@ To put it in a nutshell, when writing code I recommend you to type these command
 
 \subsection*{Phases of Translation}
 Recapitulate on the translation phases: What happens in which order when we invoke the gcc?
+
+\subsection*{Compiling Code}
+Copy the following code (without the line numbers) and save it as \texttt{chameleon.c}. Now try to compile and execute it. Can you make it so that the program is executed by typing \texttt{showChameleon}?
+
+\begin{codebox}[chameleon.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main (void) {
+	printf("                      _       _._\n");
+	printf("               _,,-''' ''-,_ }'._''.,_.=._\n");
+	printf("            ,-'      _ _    '        (  @)'-,\n");
+	printf("          ,'  _..==;;::_::'-     __..----'''}\n");
+	printf("         :  .'::_;==''       ,'',: : : '' '}\n");
+	printf("        }  '::-'            /   },: : : :_,'\n");
+	printf("       :  :'     _..,,_    '., '._-,,,--\'    _\n");
+	printf("      :  ;   .-'       :      '-, ';,__\\.\\_.-'\n");
+	printf("     {   '  :    _,,,   :__,,--::',,}___}^}_.-'\n");
+	printf("     }        _,'__''',  ;_.-''_.-'\n");
+	printf("    :      ,':-''  ';, ;  ;_..-'\n");
+	printf("_.-' }    ,',' ,''',  : ^^\n");
+	printf("_.-''{    { ; ; ,', '  :\n");
+	printf("      }   } :  ;_,' ;  }\n");
+	printf("       {   ',',___,'   '\n");
+	printf("   pils ',           ,'\n");
+	printf("          '-,,__,,-'\n");
+}
+\end{minted}
+\captionof{listing}{Show a chameleon}
+\end{codebox}
 
 \rule{\linewidth}{0.1mm}
 
@@ -467,3 +524,30 @@ A C code file undergoes these phases of translation:
 \item[Linkage]       \hfill \\
 	Gathers object files and libraries and puts them together in one single executable
 \end{description}
+
+\subsection*{Solution: Compiling Code}
+\begin{cmdbox}[Compiling and executing the code in chameleon.c]
+\begin{minted}{text}
+$ gcc -std=c17 -Wall -Wextra -Wpedantic chameleon.c -o showChameleon
+$ ./showChameleon
+                      _       _._
+               _,,-''' ''-,_ }'._''.,_.=._
+            ,-'      _ _    '        (  @)'-,
+          ,'  _..==;;::_::'-     __..----'''}
+         :  .'::_;==''       ,'',: : : '' '}
+        }  '::-'            /   },: : : :_,'
+       :  :'     _..,,_    '., '._-,,,--'    _
+      :  ;   .-'       :      '-, ';,__\.\_.-'
+     {   '  :    _,,,   :__,,--::',,}___}^}_.-'
+     }        _,'__''',  ;_.-''_.-'
+    :      ,':-''  ';, ;  ;_..-'
+_.-' }    ,',' ,''',  : ^^
+_.-''{    { ; ; ,', '  :
+      }   } :  ;_,' ;  }
+       {   ',',___,'   '
+   pils ',           ,'
+          '-,,__,,-'
+\end{minted}
+\end{cmdbox}
+
+For Windows users, the end of the compiler invocation should be \texttt{... -o showChameleon\textbf{.exe}}.

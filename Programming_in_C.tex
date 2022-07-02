@@ -65,7 +65,11 @@
 \usepackage{wrapfig}
 \usepackage{graphicx}
 \usepackage[bf]{caption}
-	\captionsetup{format=plain}
+	\captionsetup{
+	format=plain,
+	justification=raggedright,
+	singlelinecheck=false
+}
 \usepackage{placeins}	% FloatBarrier.
 \usepackage[table]{xcolor}
 	\definecolor{titlebgdark}{RGB}{32,128,160}
@@ -276,6 +280,8 @@
 
 \newcommand*{\citationneeded}{\href{https://xkcd.com/285/}{\color{blue}\textsuperscript{[citation needed]}}}
 
+\newcommand{\inC}[1]{\mintinline{c}{#1}}
+
 %==============================================================================%
 % GLOBAL PARAMTERS
 
@@ -340,7 +346,7 @@
 	\setcounter{page}{1}
 	
 	\include{01_WhatIsCPU}
-%	\include{02_FirstProg}
+	\include{02_FirstProg}
 %	\include{03_Datatypes}
 %	\include{04_Input}
 %	\include{05_Conditions}
