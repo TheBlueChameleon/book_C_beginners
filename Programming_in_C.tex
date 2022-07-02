@@ -68,10 +68,11 @@
 	\captionsetup{format=plain}
 \usepackage{placeins}	% FloatBarrier.
 \usepackage[table]{xcolor}
-	\definecolor{tabhighlight}{RGB}{230,240,255}
-	\definecolor{grey}{RGB}{128,128,128}
 	\definecolor{titlebgdark}{RGB}{32,128,160}
 	\definecolor{titlebglight}{RGB}{191,233,233}
+	\definecolor{tabhighlight}{RGB}{230,240,255}
+	\definecolor{grey}{RGB}{128,128,128}
+	\definecolor{darkgrey}{RGB}{32,32,32}
 
 \usepackage{tikz}
 	\usetikzlibrary{positioning}
@@ -192,67 +193,67 @@
 % tcolorboxes
 
 \tcbsetforeverylayer{
-	 colback=cyan!10!white,
-	 colframe=cyan!75!black,
-	 arc=0pt,
-	 outer arc=0pt,
-	 parbox=false
-	}
-\newtcolorbox{defbox}[1][Your Title Here]
-	{colback=cyan!10!white,
-	 colframe=cyan!75!black,
-	 arc=0pt,
-	 outer arc=0pt,
-	 title=#1
-	}
-\newtcolorbox{codebox}[1][Code]
-	{colback=white,
-	 fontupper=\ttfamily ,
-	 colframe=blue!40!black,
-	 leftupper=7mm,
-	 title=#1,
-	 arc=0pt,
-	 outer arc=0pt
-	}
-\newtcolorbox{cmdbox}[1][Command Line Interface]
-	{colback=black,
-	 coltext=white,
-	 fontupper=\ttfamily ,
-	 colframe=blue!40!black,
-	 title=#1,
-	 arc=0pt,
-	 outer arc=0pt
-	}
-\newtcolorbox{warnbox}[1][Attention]
-	{colback=black!5!white,
-	 colframe=red!40!black,
-	 title=#1,
-	 arc=0pt,
-	 outer arc=0pt
-	 }
-\newtcolorbox{hintbox}[1][Hint]
-	{colback=black!5!white,
-	 colframe=green!40!black,
-	 title=#1,
-	 arc=0pt,
-	 outer arc=0pt
-	}
-\newtcolorbox{plusbox}[1][Advanced Content]
-	{colback=yellow!5!white,
-	 colframe=yellow!90!red,
-	 fontupper=\color{black},
-	 title=#1,
-	 arc=0pt,
-	 outer arc=0pt
-	}
-\newenvironment{itembox}[1][]
-	{
-		\begin{tcolorbox}[title=#1,arc=0pt,outer arc=0pt]
-		\begin{itemize}
-	}{
-		\end{itemize}
-		\end{tcolorbox}
-	}
+	colback=cyan!10!white,
+	colframe=titlebgdark,
+	arc=0pt,
+	outer arc=0pt,
+	parbox=false
+}
+\newtcolorbox{defbox}[1][Your Title Here] {
+	colback=cyan!10!white,
+	colframe=titlebgdark,
+	arc=0pt,
+	outer arc=0pt,
+	title=#1
+}
+\newtcolorbox{codebox}[1][Code] {
+	colback=white,
+	fontupper=\ttfamily ,
+	colframe=blue!40!black,
+	leftupper=7mm,
+	title=#1,
+	arc=0pt,
+	outer arc=0pt
+}
+\newtcolorbox{cmdbox}[1][Command Line Interface] {
+	colback=black,
+	coltext=white,
+	fontupper=\ttfamily ,
+	colframe=blue!40!black,
+	title=#1,
+	arc=0pt,
+	outer arc=0pt
+}
+\newtcolorbox{warnbox}[1][Attention] {
+	colback=black!5!white,
+	colframe=red!40!black,
+	title=#1,
+	arc=0pt,
+	outer arc=0pt
+}
+\newtcolorbox{hintbox}[1][Hint] {
+	colback=black!5!white,
+	colframe=green!40!black,
+	title=#1,
+	arc=0pt,
+	outer arc=0pt
+}
+\newtcolorbox{plusbox}[1][Advanced Content] {
+	colback=yellow!5!white,
+	colframe=yellow!90!red,
+	coltitle=darkgrey,
+	fontupper=\color{black},
+	title=#1,
+	arc=0pt,
+	outer arc=0pt
+}
+\newenvironment{itembox}[1][] {
+	\begin{tcolorbox}[title=#1,arc=0pt,outer arc=0pt]
+	\begin{itemize}
+}{
+	\end{itemize}
+	\end{tcolorbox}
+}
 
 %==============================================================================%
 % GLOBAL MACROS

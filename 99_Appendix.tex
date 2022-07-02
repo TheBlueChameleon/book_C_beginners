@@ -392,7 +392,7 @@
 
 \chapter{Tables}
 \section{Compiler Options}
-\begin{table}[h!]
+{
 \newcolumntype{O}{>{\centering\ttfamily\arraybackslash}m{.3  \linewidth}}
 \newcolumntype{E}{>{\centering         \arraybackslash}m{.65 \textwidth}}
 
@@ -458,6 +458,10 @@
 	Make all warnings into errors.
 \end{tabularx}
 
+\newpage
+\newcolumntype{O}{>{\centering\ttfamily\arraybackslash}m{.3  \linewidth}}
+\newcolumntype{E}{>{\centering         \arraybackslash}m{.65 \textwidth}}
+
 \vspace{6pt}
 \textbf{Debugging and Optimization} \\
 (see \url{https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html}\\
@@ -501,9 +505,9 @@
 	\bottomrule[1.5pt]
 \end{tabularx}
 
-\caption{Compiler Options}
+\captionof{table}{Compiler Options}
 \label{tab:CompilerOptions}
-\end{table}
+}
 
 \section{Escape-Sequenzen}
 \begin{table}[h!]

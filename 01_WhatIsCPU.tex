@@ -270,7 +270,7 @@ One of the oldest such encoding that is still in use is \emph{ASCII} (American S
 Texts -- \ie strings of letters and other symbols -- are simply sequences of numbers that can be interpreted according to this (or another) table. One nice way of seeing ASCII texts as them being one single number, represented in base 128.
 
 \begin{plusbox}[Other Encodings]
-ASCII has been used for a long time, since it can encode most texts with minimal overhead. Especially the \emph{one byte is one character} property means it is easy to work with ASCII text. However, this encoding is rather limiting: there are more than 128\citationneeded. Of course it is possible to come up with a longer table and list more characters in it. Essentially, this is the main idea behind Unicode. However, longer tables mean bigger numbers and therefore break the \emph{one byte is one character} property. This also requires some extra thought in order not to waste memory, make texts recoverable even when communication between two machines is flawed or when different communication standards are used.
+ASCII has been used for a long time, since it can encode most texts with minimal overhead. Especially the \emph{one byte is one character} property means it is easy to work with ASCII text. However, this encoding is rather limiting: there are more than 128 different symbols\citationneeded. Of course it is possible to come up with a longer table and list more characters in it. Essentially, this is the main idea behind Unicode. However, longer tables mean bigger numbers and therefore break the \emph{one byte is one character} property. This also requires some extra thought in order not to waste memory, make texts recoverable even when communication between two machines is flawed or when different communication standards are used.
 
 If you are inclined to learn more, feel free to look up the keyword UTF-8, which is one \emph{encoding system under Unicode}.
 \end{plusbox}
@@ -299,7 +299,7 @@ With all this theory behind us, we can finally get to practical matters: generat
 \subsection{Phases of Translation}
 You already know that \emph{translating code into machine language} is a fairly complex process. We have talked about \emph{compiling} (translating from a high level language like C into assembly) and \emph{assembling} (translating from assembly language into machine language). Before compilation, theres also a \emph{preprocessing step}, and at the end of the chain of translation phases, theres \emph{linking}.
 
-\emph{Preprocessing} will be discussed in detail in chapter \ref{chp:Preprocessor}. Essentially it is another translation step that allows to write code in a more convenient way.
+\emph{Preprocessing} will be discussed in detail in chapter \ref{chp:Preprocessor}. Essentially it is another translation step that allows to write code in a more convenient way. Think of this as a more sophisticated search-and-replace step, that still generates regular C code.
 
 \emph{Linking} means combining multiple files of machine language instructions into a single unit of executable code -- think of it as \emph{glueing together the components of a program}.
 
@@ -410,26 +410,31 @@ To put it in a nutshell, when writing code I recommend you to type these command
 \item To set an output name, use the option \texttt{-o <output filename>}
 \item There are different language standards for the C programming language. A standard can be selected with the option \texttt{-std=<standard>}. We use \texttt{-std=c17} in this course.
 \item The compiler can analyze the code for suspicious lines that most likely generate undesired behaviour. To enable this feature, add the compiler options \texttt{-Wall -Wextra -Wpedantic}.
+\item For most of our projects, the compiler invocation should look like this:\\
+	\texttt{gcc -std=c17 -Wall -Wextra -Wpedantic myCode.c -lm -o executable}
 \end{itembox}
 
 \newpage
 \section{Exercises and Solutions}
-\subsubsection*{Translating Binary}
+\subsection*{Translating Binary}
 \begin{itemize}
 \item Which positive integer corresponds to the bit sequence $101010_2$?
 \item Which bit sequence corresponds to the decimal number $21_{10}$?
 \item Which bit sequence corresponds to the string \texttt{42}?
 \end{itemize}
 
-\subsubsection*{Pitfalls in binary encoding}
+\subsection*{Pitfalls in binary encoding}
 \begin{itemize}
 \item Why does it matter for a computer whether a number is given as $2.0$ or as $2$?
 \item You are given a sequence of 16 bits together with the information that they encode an unsigned integer. Why is even this information not enough to unambiguosly decode the bit sequence?
 \end{itemize}
 
+\subsection*{Phases of Translation}
+Recapitulate on the translation phases: What happens in which order when we invoke the gcc?
+
 \rule{\linewidth}{0.1mm}
 
-\subsubsection*{Solution: Translating Binary}
+\subsection*{Solution: Translating Binary}
 \begin{itemize}
 \item $101010_2 = 42_{10}$
 \item $21_{10} = 10101_2$. \\
@@ -441,4 +446,24 @@ To put it in a nutshell, when writing code I recommend you to type these command
 	Converting these codepoints into binary gives the bit sequence \texttt{0011 0100  0011 0010}.
 \end{itemize}
 
-\subsubsection*{Pitfalls in binary encoding}
+\subsection*{Solution: Pitfalls in binary encoding}
+\begin{itemize}
+\item Albeit mathematically equivalent, $2.0$ is a \emph{floating point number} and will thus be encoded in a different manner than the \emph{integer} $2$.
+	This means the form of the bitpattern and possibly also the number of bytes required to store the information will be different.
+\item 16 bits are 2 bytes; these two bytes can be read from the left to the right or the other way round. One also has to specify a \emph{byte order}.\\
+	The byte order is hard wired into the machine, so this won't have any impact on what we do in this course; however, when communicating with other machines,
+	one has to keep in mind that the other machine might use a different byte order.´
+\end{itemize}
+
+\subsection*{Solution: Phases of Translation}
+A C code file undergoes these phases of translation:
+\begin{description}
+\item[Preprocessing] \hfill \\
+	Replaces parts of the input file with other lines of C-Code.
+\item[Compiling]     \hfill \\
+	Translates the (mostly machine-independent) in (machine dependent) assembly language, produces assembly files
+\item[Assembly]      \hfill \\
+	Translates assembly language code into machine language, produces object files
+\item[Linkage]       \hfill \\
+	Gathers object files and libraries and puts them together in one single executable
+\end{description}
