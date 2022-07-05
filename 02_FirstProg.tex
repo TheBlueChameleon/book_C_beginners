@@ -1,4 +1,3 @@
-
 \chapter{Writing C Code}
 \epigraph{The secret to getting ahead is getting started.}{Mark Twain}
 
@@ -17,7 +16,7 @@ int main() {
    printf("Hello World!\n");
 }
 \end{minted}
-\captionof{listing}{A Hello World} \label{code:helloworld}
+\captionof{code}{A Hello World} \label{code:helloworld}
 \end{codebox}
 
 To compile and run it, remember the compiler invocation:
@@ -28,7 +27,7 @@ To compile and run it, remember the compiler invocation:
 Hello World!
 \end{cmdbox}
 
-Now let's go through listing \ref{code:helloworld} line by line.
+Now let's go through code \ref{code:helloworld} line by line.
 
 We've already discussed that recurrent tasks can be externalized and put into a library. Input and Output fram and to the console is such a recurrent task. The routines concerned with these tasks are implemented in the \emph{C standard library}, which is automatically included in the linkage process -- no need to use a compiler option. However, these pre-compiled routines are, well, compiled, \ie translated into machine language. In this process, some information is lost that would allow for direct integration in our code. To provide this lost information, a so called \emph{Header File} needs to be \emph{included} into our code. For the time being, don't concern yourself with what this means in detail too much; simply think of a header file as a sort of glue that helps combining your C-Code to machine language code somewhere else.
 
@@ -56,7 +55,7 @@ helloworld.c:4:29: error: expected ‘;’ before ‘}’ token
 \end{minted}
 \end{cmdbox}
 
-This is because (unlike literal strings) statements can be spread over multiple lines. Similarly, there can be more than one statement in a single line. As programmers, this gives us some liberty in formatting the code such that it can be read more easily. Also, we can add or remove whitespaces (or tabs) pretty much anywhere, as long as we keep \enquote{words} together. The following code produces the same output as listing \ref{code:helloworld}
+This is because (unlike literal strings) statements can be spread over multiple lines. Similarly, there can be more than one statement in a single line. As programmers, this gives us some liberty in formatting the code such that it can be read more easily. Also, we can add or remove whitespaces (or tabs) pretty much anywhere, as long as we keep \enquote{words} together. The following code produces the same output as code \ref{code:helloworld}
 \begin{codebox}[Code with optional whitespaces added]
 \begin{minted}[linenos]{c}
   #include     <stdio.h>
@@ -66,13 +65,13 @@ This is because (unlike literal strings) statements can be spread over multiple 
 )   ;
    }
 \end{minted}
-\captionof{listing}{A Hello World with added whitespaces} \label{code:optionalWhitespaces}
+\captionof{code}{A Hello World with added whitespaces} \label{code:optionalWhitespaces}
 \end{codebox}
 
 \begin{hintbox}[Rule of thumb: whitespaces]
-The added whitespaces in listing \ref{code:optionalWhitespaces} are meant to illustrate where it is allowed to add them; clearly, this example makes the code look more like a random image than an organized list of instructions. This is not to say that \emph{indenting} your code is a bad idea. Quite to the contrary, these whitespaces and extra line breaks can help you a lot in visualizing relationships between different parts of the code or filter relevant information. This becomes paramount once our codes reach some complexity.
+The added whitespaces in code \ref{code:optionalWhitespaces} are meant to illustrate where it is allowed to add them; clearly, this example makes the code look more like a random image than an organized list of instructions. This is not to say that \emph{indenting} your code is a bad idea. Quite to the contrary, these whitespaces and extra line breaks can help you a lot in visualizing relationships between different parts of the code or filter relevant information. This becomes paramount once our codes reach some complexity.
 
-As a rule of thumb, you should add a level of indentation for every opening brace (\{\}), paren () or bracket ([]) that is not closed in the same line. Furthermore, the second to last line of statements that take more than one line of code should also be indented.
+As a rule of thumb, you should add a level of indentation for every opening brace (\{\}), paren () or bracket ([ ]) that is not closed in the same line. Furthermore, the second to last line of statements that take more than one line of code should also be indented.
 
 It is up to you, how many whitespaces (or tabs) you add; only you should stay consistent throughout your code. Commonly, one indentation level means four white spaces, but also two or eight whitespaces are not unheard of. Many code editors can be configured to automatically indent to the next multiple of two, four or eight whitespaces on the press of the tabulator key.
 
@@ -132,63 +131,92 @@ As humans, we prefer symbols over addresses. \emph{The value of cell 238} doesn'
   \draw [ld] (vc2.east) .. controls +(2.4,0) .. (c4.north);
 \end{tikzpicture}
 \end{center}
+\captionof{figure}{Variables in memory}
 \end{defbox}
+
+\subsection{Declaring Variables} \label{sec:DeclareVars}
+To use variables in our code, we first have to \emph{declare} them. That means we have to tell the compiler that we want a variable and what kind of variable this should be. We do that with a statement of the form:
+\begin{codebox}[Syntax: Declaring variables]
+\texttt{dataType symbolName;}
+\end{codebox}
+
+\texttt{dataType} stands for one of several registered keywords of the C programming language. Section \ref{sec:Datatypes} in the appendix lists all predefined data types. For the most part, we can limit ourselves to using one of these three:
+\newpage
+\begin{center}
+\newcolumntype{T}{>{\centering\ttfamily\arraybackslash}m{.2\linewidth}}
+\newcolumntype{U}{>{\centering \arraybackslash}        p{.3\linewidth}}
+
+\rowcolors{1}{white}{tabhighlight}
+\begin{tabularx}
+	{.5505\linewidth}
+	{TU}
+\toprule[1.5pt]
+	\textbf{\textrm{data type}} & \textbf{use} \tabcrlf
+	int                         & integers \\
+	double                      & floating point numbers \\
+	char                        & characters \\
+\bottomrule[1.5pt]
+\end{tabularx}
+\captionof{table}{The most commonly used data types in C}
+\end{center}
+
+\texttt{symbolName} is an arbitrary identifyer we can choose, like \texttt{nameOfPlayer1}. It must abide to these rules:
+\begin{itemize}
+\item Must only comprise of the characters \texttt{a..z}, \texttt{A..Z}, \texttt{0..9} or \texttt{\_}
+\item The first character must not be a digit
+\item Must have at most 40 characters
+\item Must be unique (there may not be two symbols with the same name in the same section. For example, it is not allowed to have a variable named \texttt{main} 
+	since there has to be a function with that name\footnote{\emph{Technically}, there is a way around that... practically... \url{https://xkcd.com/1475/}}.)
+\end{itemize}
+The language C is \emph{case sensitive}, \ie there is a difference between \texttt{nameOfPlayer1} and \texttt{NameOfPlayer1}. By convention, variable names start with a lower case letter. If a variable comprises of several human language words (like \texttt{nameOfPlayer1}) one often applies \enquote{camel case}, \ie begin each new word in the symbol with an upper case letter (except for the first one). An alternative is \enquote{snake case}, where the individual words are separated by underscores (\texttt{name\_of\_player\_1}). Which of the two conventions you pick is up to you; again I only advise you to be consistent in your choice (otherwise you'll have a hard time remembering whether you spelled it \texttt{paragraph\_index} or \texttt{paragraphIndex}.)
+
+\begin{hintbox}[Good names]
+A common \enquote{mistake} among beginners is to use inexpressive names such as \texttt{x}, \texttt{y}, \texttt{a}, ... While this is no problem for the compiler (note the quotation marks around \enquote{mistake}), it makes codes harder to write, maintain and debug. Programming becomes quite complex very soon, and the last thing we want is loosing track of whether \texttt{a} is the total score or which meaning behind the variable \texttt{b}.
+
+Instead, be as descriptive as possible when giving names. A guideline to follow is \emph{good code should read like prose text}. That certainly is only possible if the variables are named after human concepts like \texttt{repetitions}, \texttt{message}, \texttt{velocity\_x}, ...
+\end{hintbox}
+
+A \emph{declaration} (\ie a line like \inC{int number;}) does two things: it \emph{reserves memory} (\ie it picks a number of consecutive cells in memory and tells the operating system that they are used now) and \emph{binds it to the symbol} (\ie the compiler knows that \texttt{symbolName} should refer to the content of the reserved memory cells).
+
+Multiple variables \emph{of the same type} can be declared in a single statement\footnote{However, this programming style is sometimes discouraged.}. To do so, we list them separated by commas. A valid declaration of variables could thus look like this:
+\begin{codebox}[Declaration of variables]
+\begin{minted}[linenos]{c}
+int main () {
+   int    count;
+   double positionX, positionY;
+}
+\end{minted}
+\captionof{code}{Declaration of variables}
+\end{codebox}
+
+You may have noticed the similarity between the definition of the variable \texttt{count} and the function \texttt{main}. That is no coincidence! From the viewpoint of the compiler, the function \texttt{main} is a set of instructions to compute an \inC{int}. We'll learn more about this in chapters \ref{chp:funcs} and \ref{chp:OS-Link}.
+
+\begin{warnbox}[Avoid global variables]
+Note that the declaration of the variables \texttt{count}, \texttt{positionX} and \texttt{positionY} is \emph{within} the function \texttt{main}. We \emph{could} also define them outside of \texttt{main}; but this would potentially lead to a lot of trouble. We'll discuss the implications of that placement in chapter \ref{chp:funcs}. For now, just stick to the rule:
+
+Anything that is not an \texttt{\#include} line must be \emph{within} the braces that belong to \inC{int main}.
+\end{warnbox}
 
 %TODO
 % essentially keep structure of chapter 2, ...
 % but introduce mem structure and pointers here already (take from chapter 3)
-% C1: add "compile chameleon" to the exos
+% move xkcd: 1000 in here, after def: hex. ... or leave it in C3
+% C3 becomes: casting, pointer access, bit magic
 
-\subsection{Variablen}
-Eine Variable hat einen Namen, einen \emph{Datentyp} und einen Wert.
-
-Der Name einer Variablen ist eine beliebige Kombination aus \emph{alphanumerischen Zeichen}\footnote{Die Buchstaben a-z, A-Z, die Ziffern 0-9 sowie der Unterstrich (\_), jedoch keine Umlaute, Sonderzeichen oder das scharfe ß.}. Er muss mit einem Buchstaben beginnen, darf keine Leerzeichen enthalten und kann bis zu 40 Zeichen lang sein. Auch hier wird zwischen Groß- und Kleinschreibung unterschieden. Variablennamen müssen \emph{eindeutig} sein, \ie es darf keine zwei Variablen mit demselben Namen geben. Auch Funktionsnamen gelten als \enquote{verbraucht}; wir können keine Variable \texttt{main} nennen.
-
-Anfänger neigen dazu kurze, nichtssagende Variablennamen zu vergeben. Um Programme gut les- und wartbar zu machen (und um somit Fehler zu vermeiden) sollte der Variablenname bereits ihre Funktion im Code angeben. Statt \texttt{a, b, c} also lieber \texttt{elementCount, averageNote, currentIndex}.
-
-Unter \emph{Datentyp} versteht man die Art der Information, die in der Variablen gespeichert wird, \eg Ganzzahl, Kommazahl oder Text. Dies ist notwendig, da der Computer intern nur Einsen und Nullen speichern kann. Ohne Kontext ist es also nicht möglich, zu erkennen, wie eine Bit-Folge zu interpretieren ist. Dieser Kontext ist durch Zuweisung eines Datentyps gegeben.
-
-Der Wert einer Variablen kann schließlich alles sein, was ihrem Datentypen entspricht; eine Variable kann \eg eine einzelne Zahl oder ein ganzes Bild speichern.
-
-\subsection{Declaring Variables} \label{sec:DeclareVars}
-To use variables in our code, we first have to \emph{declare} them. That means we have to tell the compiler that we want a variable and what kind of variable this should be. We do that with a statement of the form:
-\begin{codebox}[Syntax: dDeclaring variables]
-\texttt{dataType symbolName;}
-\end{codebox}
-
-
-Mehrere Variablen können in einem Schritt deklariert werden, indem man sie durch Kommata voneinander abtrennt.
-
-Für den Moment wollen wir uns auf die Datentypen \mintinline{c}{int} (Ganzzahlen) und \mintinline{c}{double} (Kommazahlen) beschränken. Mit diesen können wir also folgende Variablen deklarieren:
-\begin{codebox}[Beispiel: Deklaration von mehreren Variablen]
-\begin{minted}[linenos]{c}
-int main () {
-   int    Ganzzahl;
-   double Kommazahl, andereZahl;
-}
-\end{minted}
-\end{codebox}
-Variablen werden also \emph{innerhalb von Funktionen} deklariert\footnote{In Abschnitt \ref{sec:globals} werden wir hierzu mehr hören; für den Moment beschränken wir uns auf den Fall, dass alle Variablen am Anfang der Funktion \texttt{main} deklariert werden.}.
-
-Ihnen mag die Ähnlichkeit zwischen der Deklaration von Ganzzahl-Variablen und der Funktion \texttt{main} aufgefallen sein. Dies ist kein Zufall. Tatsächlich ist formell die Funktion \texttt{main} die Vorschrift einen \mintinline{c}{int}-Wert zu berechnen. Das Symbol \texttt{main} ist eine Variable, die auf diese Vorschrift verweist. Hierzu mehr in Kapitel \ref{chp:OS-Link}.
 
 \subsection{Wertezuweisung} \label{sec:valueAssignment}
 Werte können über den \emph{Operator} = zugewiesen werden:
 \begin{codebox}[Beispiel: Wertzuweisung]
 \begin{minted}[linenos]{c}
 int main () {
-  int    Ganzzahl;
-  double Kommazahl, andereZahl;
+    int    Ganzzahl;
+    double Kommazahl, andereZahl;
 
-  Ganzzahl   = 7;
-  Ganzzahl   = 8;
-\end{minted}
-\end{codebox}
+    Ganzzahl   = 7;
+    Ganzzahl   = 8;
 
-\begin{codebox}[]
-\begin{minted}[linenos, firstnumber=last]{c}
-   Kommazahl  = 4.3;
-   andereZahl = 5.0;
+    Kommazahl  = 4.3;
+    andereZahl = 5.0;
 }
 \end{minted}
 \end{codebox}
@@ -311,6 +339,7 @@ Die Variable \texttt{x} geht aus der Division zweier Ganzzahlen hervor, und wird
 \end{hintbox}
 
 \subsection{Shorthands}
+%TODO prefix and postfix form
 Häufig soll sich der Wert einer Variablen \emph{inkrementiert} (\enquote{hochgezählt}) werden. Dies kann codiert werden als:
 \begin{codebox}[Beispiel: Inkrementieren einer Variablen i]
 \begin{minted}[linenos]{c}
@@ -588,36 +617,3 @@ int main () {
 }
 \end{minted}
 \end{codebox}
-
-\section{Hello World in C++}
-\begin{plusbox}
-Die hier gegebenen Erklärungen und Optionen gelten so auch für C++. Das bedeutet, dass der oben gezeigte Code auch in C++ so kompiliert werden kann und dasselbe Ergebnis erzeugt. Jedoch steht hier für die Textausgabe auch das Konzept \emph{Streams} zur Verfügung. Betrachten wir den folgenden Code:
-
-\begin{codebox}[Beispiel: Hello World in C++]
-\begin{minted}[linenos]{c++}
-#include <iostream>
-
-int main() {
-   std::cout << "Hello world!" << std::endl;
-}
-\end{minted}
-\end{codebox}
-
-Wie schon zuvor wird mit \mintinline{c++}{#include} ein Header geladen (Achtung: Hier keine Erweiterung \texttt{.h}!). In diesem Fall ist es der Header, der Input- und Output-Streams definiert. Ein \emph{Stream} ist ein Programm-Interface, das Daten in verschiedenen Formaten annehmen und verarbeiten kann.
-
-Die Deklaration des Hauptprogramms \texttt{main} verläuft völlig analog zur Form in C.
-
-\texttt{std::cout} ist der \enquote{Ausgabe-Stream}. Mit dem Operator \texttt{<{}<} können Datenobjekte an den Stream übergeben werden. Mehrere Datenobjekte können \enquote{hintereinander} in den Stream geschickt werden. So wird hier nach dem Text \texttt{Hello World!} ein Zeilenumbruch \texttt{std::endl} an den Stream übergeben.
-
-Platzhalter sind bei der Arbeit mit \texttt{std::cout} nicht notwendig.
-\end{plusbox}
-
-\begin{plusbox}[]
-Um weitere Details für die Ausgabe festzulegen siehe:
-\begin{itemize}
-\item \url{https://en.cppreference.com/w/cpp/io/manip/setw} -- Gesamtbreite für die Ausgabe einer Zahl
-\item \url{https://en.cppreference.com/w/cpp/io/manip/setprecision} -- Anzahl der Nachkommastellen
-\item \url{https://en.cppreference.com/w/cpp/io/manip/setiosflags} -- Ausgabeformat (exponentialschreibweise, hexadezimal, ...)
-\end{itemize}
-Siehe außerdem \url{https://en.cppreference.com/w/cpp/io/cout}
-\end{plusbox}

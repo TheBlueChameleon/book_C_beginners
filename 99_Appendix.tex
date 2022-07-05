@@ -614,15 +614,14 @@ In table \ref{tab:DatatypesStd} you'll find the data types that are always defin
     unsigned short int      & 0 \ldots 65\,535                                              & 2 Byte \\
     unsigned int            & \textcolor{grey}{0 \ldots 4\,294\,967\,295}
                                                                                             & \textcolor{grey}{4 Bytes} \\
-    unsigned long int       & \textcolor{grey}{0 \ldots 1.8446744e+19}                                                  
-                                                                                            & \textcolor{grey}{8 Bytes} \\
-    unsigned long long int  & 0 \ldots 1.8446744e+19                                        & 8 Bytes
+    unsigned long int       & \textcolor{grey}{0 \ldots 18\,446\,744\,073\,709\,551\,615}   & \textcolor{grey}{8 Bytes} \\
+    unsigned long long int  & 0 \ldots 18\,446\,744\,073\,709\,551\,615                     & 8 Bytes
     
 \tabcrlf
 
     float                   & $\pm$3.4E+38, ca. 7 significant digits                        & 4 Byte \\
     double                  & $\pm$1.7E+308, ca. 16 significant digits                      & 8 Byte \\
-    long double             & \textcolor{grey}{a damn lot}                                  & \textcolor{grey}{10 Byte} \\
+    long double             & \textcolor{grey}{$\pm$ 1.18E+4932, ca. 18 significant digits} & \textcolor{grey}{10 Byte} \\
 
 \bottomrule[1.5pt]
 \end{tabularx}
@@ -659,7 +658,8 @@ Table \ref{tab:DatatypesExt} describes data types defined in the header \texttt{
 Further details can be found online at cppreference.com: 
 \begin{itemize}
 \item Standard data types: \url{https://en.cppreference.com/w/c/language/types}
-\item integer definitions: \url{https://en.cppreference.com/w/c/types/integer} (as defined in header \texttt{stdint.h})
+\item Integer definitions: \url{https://en.cppreference.com/w/c/types/integer} \\
+	(as defined in header \texttt{stdint.h})
 \end{itemize}
 
 \section{Formatierte Textausgabe}
@@ -1024,7 +1024,7 @@ Die Ausgabe der Zeichenketten (\eg mit \texttt{printf}) in den Tabellen \ref{tab
 
 \begin{tabularx}
 	{\linewidth}
-	{|C|F|B|}
+	{C|F|B}
 	\toprule[1.5pt]
 
 	\textbf{Farbe} &
@@ -1116,7 +1116,7 @@ Die Ausgabe der Zeichenketten (\eg mit \texttt{printf}) in den Tabellen \ref{tab
 
 \begin{tabularx}
 	{\linewidth}
-	{|C|F|B|}
+	{C|F|B}
 	\toprule[1.5pt]
 
 	\textbf{Effekt} &

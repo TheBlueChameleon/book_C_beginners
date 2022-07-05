@@ -66,10 +66,11 @@
 \usepackage{graphicx}
 \usepackage[bf]{caption}
 	\captionsetup{
-	format=plain,
-	justification=raggedright,
-	singlelinecheck=false
-}
+		format=plain,
+		justification=raggedright,
+		singlelinecheck=false
+	}
+	\DeclareCaptionType{code}[Code Listing][List of Code Listings] 
 \usepackage{placeins}	% FloatBarrier.
 \usepackage[table]{xcolor}
 	\definecolor{titlebgdark}{RGB}{32,128,160}
@@ -367,4 +368,5 @@
 	\include{99_Appendix}
 
 	\listoffigures
+	\listofcodes
 \end{document}
