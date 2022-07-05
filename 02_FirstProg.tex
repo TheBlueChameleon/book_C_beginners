@@ -41,7 +41,7 @@ While this makes it clear what is code and what is literal text, it also introdu
 
 In line four, we find the escape sequence \texttt{\textbackslash n}; this encodes a line break (\texttt{n} stands for \emph{new line}). Unfortunately, literal texts cannot span multiple lines, so for the time being, these escape sequences are the only way to make multiline output. See table \ref{tab:Escape} in the appendix for more escape sequences.
 
-Note also that line four ends with a semicolon (;). This ends the statement. Each statement needs to end in a semicolon, otherwise, you'll find that gcc refuses to compile your code and outputs an error message.
+Note also that line four ends with a semicolon (;). This ends the statement. Each statement needs to end in a semicolon, otherwise, you'll find that gcc refuses to compile your code and outputs an error message:
 
 \begin{cmdbox}[Error message when compiling \texttt{helloworld.c} without semicolon in line 4]
 \begin{minted}{text}
@@ -55,15 +55,16 @@ helloworld.c:4:29: error: expected ‘;’ before ‘}’ token
 \end{minted}
 \end{cmdbox}
 
-This is because (unlike literal strings) statements can be spread over multiple lines. Similarly, there can be more than one statement in a single line. As programmers, this gives us some liberty in formatting the code such that it can be read more easily. Also, we can add or remove whitespaces (or tabs) pretty much anywhere, as long as we keep \enquote{words} together. The following code produces the same output as code \ref{code:helloworld}
-\begin{codebox}[Code with optional whitespaces added]
+The numbers in the error message (\texttt{helloworld.c:4:29: ...}) tell you where in your code the error was found: line 4, column 29. Especially in larger projects, this is an essential piece of information for finding the location that caused the problem\footnote{Projects a single person manages easily grow to some ten or hundred thousand lines of code. Teams of coders can build projects with millions of lines of code.}.
+
+This is because (unlike literal strings) statements can be spread over multiple lines. Similarly, there can be more than one statement in a single line. As programmers, this gives us some liberty in formatting the code such that it can be read more easily. Also, we can add or remove whitespaces (or tabs) pretty much anywhere, as long as we keep \enquote{words} together. The following code produces the same output as code \ref{code:helloworld}:
+\begin{codebox}[whitespaces.c]
 \begin{minted}[linenos]{c}
   #include     <stdio.h>
  int    main   (   )    {
       printf   (   
          "Hello World!\n"
-)   ;
-   }
+)   ;      }
 \end{minted}
 \captionof{code}{A Hello World with added whitespaces} \label{code:optionalWhitespaces}
 \end{codebox}
@@ -96,7 +97,7 @@ The value we are looking for is in one of the enumerated cells. The \enquote{num
 
 As humans, we prefer symbols over addresses. \emph{The value of cell 238} doesn't tell a lot about its content or what it means. In contrast, \emph{the value of \texttt{nameOfPlayer1}} clearly signifies some textual information. We call \texttt{nameOfPlayer1} a \emph{symbol}. It is a stand-in for the address of the cell(s), in which the name of player 1 can be found. The compiler \emph{binds} the symbols we as humans choose to the addresses in memory.
 
-\begin{defbox}[Memory Image]
+\begin{defbox}[Memory Picture]
 \begin{center}
 \begin{tikzpicture}
   [
@@ -141,7 +142,6 @@ To use variables in our code, we first have to \emph{declare} them. That means w
 \end{codebox}
 
 \texttt{dataType} stands for one of several registered keywords of the C programming language. Section \ref{sec:Datatypes} in the appendix lists all predefined data types. For the most part, we can limit ourselves to using one of these three:
-\newpage
 \begin{center}
 \newcolumntype{T}{>{\centering\ttfamily\arraybackslash}m{.2\linewidth}}
 \newcolumntype{U}{>{\centering \arraybackslash}        p{.3\linewidth}}
@@ -179,14 +179,14 @@ Instead, be as descriptive as possible when giving names. A guideline to follow 
 A \emph{declaration} (\ie a line like \inC{int number;}) does two things: it \emph{reserves memory} (\ie it picks a number of consecutive cells in memory and tells the operating system that they are used now) and \emph{binds it to the symbol} (\ie the compiler knows that \texttt{symbolName} should refer to the content of the reserved memory cells).
 
 Multiple variables \emph{of the same type} can be declared in a single statement\footnote{However, this programming style is sometimes discouraged.}. To do so, we list them separated by commas. A valid declaration of variables could thus look like this:
-\begin{codebox}[Declaration of variables]
+\begin{codebox}[declarations.c]
 \begin{minted}[linenos]{c}
 int main () {
    int    count;
    double positionX, positionY;
 }
 \end{minted}
-\captionof{code}{Declaration of variables}
+\captionof{code}{Declaration of variables} \label{code:declaringVars}
 \end{codebox}
 
 You may have noticed the similarity between the definition of the variable \texttt{count} and the function \texttt{main}. That is no coincidence! From the viewpoint of the compiler, the function \texttt{main} is a set of instructions to compute an \inC{int}. We'll learn more about this in chapters \ref{chp:funcs} and \ref{chp:OS-Link}.
@@ -197,110 +197,166 @@ Note that the declaration of the variables \texttt{count}, \texttt{positionX} an
 Anything that is not an \texttt{\#include} line must be \emph{within} the braces that belong to \inC{int main}.
 \end{warnbox}
 
+\begin{warnbox}[No duplicates or redeclarations]
+Symbols that have been declared once cannot be declared again. In the following example, there are multiple \emph{forbidden} lines:
+\begin{codebox}[redeclaration.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int x;
+    double x;
+    int x;
+}
+\end{minted}
+\captionof{code}{Attempts of redeclaration} \label{code:redeclarations}
+\end{codebox}
+The problems are:
+\begin{itemize}
+\item Line 3: the variable \texttt{x} already exists (line 2) and cannot be re-typed to \inC{double}.
+\item Line 4: again, the variable \texttt{x} already exists; even repeating an identical declaration is not allowed.
+\end{itemize}
+
+Consequently, trying to compile code \ref{code:redeclarations} will result in error messages:
+\begin{cmdbox}[Error messages produced by code redeclarations.c]
+\begin{minted}{text}
+redeclaration.c: In function ‘main’:
+redeclaration.c:3:12: error: conflicting types for ‘x’; have ‘double’
+    3 |     double x;
+      |            ^
+redeclaration.c:2:9: note: previous declaration of ‘x’ with type ‘int’
+    2 |     int x;
+      |         ^
+redeclaration.c:4:9: error: conflicting types for ‘x’; have ‘int’
+    4 |     int x;
+      |         ^
+redeclaration.c:3:12: note: previous declaration of ‘x’ with type
+    ‘double’
+    3 |     double x;
+\end{minted}
+\end{cmdbox}
+\end{warnbox}
+
+\newpage
+\subsection{Assignments} \label{sec:valueAssignment}
+We can assign values to our varibles with the \emph{operator} \texttt{=}:
+\begin{codebox}[assignments.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int    count;
+    double positionX, positionY;
+
+    count = 7;
+    count = 8;
+
+    positionX = 4.3;
+    positionY = 5.0;
+}
+\end{minted}
+\captionof{code}{Assigning values to variables} \label{code:simpleAssignment}
+\end{codebox}
+
+In this, line 5 makes it so that \texttt{count} stores the value \inC{5}. The subsequent line 6 overwrites this value and assigns \inC{8} to \texttt{count}.
+
+The lines 7 and 8 also assign values to the two previously defined \inC{double} variables. Note that we use a dot as a decimal separator\footnote{In some parts of the world, using a comma as a decimal separator. One example for this is Germany, my humble country of origin.}. Note also that \texttt{positionY} is assigned the value \inC{5.0} (as opposed to simply \inC{5}): the data types of variable and assigned value match. In chapter \ref{chp:casting} we'll discuss what happens if you don't abide by this rule (and when this is possible in the first place).
+
+%TODO var needs to be declared before use
+
+\subsection{Combined declaration and assignment} \label{sec:valueAssignment}
+Declaration and assignment can be done in a single statement:
+\begin{codebox}[combinedAssignments.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int    count = 8;
+    double positionX = 4.3,
+           positionY = 5.0;
+}
+\end{minted}
+\captionof{code}{Combined declaration and assignment} \label{code:combinedAssignment}
+\end{codebox}
+
+The final \emph{state} (\ie totality of values in memory) after running code \ref{code:combinedAssignment} is the same as that after executing code \ref{code:simpleAssignment}. Note how line 3 and 4 form a \emph{single statement}: line 3 ends in a comma, which does not end the statement. Only the semicolon in line 4 ends the declartion of \inC{double} variables. The statement could also be compressed into one line of code: \texttt{double positionX = 4.3, positionY = 5.0;}
+
+\begin{hintbox}[Uninitialized variables]
+When declaring variables (like in code \ref{code:declaringVars}), the compiler only \emph{reserves} memory for the variable, but does not write any value into the reserved cell(s). However, there is no such thing as an empty memory cell; each byte in memory always holds some bitpattern. Directly after declaration, this can be anything: maybe the same memory cell has been used previously by another program and still holds a character of a text the program displayed. Essentially, the value a variable has after declaration is random!
+\end{hintbox}
+%
+\begin{hintbox}[]
+If your program \emph{reads} an uninitialized value \ie does anything with the variable other than assigning it a value, the result will be \emph{undefined behaviour}. Results of this can be benign (\eg  strange outputs on the console) bad (\eg crash of your program) or outright harmful (\eg overwriting files), depending on what you do with the uninitialized variables. More often than not, it is not always obvious that an uninitialized variable causes trouble; there could be a range of values of the uninitialized variable for which the behaviour of the program looks fine, and only certain values cause glitches, crashes or damage. Still, it is a condition we should avoid at all cost.
+
+For that reason, I strongly advise you to \emph{always} initialize your variables with some default value, \ie to always use the combined declaration and assignment syntax. If you are not sure which default value is the best for your specific problem, simply put in \texttt{0}. It is easier to debug problems caused by one known value than such caused by a completely random factor.
+\end{hintbox}
+
+\subsection{Using Variables in Computations}\label{sec:OperatorsArithmetic}
+The point of computers is to compute\citationneeded! Computations have an input and an output. This input can be \emph{constants} (such as \inC{5}) or variables. The output needs to be stored somewhere, too, so again we'll see the use of variables here.
+
+Computations are written as \enquote{normal} expressions as we know them from our human every day experience; for example \inC{5 + 3} instructs the computer to sum up the constants \inC{5} and \inC{3}. The result of this \emph{expression} can then be stored in a variable with an assignment, like we've seen them before. This works with both, the simple assignment and the combined declaration/assignment:
+\begin{codebox}[computations.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int     count = 5 + 3;
+    int nextCount;
+    
+    nextCount = (count - 3) * 7;
+}
+\end{minted}
+\captionof{code}{Computations with variables} \label{code:simpleComputations}
+\end{codebox}
+In this, the value of \texttt{nextCount} will be \inC{35}.
+
+Valid \emph{operators} in C are:
+{
+\newcolumntype{N}{>{         \centering\arraybackslash} p{.25\linewidth}}
+\newcolumntype{R}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
+\begin{center}
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{.907\linewidth}
+	{NR|NR}
+\toprule[1.5pt]
+
+    \textbf{Operation}       & \textrm{\textbf{Operator}}  &  \textbf{Operation}                       & \textrm{\textbf{Operator}}
+\tabcrlf
+    Addition                 & +                           &  Multiplication                           & * \\
+    Subtraction              & -                           &  Division                                 & / \\
+    Negation ($x \thus -x$)  & -                           &  Remainder of Division (\enquote{Modulo}) & \%\\
+
+\bottomrule[1.5pt]
+\end{tabularx}
+\end{center}
+\captionof{table}{Arithmetic operators in C}\label{tab:OperatorsArithmetic}
+}
+
+As you've seen in example \ref{code:simpleComputations}, you can also use parentheses to affect the order of evaluation. Precedence of operations (multiplication is evaluated before addition) is also respected. Later in this course, we'll learn about other operations; all of them and their precedence are summarized in the appendix in table \ref{tab:OperatorPrecedence}. Note that there is no exponentiation operator; we'll see in chapter \ref{chp:maths} how in C we can compute powers nonetheless.
+
+\begin{hintbox}[Expressions vs. statements vs. declarations]
+In the programming world, we make a distinction between \emph{expressions}, \emph{statements} and \emph{declarations}.
+
+\begin{itemize}
+\item An \emph{expression} is anything that can be \emph{evaluated}, \ie condensed into a single value. Examples for statements are \inC{5 + 3} (evaluated to \inC{8}) 
+	or \inC{count - 3} (evaluation depends on the current value of \texttt{count}).
+\end{itemize}
+\end{hintbox}
+%
+\begin{hintbox}[]
+\begin{itemize}
+\item A \emph{statement}, on the other hand, is one single complete line of code that changes the \emph{state of the machine}, \ie changes some values in memory.
+	For example \inC{printf("hello world\n");} is a statement (it changes the video memory that is used to show the output on screen).
+\item \emph{Declarations} look a lot like statements, but do not not change the \emph{content} of memory, but only introduce symbols.
+	The line \inC{int count;} is a declaration: it merely informes the compiler that some memory has to be reserved, but the contents of the memory are not changed.
+\end{itemize}
+
+For very technical reasons, a line like \inC{int count = 8;} is not considered a statement, but a \emph{declaration with initialization}. One rationale behind this is that such lines cannot be executed several times in a row: once a symbol has been introduced, it exists. Remember that \emph{redeclarations} (\ie binding the symbol to a new location in memory) is forbidden (cf. code \ref{code:redeclarations}).
+
+To muddy the waters, in chapter \ref{chp:funcs} we'll see that there are statements that are also expressions at the same time. You don't need to worry too much about these differences for now; but be aware that they exist when discussing with fellow programmers.
+\end{hintbox}
+
 %TODO
 % essentially keep structure of chapter 2, ...
 % but introduce mem structure and pointers here already (take from chapter 3)
 % move xkcd: 1000 in here, after def: hex. ... or leave it in C3
 % C3 becomes: casting, pointer access, bit magic
+% C3: remember int x = 5.5 does implicit rounding
+% C3: introduce scanf
 
-
-\subsection{Wertezuweisung} \label{sec:valueAssignment}
-Werte können über den \emph{Operator} = zugewiesen werden:
-\begin{codebox}[Beispiel: Wertzuweisung]
-\begin{minted}[linenos]{c}
-int main () {
-    int    Ganzzahl;
-    double Kommazahl, andereZahl;
-
-    Ganzzahl   = 7;
-    Ganzzahl   = 8;
-
-    Kommazahl  = 4.3;
-    andereZahl = 5.0;
-}
-\end{minted}
-\end{codebox}
-
-In Zeile 5 wird also der Variablen \texttt{Ganzzahl} der Wert 7 zugewiesen. In der folgenden Zeile 6 überschreiben wir diesen Wert mit dem Wert 8.
-
-In den Zeilen 7 und 8 erhalten die beiden \mintinline{c}{double}-Variablen ebenfalls Werte. Wir bemerken, dass hier ein \emph{Dezimalpunkt} gesetzt wird, also kein Komma.
-
-Deklaration und Wertzuweisung können auch in einem einzigen Schritt geschehen:
-\begin{codebox}[Beispiel: Kombinierte Deklaration und Wertzuweisung]
-\begin{minted}[linenos]{c}
-int main () {
-   int    Ganzzahl   = 8;
-   double Kommazahl  = 4.3,
-          andereZahl = 5.0;
-}
-\end{minted}
-\end{codebox}
-
-\begin{hintbox}[Nicht-Initialisierte Variablen]
-Wenn eine Variable deklariert wird, sorgt der Compiler lediglich dafür, dass genug Platz im Speicher reserviert wird, um diesen Wert zu erfassen. Im Allgemeinen wird aber kein bestimmter \enquote{Startwert} festgelegt. Die neue Variable startet mit dem Wert, den das Bitmuster an der Stelle festlegt, an der Platz für die Variable reserviert wurde. Dies ist ein zufälliger Wert! Programme, die mit einem solchen Zufallswert weiterarbeiten haben generell \emph{undefiniertes} Verhalten und können abstürzen oder sogar Schaden anrichten. Es ist daher also ratsam, allen Variablen bei der Deklaration gleich einen sinnvollen oder sicheren Startwert zuzuweisen.
-\end{hintbox}
-
-\begin{hintbox}[Fließkommazahlen ohne Nachkommastelle]
-In der Mathematik gilt $5 = 5.0$. Ein Computer arbeitet zwar nach mathematischen Prinzipien; streng genommen gilt diese Gleichheit für den Prozessor aber nicht. Wie wir in Abschnitt \ref{sec:DataRepresentation} sehen werden kann dieselbe (mathematische) Zahl auf verschiedene Weisen binär dargestellt werden. Insbesondere zwischen Ganzzahlen und Kommazahlen bestehen große Unterschiede in der Binär-Darstellung. Der gcc kann zwar Umwandlungen automatisch durchführen, und würde auch
-\begin{codebox}[Beispiel: Implizite Typumwandlung von Ganzzahl zu Fließkommazahl]
-\begin{minted}[linenos]{c}
-int main () {
-   double Kommazahl = 5;
-}
-\end{minted}
-\end{codebox}
-\enquote{korrekt} umsetzen. Hier wird versucht, die \emph{Ganzzahl} \texttt{5} in der \mintinline{c}{double}-Variablen \texttt{Kommazahl} zu speichern. Da dies direkt nicht möglich ist, wandelt der gcc diese Ganzzahl zuerst in die Fließkommazahl \texttt{5.0} um und speichert dann diese. Eine solche \emph{implizite Typumwandlung} kann aber unbeabsichtigte Nebeneffekte haben und sollte daher vermieden werden. Als Beispiel für solche Nebeneffekte möchte ich Ihnen das folgende Beispiel geben:
-\end{hintbox}
-%
-\begin{hintbox}[]
-\begin{codebox}[Beispiel: Implizite Typumwandlung von Fließkommazahl zu Ganzzahl]
-\begin{minted}[linenos]{c}
-int main () {
-   int Ganzzahl = 5.5;
-}
-\end{minted}
-\end{codebox}
-Analog zum Beispiel oben wird nun implizit die Zahl \texttt{5.5} zu einer Ganzzahl konvertiert. Natürlich ist Ihnen bewusst, dass es keine ganze Zahl gibt, die gleich $5.5$ ist. Es wird also gerundet. Im Gegensatz zur menschlichen Intuition rundet der gcc hier aber \emph{ab}. Außerdem können die \enquote{fehlenden} $0.5$ das Verhalten des Programms in der Laufzeit gegenüber der Erwartung verändern.
-
-Damit der Datentyp (und damit das Verhalten des Programms) immer ersichtlich ist, sollten daher \enquote{ganzzahlige Fließkommawerte} als Kommawert (\eg \texttt{5.0}) gesetzt werden.
-\end{hintbox}
-
-\subsection{Rechnen mit Variablen -- Operatoren}\label{sec:OperatorsArithmetic}
-Mit Variablen kann auch gerechnet werden. Hierzu stehen 6 \enquote{Grundrechenarten} zur Verfügung (siehe Tabelle \ref{tab:OperatorsArithmetic}). Mehrere solche Rechenoperationen können hintereinander geschaltet werden. Es gilt wie üblich Punkt-vor-Strich; Klammern können gesetzt werden um eine andere Reihenfolge festzulegen.
-\begin{table}[h!]
-	\newcolumntype{C}{>{\ttfamily\centering\arraybackslash} p{.2\linewidth}}
-\begin{center}
-\begin{tabularx}
-	{.95\linewidth}
-	{cC|cC}
-\toprule[1pt]
-
-	Operation   & \normalfont Zeichen  &  Operation                              & \normalfont Zeichen
-\tabcrlf
-	Addition    & +                    &  Multiplikation                         & * \\
-	Subtraktion & -                    &  Division                               & / \\
-	Negation    & -                    &  Rest der Division (\enquote{Modulo})   & \%\\
-
-\bottomrule[1pt]
-\end{tabularx}
-\end{center}
-\caption{Rechenoperatoren in C}\label{tab:OperatorsArithmetic}
-\end{table}
-
-\begin{codebox}[Beispiel: Rechnen mit Variablen]
-\begin{minted}[linenos]{c}
-int main () {
-   int    Ganzzahl;
-   double Kommazahl, andereZahl;
-
-   Ganzzahl   = 7;
-   Ganzzahl   = Ganzzahl + 8;
-
-   Kommazahl  = 4.3;
-   andereZahl = 3.0 * (-Kommazahl + 7.9) / 2.0;
-}
-\end{minted}
-\end{codebox}
 
 Wichtig ist, dass Variablen bereits deklariert sind \emph{bevor} auf sie verwiesen wird, \ie bevor sie in anderen Ausdrücken vorkommen. Folgendes Beispiel funktioniert daher nicht:
 \begin{codebox}[Beispiel: Fehlerhafter Code{,} Variablen zu spät deklariert]
@@ -585,7 +641,10 @@ Text 15.000 Text
 \end{minted}
 \end{cmdbox}
 
-\section{Kommentare}
+
+\section{Comments}
+Perfect code is self-explaining. In this course we'll set aside some time for best practices. 
+
 Im Optimalfall ist Code selbsterklärend. \enquote{Sprechende} Variablennamen und gute Struktur erlauben, viele Zusammenhänge intuitiv zu erfassen. Dennoch ist es oft notwendig (und dann auch guter Stil), Programme mit Kommentaren zu versehen.
 
 Kommentare können auf zwei Arten gesetzt werden:

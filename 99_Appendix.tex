@@ -662,6 +662,72 @@ Further details can be found online at cppreference.com:
 	(as defined in header \texttt{stdint.h})
 \end{itemize}
 
+\newpage
+\section{Precedence of Operators}
+{
+	\rowcolors{1}{white}{tabhighlight}
+	\newcolumntype{P}{>{\centering \arraybackslash          } p{.2 \linewidth}}
+	\newcolumntype{C}{>{\centering \arraybackslash \ttfamily} p{.2 \linewidth}}
+	\newcolumntype{D}{>{\centering \arraybackslash          } p{.5\linewidth}}
+\begin{tabularx}
+		{\linewidth}
+		{PCD}
+		\toprule[1pt]
+
+	\textbf{Priority} & \normalfont\textbf{Operator} & \textbf{Description} \tabcrlf
+	
+	1  & \makecell{
+			++, -{}-\\
+			()\\
+			{[]}\\
+			., ->
+		} & \makecell{
+			Increment and decrement (Postfix) \\
+			Function call\\
+			Index access (arrays)\\
+			Member access (\texttt{struct}s)
+		} \\
+	2  & \makecell{
+			++, -{}-\\
+			!, \textasciitilde \\
+			(type) \\
+			*\\
+			\&\\
+			sizeof
+		} & \makecell{
+			Increment and decrement (Prefix) \\
+			Logical and bitwise NOT \\
+			Typecast\\
+			Dereferencing\\
+			Determining the address\\
+			Determining structure size
+		} \\
+	3  & *, /, \%                & Multiplication, Division, Modulo\\
+	4  & +, -                    & Addition, Subtraction\\
+	5  & <{}<, >{}>              & Bitshift to the left or right\\
+	6  & \makecell{
+			<, >\\
+	 		<=, >=
+	 	} &  \makecell{Comparison operators greater/less than \\
+				 	   and greater/less or equan than
+		} \\
+	7  & ==, != & Comparison operators equality and inequality \\
+	8  & \&                      & Bitwise AND\\
+	9  & \textasciicircum        & Bitwise XOR\\
+	10 & |                       & Bitwise OR\\
+	11 & \&\& & Logical AND\\
+	12 & || & Logical OR\\
+	13 & ? : & Conditional evaluation (\emph{ternary operator})\\
+	14 & = \\
+	
+	\bottomrule[1pt]	
+\end{tabularx}
+\captionof{table}{Präzedenz der Operatoren in C} \label{tab:OperatorPrecedence}
+}
+
+See also \url{https://en.cppreference.com/w/c/language/operator_precedence} for further details.
+
+
 \section{Formatierte Textausgabe}
 Die Format-Codes in Tabellen \ref{tab:FormatOutNum} und \ref{tab:FormatOutSpc} funktionieren sowohl mit \texttt{printf}, \texttt{sprintf}, \texttt{snprintf}, als auch mit \texttt{fprintf}.
 
@@ -1154,75 +1220,6 @@ Die Ausgabe der Zeichenketten (\eg mit \texttt{printf}) in den Tabellen \ref{tab
 \end{table}
 
 
-\FloatBarrier
-\section{Operator-Hierarchie}
-\begin{table}[h!]
-	\rowcolors{1}{white}{tabhighlight}
-	\newcolumntype{P}{>{\centering \arraybackslash          } p{.2 \linewidth}}
-	\newcolumntype{C}{>{\centering \arraybackslash \ttfamily} p{.2 \linewidth}}
-	\newcolumntype{D}{>{\centering \arraybackslash          } p{.5\linewidth}}
-\begin{tabularx}
-		{\linewidth}
-		{PCD}
-		\toprule[1pt]
-
-	\textbf{Priorität} & \normalfont\textbf{Operator} & \textbf{Beschreibung} \tabcrlf
-	
-	1  & \makecell{
-			++, -{}-\\
-			()\\
-			{[]}\\
-			., ->
-		} & \makecell{
-			Inkrement und Dekrement (Postfix) \\
-			Funktionsaufruf\\
-			Array-Indizierung\\
-			Strukturzugriff
-		} \\
-	2  & \makecell{
-			++, -{}-\\
-			!, \textasciitilde \\
-			(type) \\
-			*\\
-			\&\\
-			sizeof
-		} & \makecell{
-			Inkrement und Dekrement (Prefix) \\
-			Logisches und bitweises NOT \\
-			Typecast\\
-			Dereferenzierung\\
-			Adresse finden\\
-			Strukturgröße ermitteln
-		} \\
-	3  & *, /, \%                & Multiplikation, Division, Modulo\\
-	4  & +, -                    & Addition, Subtraktion\\
-	5  & <{}<, >{}>              & Bitshift nach links und rechts\\
-	6  & \makecell{
-			<, >\\
-	 		<=, >=
-	 	} &  \makecell{Vergleichsoperatoren kleiner/größer als \\
-				 	   und kleiner gleich/größer gleich
-		} \\
-	7  & ==, != & Vergleichsoperatoren Gleichheit, Ungleichheit\\
-	8  & \&                      & Bitweises AND\\
-	9  & \textasciicircum        & Bitweises XOR\\
-	10 & |                       & Bitweises OR\\
-	11 & \&\& & Logisches AND\\
-	12 & || & Logisches OR\\
-	13 & ? : & Bedingte Auswertung (\emph{ternärer Operator})\\
-	14 & = \\
-	
-	
-	\bottomrule[1pt]	
-\end{tabularx}
-\caption{Präzedenz der Operatoren in C} \label{tab:OperatorPrecedence}
-\end{table}
-
-Siehe auch \url{https://en.cppreference.com/w/c/language/operator_precedence} für weitere Informationen.
-
-\begin{plusbox}[C++: Erweiterte Liste von Operatoren]
-Die Sprache C++ kennt einige weitere Operatoren, die hier nicht angesprochen werden können. Der Vollständigkeit halber sei dennoch auf den C++-spezifischen Artikel unter \url{https://en.cppreference.com/w/cpp/language/operator_precedence} verwiesen.
-\end{plusbox}
 
 
 \FloatBarrier
