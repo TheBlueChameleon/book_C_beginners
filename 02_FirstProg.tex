@@ -79,7 +79,7 @@ It is up to you, how many whitespaces (or tabs) you add; only you should stay co
 In this book I'll do my best to stay consistent in my indentation style. You may take this as inspiration for your own code.
 \end{hintbox}
 
-The gcc reads the code \enquote{from top to bottom}. This means that the order of statements is of great importance. If, for example, you move the \inC{#include} statement from line 1 to the end of the code, you'd get an error message. The reason behind this is that the command \texttt{printf} is only declared in the fine \texttt{stdio.h}; before this declaration, the compiler \enquote{doesn't know} what \texttt{printf} even means.
+The gcc reads the code \enquote{from top to bottom}. This means that the order of statements is of great importance. If, for example, you move the \texttt{\#include} statement from line 1 to the end of the code, you'd get an error message. The reason behind this is that the command \texttt{printf} is only declared in the fine \texttt{stdio.h}; before this declaration, the compiler \enquote{doesn't know} what \texttt{printf} even means.
 
 \section{Variables, Data Types, Operators} \label{sec:expressions}
 \emph{Useful} programs evolve over time. They compute some result or react to user input. To realize such dynamicity, C allows the existens of \emph{variables}, \ie stored information that can change over time. In this section we'll learn how to create and use variables and some of the \enquote{behind the scenes}, \ie what happens in memory when we use them.
@@ -176,6 +176,10 @@ A common \enquote{mistake} among beginners is to use inexpressive names such as 
 Instead, be as descriptive as possible when giving names. A guideline to follow is \emph{good code should read like prose text}. That certainly is only possible if the variables are named after human concepts like \texttt{repetitions}, \texttt{message}, \texttt{velocity\_x}, ...
 \end{hintbox}
 
+\begin{hintbox}[Efficiency and accuracy through data types]
+In principle, you could use the data type \inC{double} for all your numbers, since any integer can be converted into a floating point value. However, operations involving integers are usually faster that such involving floating point numbers. The memory consumption for an \inC{int} also is (usually -- see appendix table \ref{tab:DatatypesStd}) only half as much as that of a \inC{double}. The most important reason to use integers over floating point values is, however, that the latter always accumulate rounding errors with each computation. Only integer math is guaranteed to be exact (unless there is an overflow, \ie the computed number becomes too big to be stored in an \inC{int} variable).
+\end{hintbox}
+
 A \emph{declaration} (\ie a line like \inC{int number;}) does two things: it \emph{reserves memory} (\ie it picks a number of consecutive cells in memory and tells the operating system that they are used now) and \emph{binds it to the symbol} (\ie the compiler knows that \texttt{symbolName} should refer to the content of the reserved memory cells).
 
 Multiple variables \emph{of the same type} can be declared in a single statement\footnote{However, this programming style is sometimes discouraged.}. To do so, we list them separated by commas. A valid declaration of variables could thus look like this:
@@ -235,7 +239,6 @@ redeclaration.c:3:12: note: previous declaration of ‘x’ with type
 \end{cmdbox}
 \end{warnbox}
 
-\newpage
 \subsection{Assignments} \label{sec:valueAssignment}
 We can assign values to our varibles with the \emph{operator} \texttt{=}:
 \begin{codebox}[assignments.c]
@@ -258,8 +261,26 @@ In this, line 5 makes it so that \texttt{count} stores the value \inC{5}. The su
 
 The lines 7 and 8 also assign values to the two previously defined \inC{double} variables. Note that we use a dot as a decimal separator\footnote{In some parts of the world, using a comma as a decimal separator. One example for this is Germany, my humble country of origin.}. Note also that \texttt{positionY} is assigned the value \inC{5.0} (as opposed to simply \inC{5}): the data types of variable and assigned value match. In chapter \ref{chp:casting} we'll discuss what happens if you don't abide by this rule (and when this is possible in the first place).
 
-%TODO var needs to be declared before use
+\begin{hintbox}[Order of statements]
+(Unlike humans), the computer can only \enquote{read} code from top to bottom. We've heard this before when we discussed the \texttt{\#include} preprocessor directive, and of course it affects all code equally. In particular, this means that variables have to be declared before they are used. In example \ref{code:simpleAssignment}, if moved line 2 (declaration of \texttt{count}) to line 7 (after writing \texttt{count}), compilation would fail and we'd see the error message:
 
+\begin{cmdbox}[Error message: undeclared identifier]
+\begin{minted}{text}
+assignments.c: In function ‘main’:
+assignments.c:5:5: error: ‘count’ undeclared (first use in this function)
+    2 |     count = 7;
+      |     ^~~~~
+assignments.c:5:5: note: each undeclared identifier is reported only once 
+    for each function it appears in
+\end{minted}
+\end{cmdbox}
+
+The last line (\emph{each undeclared identifier is reported only once for each function it appears in}) means that, albeit line 6 (\texttt{count = 8}) is equally faulty without declaration of the symbol \texttt{count}, it is not reported by the compiler because it has already uttered an error message related to the symbol \texttt{count}.
+
+A real life counterpart of this scenario would be this: I tell you to write the number 7 on \emph{the paper}. My desk is cluttered with different pieces of paper, so you would have no idea where I wanted you to put that note to. When I later tell you that \emph{the paper} means the blue post it on the left, it's already too late: you've written the number to some other piece of paper, because as a human, you can proactively make decisions. A computer does not have the capacity to make decisions of its own (remember our mantra), and hence, the only thing it can do is complain by means of an error message.
+\end{hintbox}
+
+\newpage
 \subsection{Combined declaration and assignment} \label{sec:valueAssignment}
 Declaration and assignment can be done in a single statement:
 \begin{codebox}[combinedAssignments.c]
@@ -277,24 +298,21 @@ The final \emph{state} (\ie totality of values in memory) after running code \re
 
 \begin{hintbox}[Uninitialized variables]
 When declaring variables (like in code \ref{code:declaringVars}), the compiler only \emph{reserves} memory for the variable, but does not write any value into the reserved cell(s). However, there is no such thing as an empty memory cell; each byte in memory always holds some bitpattern. Directly after declaration, this can be anything: maybe the same memory cell has been used previously by another program and still holds a character of a text the program displayed. Essentially, the value a variable has after declaration is random!
-\end{hintbox}
-%
-\begin{hintbox}[]
+
 If your program \emph{reads} an uninitialized value \ie does anything with the variable other than assigning it a value, the result will be \emph{undefined behaviour}. Results of this can be benign (\eg  strange outputs on the console) bad (\eg crash of your program) or outright harmful (\eg overwriting files), depending on what you do with the uninitialized variables. More often than not, it is not always obvious that an uninitialized variable causes trouble; there could be a range of values of the uninitialized variable for which the behaviour of the program looks fine, and only certain values cause glitches, crashes or damage. Still, it is a condition we should avoid at all cost.
 
 For that reason, I strongly advise you to \emph{always} initialize your variables with some default value, \ie to always use the combined declaration and assignment syntax. If you are not sure which default value is the best for your specific problem, simply put in \texttt{0}. It is easier to debug problems caused by one known value than such caused by a completely random factor.
 \end{hintbox}
 
 \subsection{Using Variables in Computations}\label{sec:OperatorsArithmetic}
-The point of computers is to compute\citationneeded! Computations have an input and an output. This input can be \emph{constants} (such as \inC{5}) or variables. The output needs to be stored somewhere, too, so again we'll see the use of variables here.
+The point of computers is to compute\citationneeded[https://xkcd.com/703/]! Computations have an input and an output. This input can be \emph{constants} (such as \inC{5}) or variables. The output needs to be stored somewhere, too, so again we'll see the use of variables here.
 
 Computations are written as \enquote{normal} expressions as we know them from our human every day experience; for example \inC{5 + 3} instructs the computer to sum up the constants \inC{5} and \inC{3}. The result of this \emph{expression} can then be stored in a variable with an assignment, like we've seen them before. This works with both, the simple assignment and the combined declaration/assignment:
 \begin{codebox}[computations.c]
 \begin{minted}[linenos]{c}
 int main () {
     int     count = 5 + 3;
-    int nextCount;
-    
+    int nextCount;    
     nextCount = (count - 3) * 7;
 }
 \end{minted}
@@ -333,16 +351,13 @@ In the programming world, we make a distinction between \emph{expressions}, \emp
 \begin{itemize}
 \item An \emph{expression} is anything that can be \emph{evaluated}, \ie condensed into a single value. Examples for statements are \inC{5 + 3} (evaluated to \inC{8}) 
 	or \inC{count - 3} (evaluation depends on the current value of \texttt{count}).
-\end{itemize}
-\end{hintbox}
-%
-\begin{hintbox}[]
-\begin{itemize}
 \item A \emph{statement}, on the other hand, is one single complete line of code that changes the \emph{state of the machine}, \ie changes some values in memory.
 	For example \inC{printf("hello world\n");} is a statement (it changes the video memory that is used to show the output on screen).
 \item \emph{Declarations} look a lot like statements, but do not not change the \emph{content} of memory, but only introduce symbols.
 	The line \inC{int count;} is a declaration: it merely informes the compiler that some memory has to be reserved, but the contents of the memory are not changed.
 \end{itemize}
+
+Preprocessor directives are considered a different thing alltogether, since they are replaced by \enquote{proper} C code before compilation. We've only encountered the directive \texttt{\#include} so far, which pastes the content of another file into our code before compilation. Other directives have similar effects in that they only generate C code which then might be be a declaration of symbols, an executable statement or an evaluatable expression.
 
 For very technical reasons, a line like \inC{int count = 8;} is not considered a statement, but a \emph{declaration with initialization}. One rationale behind this is that such lines cannot be executed several times in a row: once a symbol has been introduced, it exists. Remember that \emph{redeclarations} (\ie binding the symbol to a new location in memory) is forbidden (cf. code \ref{code:redeclarations}).
 
