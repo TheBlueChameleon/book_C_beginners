@@ -153,20 +153,20 @@ Binary & Decimal & Binary & Decimal \tabcrlf
 The first two bits (bit exponents 0 and 1) are interpreted as usual. The \emph{highest order bit} (exponent 2) gives a value of ${\color{blue}-}2^2 = -4$.
 \end{defbox}
 
-\begin{warnbox}[Everything is up for interpretation!]
+\begin{hintbox}[Everything is up for interpretation!]
 As you see, the same bitbpattern can be interpreted in numerous ways! There is nothing inherent to the sequence of ones and zeros that could tell whether we are dealing with an unsigned or signed integer. As we will later see, this ambiguity also holds for floating point numbers, texts, programs, images, ...
 
 Information in isolation is nigh-worthless. To do anything useful with it, we need some context that provides the way of interpretation for the given information. We will see later on how this is realized in the C programming language.
-\end{warnbox}
+\end{hintbox}
 
 \subsection{Byte Sized Chunks}
 In the human world, we can (in principle) use an arbitrary number of digits to write down any number we fancy. While the binary system does allow the same degree of freedom, computers are more restrictive. Any piece of information will always be composed of an integer multiple of eight bits. We say, information always comes in units of \emph{bytes}.
 
 Several bytes can be joint to form a bigger compound. That is, you can form a (potentially) bigger number out of two bytes. \enquote{Unused} bits will be padded with zeros. For example, the number $15$ could in principle be written as $1111_2$ (in which the index $2$ signifies that this is a binary number.) Since we have to use at least eight bits, in a computer it would be stored as the bitpattern \texttt{00001111}.
 
-\begin{warnbox}[No obvious end]
+\begin{hintbox}[No obvious end]
 Again, there is no inherent \enquote{end} of a number. A randomly picked byte from memory could equally well be the start, middle or end of a multi-byte number, or of course a stand-alone one-byte representation of a number. To know which is which, some context is needed which we will have to specify explicitly in our programs.
-\end{warnbox}
+\end{hintbox}
 
 \section{Binary Representation of Real Numbers}
 Real numbers -- numbers with a decimal part, or \enquote{comma values} -- play an important our daily lives. Luckily, computers can handle them as well; of course, this means that there is a way to translate them into binary, as well. The most simple way of doing so would be to specify a fixed position where to insert the decimal point. While this works in principle, it has prooven too inflexible for most real life applications. Instead, a devious scheme to implement \emph{floating point numbers} has been devised. This scheme comes at the cost of introducing a small but sometimes noticeable \emph{rounding error} in each operation that involves such a floating point number.
@@ -270,13 +270,13 @@ One of the oldest such encoding that is still in use is \emph{ASCII} (American S
 Texts -- \ie strings of letters and other symbols -- are simply sequences of numbers that can be interpreted according to this (or another) table. One nice way of seeing ASCII texts as them being one single number, represented in base 128.
 
 \begin{plusbox}[Other Encodings]
-ASCII has been used for a long time, since it can encode most texts with minimal overhead. Especially the \emph{one byte is one character} property means it is easy to work with ASCII text. However, this encoding is rather limiting: there are more than 128 different symbols\citationneeded. Of course it is possible to come up with a longer table and list more characters in it. Essentially, this is the main idea behind Unicode. However, longer tables mean bigger numbers and therefore break the \emph{one byte is one character} property. This also requires some extra thought in order not to waste memory, make texts recoverable even when communication between two machines is flawed or when different communication standards are used.
+ASCII has been used for a long time, since it can encode most texts with minimal overhead. Especially the \emph{one byte is one character} property means it is easy to work with ASCII text. However, this encoding is rather limiting: there are more than 128 different symbols\citationneeded[https://xkcd.com/1726/]. Of course it is possible to come up with a longer table and list more characters in it. Essentially, this is the main idea behind Unicode. However, longer tables mean bigger numbers and therefore break the \emph{one byte is one character} property. This also requires some extra thought in order not to waste memory, make texts recoverable even when communication between two machines is flawed or when different communication standards are used.
 
 If you are inclined to learn more, feel free to look up the keyword UTF-8, which is one \emph{encoding system under Unicode}.
 \end{plusbox}
 
 \subsection{Graphics and Sound}
-A picture can be understood as a collection of pixels in a given order. So a list of pixel data (together with width and height of the complete image) can be used to encode an image. Each pixel is then defined by its colour, which we could again represent by a single number from a table. As there are a lot of colours\citationneeded, it is more convenient to use analogies to the physical world in which these pictures exist to encode the information.
+A picture can be understood as a collection of pixels in a given order. So a list of pixel data (together with width and height of the complete image) can be used to encode an image. Each pixel is then defined by its colour, which we could again represent by a single number from a table. As there are a lot of colours\citationneeded[https://xkcd.com/1882/], it is more convenient to use analogies to the physical world in which these pictures exist to encode the information.
 
 In the case of pictures, we use the fact that humans have photoreceptors for red, green and blue light. Different intensities in these three categories yield the impression of different colours. Hence, storing three numbers per pixel -- one per \enquote{channel} -- is a great way of putting graphical information in memory.
 
@@ -304,7 +304,7 @@ You already know that \emph{translating code into machine language} is a fairly 
 \emph{Linking} means combining multiple files of machine language instructions into a single unit of executable code -- think of it as \emph{glueing together the components of a program}.
 
 \subsection{Invoking the Compiler}
-Luckily, all these functions can be executed by a single program (which will invoke other programs to do the four discussed tasks in sequence). This program is the \texttt{gcc}. It combines a preprocessor, compiler, assembler and linker in one program. For convenience, it is usually only referred to as \emph{the compiler}; \emph{to compile} most often means the complete chain of four operations that are needed to generate an executable file.
+Luckily, all these functions can be executed by a single program (which will invoke other programs to do the four discussed tasks in sequence). One such program is the \texttt{gcc}\footnote{Actually, there are several programs available that translate C code into machine language. While the final result is mostly the same for all of them, there are subtle differences, which we won't discuss here. The specific details of the various compilers can only be understood and appreciated with some deeper knowledge about programming and would only confuse the beginners this book is aimed at. The gcc is open source, available on all major plattforms and tends to support new standards of the C programming language earlier than its competitors; hence my focus on that compiler.}. It combines a preprocessor, compiler, assembler and linker in one program. For convenience, it is usually only referred to as \emph{the compiler}; \emph{to compile} most often means the complete chain of four operations that are needed to generate an executable file.
 
 Naively attempting to start it from the command line will result in an error message:
 \begin{cmdbox}[Invoking the compiler without argument]
@@ -366,11 +366,11 @@ If you want to write the compiled output into a different file, you can prepend 
 \$ gcc mycode.c \textbf{-o myexecutable}
 \end{cmdbox}
 
-\begin{warnbox}[Extensions matter]
+\begin{hintbox}[Extensions matter]
 I hope you noticed the \texttt{.c} at the end of the code filename. This \emph{filename extension} is not optional. The extension specifies what kind of content can be found in the file. We will soon see that the compiler can process other types of data than C code; to distinguish between how to process different inputs it needs this file extension.
 
 Likewise, the extension of the generated output file should either be \texttt{.exe} if you work on a Windows machine, or none at all on Linux and Mac.
-\end{warnbox}
+\end{hintbox}
 
 The chain: preprocessing-compiling-assembling-linking can be stopped after the assembly step. The result is a file that contains machine language, but is not directly executable code. This can be useful if some part of the code is used in multiple projects; one can then translate this shared code only once and only do the last step (linkage) with these \emph{precompiled routines}. To do so, one prefixes the command line flag \texttt{-c} to the code file that should be compiled but not linked:
 \begin{cmdbox}[Compiling without linking]
