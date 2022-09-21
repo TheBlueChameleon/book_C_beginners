@@ -1,0 +1,655 @@
+\chapter{Variables and Computations}\label{chp:expressions}
+\epigraph{Beauty is variable, ugliness is constant.}{Douglas Horton}
+
+\emph{Useful} programs evolve over time. They compute some result or react to user input. To realize such dynamicity, C allows the existens of \emph{variables}, \ie stored information that can change over time. In this section we'll learn how to create and use variables and some of the \enquote{behind the scenes}, \ie what happens in memory when we use them.
+
+\section{Memory Structure}
+Imagine the memory as a long chain of enumerated cells. Each cell holds one byte's worth of information, \ie eight bits. These cells can never be empty; there's always \emph{some} information stored in them, albeit possibly nonsensical or useless. If we want to make use of this structure, someone or something will have to keep track of which cells hold which pieces of information, and how to interpret them.
+
+Luckily, most of this bookkeeping is done automatically by the compiler; to properly utilize its features, however, we need to clarify some names.
+
+Within the cells, we find \emph{values}. As mentioned, they are, a priori, pure bitpatterns with no inherent meaning. Provided we know \emph{what sort of information} they encode, we can make sense of these bitpatterns.
+
+The question \emph{what sort of information} is contained in a cell is called \emph{data type}. The data type is a name for both, the method of interpretation of the raw data in the cells, as well as the \emph{number of bytes per unit of information}. From the previous chapter, you remember how to interpret bit patterns as signed integers; to do so, you also need to know how many bytes to consider in your interpretation. A \emph{32bit signed integer} is thus a data type.
+
+The value we are looking for is in one of the enumerated cells. The \enquote{number of the cell} in which a given value is stored is its \emph{address}. An address itself can be stored as some unsigned integer. Adresses often are expressed as \emph{hexadecimal numbers}. That means, the number is written in base 16. You'll not only find the digits 0..9, but also A, B, ..., F (or, sometimes, the lower case letters a .. f). The digit 'A' then has the decimal value 10, 'B' is 11 and so on. The transformation back into base ten works just like described in section \ref{sec:BinaryNumbers}. To make sure a number is given in hexadecimal, it often carries the prefix \texttt{0x}. More often than not, the exact value of addresses is of little importance; if you ever see hexadecimal numbers, simply know that they are just another way of writing normal decimal numbers.
+
+As humans, we prefer symbols over addresses. \emph{The value of cell 238} doesn't tell a lot about its content or what it means. In contrast, \emph{the value of \texttt{nameOfPlayer1}} clearly signifies some textual information. We call \texttt{nameOfPlayer1} a \emph{symbol}. It is a stand-in for the address of the cell(s), in which the name of player 1 can be found. The compiler \emph{binds} the symbols we as humans choose to the addresses in memory.
+
+\begin{defbox}[Memory Picture]
+\begin{center}
+\begin{tikzpicture}
+  [
+    cell/.style={text width=8mm,
+      text height=4mm, draw=black, inner sep=1mm},
+    ld/.style={draw=blue,shorten >=2pt,->}
+  ]
+  \node (c1) at (0,0) [cell] {\ttfamily 99};
+  \node (c2) at (1,0) [cell] {\ttfamily 1};
+  \node (c3) at (2,0) [cell] {\ttfamily 255};
+  \node (c4) at (3,0) [cell] {\ttfamily 0};
+  \node (c5) at (4,0) [cell] {\ttfamily 80};
+  \node (c6) at (5,0) [cell] {\ttfamily ...};
+
+  \node (labelMem) at (8,  1) {Symbols in our Code};
+  \node (labelMem) at (8,  0) {Values in memory};
+  \node (labelMem) at (8, -1) {Addresses};
+
+  \node (a1) [below=2mm of c1]            {\tiny 0x27ff};
+  \node (a2) [below=2mm of c2, color=red] {\tiny 0x2800};
+  \node (a3) [below=2mm of c3]            {\tiny 0x2801};
+  \node (a4) [below=2mm of c4]            {\tiny 0x2802};
+  \node (a5) [below=2mm of c5]            {\tiny 0x2803};
+  \node (a6) [below=2mm of c6]            {\tiny 0x2804};
+
+  \node (ptr) [below=8mm of c1] {\scriptsize Address of \texttt{x}};
+  \node (vc2) [above=6mm of c1] {\scriptsize Variable \texttt{x}};
+  \node (vc0) [above=2mm of c1] {\scriptsize Variable \texttt{y}};
+
+  \draw [ld] (ptr.east) .. controls +(0.3,0) .. (a2.south);
+  \draw [ld] (vc0.east) .. controls +(0.4,0) .. (c2.north);
+  \draw [ld] (vc2.east) .. controls +(2.4,0) .. (c4.north);
+\end{tikzpicture}
+\end{center}
+\captionof{figure}{Variables in memory}
+\end{defbox}
+
+\begin{plusbox}[Powers of two in computing and why we use hexadecimal]
+Everything in the world of computers is build around powers of two. There are 16bit-, 32bit- and 64bit operating systems, USB sticks with 2, 4, 8 or 16 GB and even your screen might be 1024, 2048 or 4096 pixels wide. This is no coincidence. Since everything boils down to collections of bits, powers of two are built into the very basis of our computation technology.
+
+One nice aspect of hexadecimal numbers is that they \emph{align nicely} with binary numbers. I.\;e. round numbers in binary (numbers with lots of zeros) will also look like round numbers in hexadecimal (since 16 is also a power of two). The binary number $1000~ 0000_2$ translates to the decimal $128_{10}$ and to the hexadecimal $80_{16}$. The binary number $1111~ 0000~ 1100~ 0000_2$ is $F0C0_{16}$ in hexadecimal. Note also how each group of four binary digits corresponds to one hexadecimal digit. It is fortunately rare that we really have to deal with bit patterns directly; but when we have to do, being working with its hexadecimal representation is usually much more convenient than dealing with its binary or decimal form.
+
+Powers of two appear so frequently, that some computer technicials expirience them as round numbers, regardless of their base representation. For example, Randall Munroe, author of the famous webcomic \href{https://www.xkcd.com/}{xkcd} celebrated his one thousandth strip with this comic:
+\begin{center}
+\includegraphics[width=.9\linewidth]{./gfx/xkcd-1000}
+\end{center}
+\captionof{figure}
+	[Decimal and binary round numbers]
+	{Decimal and binary round numbers. Source: \url{https://www.xkcd.com/1000/}}
+\end{plusbox}
+
+\section{Declaring Variables} \label{sec:DeclareVars}
+To use variables in our code, we first have to \emph{declare} them. That means we have to tell the compiler that we want a variable and what kind of variable this should be. We do that with a statement of the form:
+\begin{codebox}[Syntax: Declaring variables]
+\texttt{dataType symbolName;}
+\end{codebox}
+
+\texttt{dataType} stands for one of several registered keywords of the C programming language. Section \ref{sec:Datatypes} in the appendix lists all predefined data types. For the most part, we can limit ourselves to using one of these three:
+\begin{center}
+\newcolumntype{T}{>{\centering\ttfamily\arraybackslash}m{.2\linewidth}}
+\newcolumntype{U}{>{\centering \arraybackslash}        p{.3\linewidth}}
+
+\rowcolors{1}{white}{tabhighlight}
+\begin{tabularx}
+	{.5505\linewidth}
+	{TU}
+\toprule[1.5pt]
+	\textbf{\textrm{data type}} & \textbf{use} \tabcrlf
+	int                         & integers \\
+	double                      & floating point numbers \\
+	char                        & characters \\
+\bottomrule[1.5pt]
+\end{tabularx}
+\captionof{table}{The most commonly used data types in C}
+\end{center}
+
+\texttt{symbolName} is an arbitrary identifyer we can choose, like \texttt{nameOfPlayer1}. It must abide to these rules: \vspace{-9pt}
+\begin{itemize}
+\setlength\itemsep{0pt}
+\item Must only comprise of the characters \texttt{a..z}, \texttt{A..Z}, \texttt{0..9} or \texttt{\_}
+\item The first character must not be a digit
+\item Must have at most 40 characters
+\item Must be unique (there may not be two symbols with the same name in the same section. For example, it is not allowed to have a variable named \texttt{main} 
+	since there has to be a function with that name\footnote{\emph{Technically}, there is a way around that... practically... \url{https://xkcd.com/1475/}}.)
+\end{itemize}
+\vspace{-8pt}
+
+The language C is \emph{case sensitive}, \ie there is a difference between \texttt{nameOfPlayer1} and \texttt{NameOfPlayer1}. By convention, variable names start with a lower case letter. If a variable comprises of several human language words (like \texttt{nameOfPlayer1}) one often applies \enquote{camel case}, \ie begin each new word in the symbol with an upper case letter (except for the first one). An alternative is \enquote{snake case}, where the individual words are separated by underscores (\texttt{name\_of\_player\_1}). Which of the two conventions you pick is up to you; again I only advise you to be consistent in your choice (otherwise you'll have a hard time remembering whether you spelled it \texttt{paragraph\_index} or \texttt{paragraphIndex}.)
+
+\begin{hintbox}[Good names]
+A common \enquote{mistake} among beginners is to use inexpressive names such as \texttt{x}, \texttt{y}, \texttt{a}, ... While this is no problem for the compiler (note the quotation marks around \enquote{mistake}), it makes codes harder to write, maintain and debug. Programming becomes quite complex very soon, and the last thing we want is loosing track of whether \texttt{a} is the total score or which meaning behind the variable \texttt{b}.
+
+Instead, be as descriptive as possible when giving names. A guideline to follow is \emph{good code should read like prose text}. That certainly is only possible if the variables are named after human concepts like \texttt{repetitions}, \texttt{message}, \texttt{velocity\_x}, ...
+\end{hintbox}
+
+\begin{hintbox}[Efficiency and accuracy through data types]
+In principle, you could use the data type \inC{double} for all your numbers, since any integer can be converted into a floating point value. However, operations involving integers are usually faster that such involving floating point numbers. The memory consumption for an \inC{int} also is (usually -- see appendix table \ref{tab:DatatypesStd}) only half as much as that of a \inC{double}. The most important reason to use integers over floating point values is, however, that the latter always accumulate rounding errors with each computation. Only integer math is guaranteed to be exact (unless there is an overflow, \ie the computed number becomes too big to be stored in an \inC{int} variable).
+\end{hintbox}
+
+A \emph{declaration} (\ie a line like \inC{int number;}) does two things: it \emph{reserves memory} (\ie it picks a number of consecutive cells in memory and tells the operating system that they are used now) and \emph{binds it to the symbol} (\ie the compiler knows that \texttt{symbolName} should refer to the content of the reserved memory cells).
+
+Multiple variables \emph{of the same type} can be declared in a single statement\footnote{However, this programming style is sometimes discouraged.}. To do so, we list them separated by commas. A valid declaration of variables could thus look like this:
+\begin{codebox}[declarations.c]
+\begin{minted}[linenos]{c}
+int main () {
+   int    count;
+   double positionX, positionY;
+}
+\end{minted}
+\captionof{code}{Declaration of variables} \label{code:declaringVars}
+\end{codebox}
+
+You may have noticed the similarity between the definition of the variable \texttt{count} and the function \texttt{main}. That is no coincidence! From the viewpoint of the compiler, the function \texttt{main} is a set of instructions to compute an \inC{int}. We'll learn more about this in chapters \ref{chp:funcs} and \ref{chp:OS-Link}.
+
+\begin{warnbox}[Avoid global variables]
+Note that the declaration of the variables \texttt{count}, \texttt{positionX} and \texttt{positionY} is \emph{within} the function \texttt{main}. We \emph{could} also define them outside of \texttt{main}; but this would potentially lead to a lot of trouble. We'll discuss the implications of that placement in chapter \ref{chp:funcs}. For now, just stick to the rule:
+
+Anything that is not an \texttt{\#include} line must be \emph{within} the braces that belong to \inC{int main}.
+\end{warnbox}
+
+\begin{warnbox}[No duplicates or redeclarations]
+Symbols that have been declared once cannot be declared again. In the following example, there are multiple \emph{forbidden} lines:
+\begin{codebox}[redeclaration.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int x;
+    double x;
+    int x;
+}
+\end{minted}
+\captionof{code}{Attempts of redeclaration} \label{code:redeclarations}
+\end{codebox}
+The problems are: \vspace{-6pt}
+\begin{itemize}
+\setlength\itemsep{-3pt}
+\item Line 3: the variable \texttt{x} already exists (line 2) and cannot be re-typed to \inC{double}.
+\item Line 4: again, the variable \texttt{x} already exists; even repeating an identical declaration is not allowed.
+\end{itemize}
+
+Consequently, trying to compile code \ref{code:redeclarations} will result in error messages:
+\begin{cmdbox}[Error messages produced by code redeclarations.c]
+\begin{minted}{text}
+redeclaration.c: In function ‘main’:
+redeclaration.c:3:12: error: conflicting types for ‘x’; have ‘double’
+    3 |     double x;
+      |            ^
+redeclaration.c:2:9: note: previous declaration of ‘x’ with type ‘int’
+    2 |     int x;
+      |         ^
+redeclaration.c:4:9: error: conflicting types for ‘x’; have ‘int’
+    4 |     int x;
+      |         ^
+redeclaration.c:3:12: note: previous declaration of ‘x’ with type
+    ‘double’
+    3 |     double x;
+\end{minted}
+\end{cmdbox}
+\end{warnbox}
+
+\section{Assignments} \label{sec:valueAssignment}
+We can assign values to our varibles with the \emph{operator} \texttt{=}:
+\begin{codebox}[assignments.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int    count;
+    double positionX, positionY;
+
+    count = 7;
+    count = 8;
+
+    positionX = 4.3;
+    positionY = 5.0;
+}
+\end{minted}
+\captionof{code}{Assigning values to variables} \label{code:simpleAssignment}
+\end{codebox}
+
+In this, line 5 makes it so that \texttt{count} stores the value \inC{7}. The subsequent line 6 overwrites this value and assigns \inC{8} to \texttt{count}.
+
+The lines 8 and 9 also assign values to the two previously defined \inC{double} variables. Note that we use a dot as a decimal separator\footnote{In some parts of the world, using a comma as a decimal separator. One example for this is Germany, my humble country of origin.}. Note also that \texttt{positionY} is assigned the value \inC{5.0} (as opposed to simply \inC{5}): the data types of variable and assigned value match, \ie they're both floating point values. In chapter \ref{chp:casting} we'll discuss what happens if you don't abide by this rule (and when this is possible in the first place).
+
+\begin{hintbox}[Order of statements]
+(Unlike humans), the computer can only \enquote{read} code from top to bottom. We've heard this before when we discussed the \texttt{\#include} preprocessor directive, and of course it affects all code equally. In particular, this means that variables have to be declared before they are used. In example \ref{code:simpleAssignment}, if moved line 2 (declaration of \texttt{count}) to line 7 (after writing \texttt{count}), compilation would fail and we'd see the error message:
+
+\begin{cmdbox}[Error message: undeclared identifier]
+\begin{minted}{text}
+assignments.c: In function ‘main’:
+assignments.c:5:5: error: ‘count’ undeclared (first use in this function)
+    2 |     count = 7;
+      |     ^~~~~
+assignments.c:5:5: note: each undeclared identifier is reported only once 
+    for each function it appears in
+\end{minted}
+\end{cmdbox}
+
+The last line (\emph{each undeclared identifier is reported only once for each function it appears in}) means that, albeit line 6 (\texttt{count = 8}) is equally faulty without declaration of the symbol \texttt{count}, it is not reported by the compiler because it has already uttered an error message related to the symbol \texttt{count}.
+
+A real life counterpart of this scenario would be this: I tell you to write the number 7 on \emph{the paper}. My desk is cluttered with different pieces of paper, so you would have no idea where I wanted you to put that note to. When I later tell you that \emph{the paper} means the blue post it on the left, it's already too late: you've written the number to some other piece of paper, because as a human, you can proactively make decisions. A computer does not have the capacity to make decisions of its own (remember our mantra), and hence, the only thing it can do is complain by means of an error message.
+\end{hintbox}
+
+
+\subsection{Combined declaration and assignment} \label{sec:valueAssignment}
+Declaration and assignment can be done in a single statement:
+\begin{codebox}[combinedAssignments.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int    count = 8;
+    double positionX = 4.3,
+           positionY = 5.0;
+}
+\end{minted}
+\captionof{code}{Combined declaration and assignment} \label{code:combinedAssignment}
+\end{codebox}
+
+The final \emph{state} (\ie totality of values in memory) after running code \ref{code:combinedAssignment} is the same as that after executing code \ref{code:simpleAssignment}. Note how line 3 and 4 form a \emph{single statement}: line 3 ends in a comma, which does not end the statement. Only the semicolon in line 4 ends the declartion of \inC{double} variables. The statement could also be compressed into one line of code: \texttt{double positionX = 4.3, positionY = 5.0;}
+
+\begin{hintbox}[Uninitialized variables]
+When declaring variables (like in code \ref{code:declaringVars}), the compiler only \emph{reserves} memory for the variable, but does not write any value into the reserved cell(s). However, there is no such thing as an empty memory cell; each byte in memory always holds some bitpattern. Directly after declaration, this can be anything: maybe the same memory cell has been used previously by another program and still holds a character of a text the program displayed. Essentially, the value a variable has after declaration is random!
+
+If your program \emph{reads} an uninitialized value \ie does anything with the variable other than assigning it a value, the result will be \emph{undefined behaviour}. Results of this can be benign (\eg  strange outputs on the console) bad (\eg crash of your program) or outright harmful (\eg overwriting files), depending on what you do with the uninitialized variables. More often than not, it is not always obvious that an uninitialized variable causes trouble; there could be a range of values of the uninitialized variable for which the behaviour of the program looks fine, and only certain values cause glitches, crashes or damage. Still, it is a condition we should avoid at all cost.
+
+For that reason, I strongly advise you to \emph{always} initialize your variables with some default value, \ie to always use the combined declaration and assignment syntax. If you are not sure which default value is the best for your specific problem, simply put in \texttt{0}. It is easier to debug problems caused by one known value than such caused by a completely random factor.
+\end{hintbox}
+
+
+\section{Using Variables in Computations}\label{sec:OperatorsArithmetic}
+The point of computers is to compute\citationneeded[https://xkcd.com/703/]! Computations have an input and an output. This input can be \emph{constants} (such as \inC{5}) or variables. The output needs to be stored somewhere, too, so again we'll see the use of variables here.
+
+Computations are written as \enquote{normal} expressions as we know them from our human every day experience; for example \inC{5 + 3} instructs the computer to sum up the constants \inC{5} and \inC{3}. The result of this \emph{expression} can then be stored in a variable with an assignment, like we've seen them before. This works with both, the simple assignment and the combined declaration/assignment:
+\begin{codebox}[computations.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int     count = 5 + 3;
+    int nextCount;    
+    nextCount = (count - 3) * 7;
+}
+\end{minted}
+\captionof{code}{Computations with variables} \label{code:simpleComputations}
+\end{codebox}
+In this, the value of \texttt{nextCount} will be \inC{35}.
+
+Valid \emph{operators} in C are:
+{
+\newcolumntype{N}{>{         \centering\arraybackslash} p{.25\linewidth}}
+\newcolumntype{R}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
+\begin{center}
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{.907\linewidth}
+	{NR|NR}
+\toprule[1.5pt]
+
+    \textbf{Operation}       & \textrm{\textbf{Operator}}  &  \textbf{Operation}                       & \textrm{\textbf{Operator}}
+\tabcrlf
+    Addition                 & +                           &  Multiplication                           & * \\
+    Subtraction              & -                           &  Division                                 & / \\
+    Negation ($x \thus -x$)  & -                           &  Remainder of Division (\enquote{Modulo}) & \%\\
+
+\bottomrule[1.5pt]
+\end{tabularx}
+\end{center}
+\captionof{table}{Arithmetic operators in C}\label{tab:OperatorsArithmetic}
+}
+
+As you've seen in example \ref{code:simpleComputations}, you can also use parentheses to affect the order of evaluation. Precedence of operations (multiplication is evaluated before addition) is also respected. Later in this course, we'll learn about other operations; all of them and their precedence are summarized in the appendix in table \ref{tab:OperatorPrecedence}. Note that there is no exponentiation operator; we'll see in chapter \ref{chp:maths} how in C we can compute powers nonetheless.
+
+\begin{hintbox}[Expressions vs. statements vs. declarations]
+In the programming world, we make a distinction between \emph{expressions}, \emph{statements} and \emph{declarations}.
+
+\begin{itemize}
+\setlength\itemsep{0pt}
+\item An \emph{expression} is anything that can be \emph{evaluated}, \ie condensed into a single value. Examples for statements are \inC{5 + 3} (evaluated to \inC{8}) 
+	or \inC{count - 3} (evaluation depends on the current value of the variable \texttt{count}).
+\item A \emph{statement}, on the other hand, is one single complete line of code that changes the \emph{state of the machine}, \ie changes some values in memory\footnote{well... actually,
+	there also are statements that do nothing at all... but saying a statement changes the state of the machine will give you the correct intuition, at the very least.}.
+	For example \inC{printf("hello world\n");} is a statement (it changes the video memory that is used to show the output on screen).
+\item \emph{Declarations} look a lot like statements, but do not not change the \emph{content} of memory, but only introduce symbols.
+	The line \inC{int count;} is a declaration: it merely informes the compiler that some memory has to be reserved, but the contents of the memory are not changed.
+\end{itemize}
+
+Preprocessor directives are considered a different thing alltogether, since they are replaced by \enquote{proper} C code before compilation. We've only encountered the directive \texttt{\#include} so far, which pastes the content of another file into our code before compilation. Other directives have similar effects in that they only generate C code which then might be be a declaration of symbols, an executable statement or an evaluatable expression.
+
+For very technical reasons, a line like \inC{int count = 8;} is not considered a statement, but a \emph{declaration with initialization}. One rationale behind this is that such lines cannot be executed several times in a row: once a symbol has been introduced, it exists. Remember that \emph{redeclarations} (\ie binding the symbol to a new location in memory) is forbidden (cf. code \ref{code:redeclarations}).
+
+To muddy the waters, in chapter \ref{chp:funcs} we'll see that there are statements that are also expressions at the same time. You don't need to worry too much about these differences for now; but be aware that they exist when discussing with fellow programmers.
+\end{hintbox}
+
+Assignments are always made from the right to the left. I.\;e. on the right hand side of the equals sign, there's an expression that will be stored in the variable on the left hand side\footnote{In section \ref{sec:Pointer}, we'll see that the left hand side of an assignment can also be an expression; however, this expression has to evaluate to a variable, as opposed to a value. We'll see soon enough what that means.}.
+
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{codebox}[Correct order of expression and variable]
+\inC{result = 2 + 2;}
+\end{codebox}
+%
+\begin{warnbox}[Wrong order of expression and variable]
+\inC{2 + 2 = result;}
+\end{warnbox}
+\end{tcbraster}
+
+\subsection{Divisions}
+When dividing two numbers, we need to be extra careful. For a computer there are \emph{two kinds of division}: \emph{integer division} and \emph{floating point division}. The names already give away the difference -- the result data type of the two operations is different. While the floating point division produces the result we as humans would consider correct, the integer division might round down to the nearest integer. Both operations are invoked by the same symbol (the division operator \texttt{/}). Integer division takes place when both operands (dividend and divisor) are \inC{int}-like types (appendix section \ref{sec:Datatypes} lists some other data types that behave like \inC{int}s in this respect). If either operand or both operands are floating point numbers, the floating point division will be executed.
+
+\begin{codebox}[divisions.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int    dividend_int    = 3;
+    double dividend_double = 3.0;
+    
+    int    divisor_int    = 2;
+    double divisor_double = 2.0;
+
+    int    result_1 = dividend_int    / divisor_int;
+    
+    double result_2 = dividend_double / divisor_double;
+    double result_3 = dividend_int    / divisor_double;
+    double result_4 = dividend_double / divisor_int;
+
+    int    result_5 = dividend_double / divisor_double;
+}
+\end{minted}
+\captionof{code}{Integer and floating point divisions} \label{code:divisions}
+\end{codebox}
+
+In listing \ref{code:divisions} we'll find the following results:\vspace{-9pt}
+\begin{itemize}
+\setlength\itemsep{-6pt}
+\item \texttt{result\_1} will be computed from an integer division, since both operands are integers. Hence the \enquote{mathematically correct} result $1.5$ will be rounded down to 
+	the nearest integer, which is \inC{1}.
+\item All of \texttt{result\_2} through \texttt{result\_4} trigger floating point division, since at least one operand is a \inC{double}. Hence, these three variables all store the 
+	value \inC{1.5}.
+\item \texttt{result\_5} is of type \inC{int}. Although the computation itself is done as a floating point division and produces the intermediate result \inC{1.5}, the computer cannot 
+	store a \inC{double} result in an \inC{int} variable. Instead, this intermediate result is again rounded to \inC{1}. More on this in chapter \ref{chp:casting}.
+\end{itemize}
+
+
+\section{Formatted Output}
+It's nice that we can make the computer do computations for us. But up to now, all we know is that the results are \emph{somewhere in memory}, which is not very useful for us as humans.
+
+
+\section{Pointers}
+
+
+%TODO
+% essentially keep structure of chapter 2, ...
+% but introduce mem structure and pointers here already (take from chapter 3)
+% move xkcd: 1000 in here, after def: hex. ... or leave it in C3
+% C3 becomes: casting, pointer access, bit magic
+% C3: remember int x = 5.5 does implicit rounding
+% C3: introduce scanf
+
+
+Wichtig ist, dass Variablen bereits deklariert sind \emph{bevor} auf sie verwiesen wird, \ie bevor sie in anderen Ausdrücken vorkommen. Folgendes Beispiel funktioniert daher nicht:
+\begin{codebox}[Beispiel: Fehlerhafter Code{,} Variablen zu spät deklariert]
+\begin{minted}[linenos]{c}
+int main () {
+  Ganzzahl = 7;
+  int Ganzzahl;
+}
+\end{minted}
+\end{codebox}
+und erzeugt die folgende Fehlermeldung:
+\begin{cmdbox}[Fehlermeldungen des gcc]
+\begin{minted}{text}
+myProgram.c: In function ‘main’:
+myProgram.c:2:4: error: ‘Ganzzahl’ undeclared (first use in this
+function)
+    Ganzzahl = 7;
+    ^~~~~~~~
+myProgram.c:2:4: note: each undeclared identifier is reported only once
+for each function it appears in
+\end{minted}
+\end{cmdbox}
+Jede Fehlermeldung beginnt mit einem Verweis auf die fehlerhafte Datei und die Funktion darin, in der das Problem aufgetreten ist (\texttt{myProgram.c: In function ‘main’:}). In der folgenden Zeile der Fehlerausgabe wird genauer spezifiziert in welcher Zeile, und an welcher Stelle der Fehler auftrat (\texttt{myProgram.c:2:4}, also  Zeile 2, Spalte 4) und welcher Fehler gefunden wurde (\texttt{‘Ganzzahl’ undeclared}). Schließlich gibt der Compiler noch die relevante Stelle aus und markiert diese erfreulicherweise.
+
+\begin{hintbox}[Zur Division mit Ganzzahl- und Fließkomma-Werten]
+Der Datentyp einer Division hängt vom Datentyp von Divisor und Dividend ab. Ist einer der beiden ein Fließkommawert, so wird auch das Ergebnis als Fließkommawert berechnet. Sind beide Werte Ganzzahlen, wird auch das Ergebnis als Ganzzahl berechnet und gegebenenfalls abgerundet. Betrachten wir folgendes Beispiel:
+\begin{codebox}[Beispiel: Division von Ganzzahlen und Fließkommazahlen]
+\begin{minted}[linenos]{c}
+double x = 3   / 2  ,
+       y = 3.0 / 2.0,
+       z = 3.0 / 2  ,
+       w = 3   / 2.0;
+\end{minted}
+\end{codebox}
+Die Variable \texttt{x} geht aus der Division zweier Ganzzahlen hervor, und wird damit zu \texttt{1.0} abgerundet. Bei der Berechnung von \texttt{y} hingegen gehen Fließkommazahlen in die Division ein; somit wird das Ergebnis nicht gerundet und als 1.5 gespeichert. Dasselbe gilt für \texttt{z} und \texttt{w}, da zumindest \emph{eine} der an der Division beteiligten Zahlen eine Fließkommazahl war.
+\end{hintbox}
+
+\subsection{Shorthands}
+%TODO prefix and postfix form
+Häufig soll sich der Wert einer Variablen \emph{inkrementiert} (\enquote{hochgezählt}) werden. Dies kann codiert werden als:
+\begin{codebox}[Beispiel: Inkrementieren einer Variablen i]
+\begin{minted}[linenos]{c}
+int main () {
+   int i = 5;
+   i = i + 1;  // i hat jetzt den Wert 6
+}
+\end{minted}
+\end{codebox}
+
+Daneben gibt es auch den \emph{Shorthand} (Kurzform) \texttt{variable++}:
+\begin{codebox}[Beispiel: Inkrementieren einer Variablen i mit Shorthand ++]
+\begin{minted}[linenos]{c}
+int main () {
+   int i = 5;
+   i++;       // i hat jetzt den Wert 6
+}
+\end{minted}
+\end{codebox}
+
+In beiden Beispielen wird der Wert von \texttt{i} in Zeile 3 um 1 erhöht.
+
+Analog dazu existiert der \emph{Dekrement}-Operator \texttt{variable-{}-}, der den Wert von \texttt{variable} um 1 verringert.
+
+Weiter existieren der Operator-Shorthand \texttt{variable += expression}. Zu \texttt{variable} wird der Wert von \texttt{expression} hinzugezählt und anschließend in \texttt{variable} gespeichert. \texttt{expression} darf dabei ein beliebig komplexer Ausdruck sein:
+\begin{codebox}[Beispiel: Inkrementieren einer Variablen i mit Shorthand \texttt{+=}]
+\begin{minted}[linenos]{c}
+int main () {
+   int i = 5,
+       j = 2;
+   i += 3 * j + 1;     // i = i + 3 * j + 1
+}
+\end{minted}
+\end{codebox}
+Hier wird zunächst der Ausdruck \texttt{3 * j + 1} ausgewertet zu \texttt{7}; als nächster Schritt wird die Summe \texttt{i + 7} berechnet, und diese dann in \texttt{i} gespeichert. Die Variable \texttt{i} hat also nach Zeile 4 den Wert 12.
+
+Analog existieren auch die Shorthands \texttt{-=}, \texttt{*=}, \texttt{/=} und \texttt{\%=}.
+
+\begin{hintbox}[Inkrement und Dekrement: Prefix und Postfix]
+Die Operatoren \texttt{++} und \texttt{-{}-} können sowohl \emph{vor} als auch \texttt{hinter} einen Ausdruck gesetzt werden (wir sprechen von \emph{Prefix} und \emph{Postfix}). Für sich alleine ist in beiden Fällen der Effekt derselbe -- der Wert des Ausdrucks wird um 1 erhöht bzw. verringert. Kombiniert mit anderen Operationen ergeben sich aber Unterschiede. Betrachten wir folgendes Beispiel:
+
+\begin{codebox}[Beispiel: Unterschiede bei Prefix- und Postfix-Inkrement]
+\begin{minted}[linenos]{c}
+int main () {
+   int i, j;
+
+   // Postfix-Form
+   i = 5;
+   j = i++;		// i = 6, j = 5.
+
+   // Prefix-Form
+   i = 5;
+   j = ++i;		// i = 6, j = 6.
+}
+\end{minted}
+\end{codebox}
+
+In der Postfix-Form (Zeile 6) wird zuerst der Wert von \texttt{i} gelesen und der Variablen \texttt{j} zugewiesen; danach wird \texttt{i} inkrementiert.
+
+Bei der Prefix-Form (Zeile 10) dagegen wird zuerst \texttt{i} inkrementiert und danach der Wert von \texttt{i} in \texttt{j} gespeichert.
+\end{hintbox}
+%
+\begin{hintbox}[]
+Um den Code leicht les- und wartbar zu halten, empfehle ich, alle gedanklichen Schritte in abgeschlossene Befehle zu setzen. Äquivalent zum obigen Code ist der folgende, intuitiv leichter verständliche Code:
+
+\begin{codebox}[Beispiel: Äquivalente Codes]
+\begin{minted}[linenos]{c}
+int main () {
+   int i, j;
+
+   // zur Postfix-Form
+   i = 5;
+   j = i;
+   i++;		// i = 6, j = 5.
+
+   // zur Prefix-Form
+   i = 5;
+   i++;
+   j = i;		// i = 6, j = 6.
+}
+\end{minted}
+\end{codebox}
+\end{hintbox}
+
+\section{Formatierte Ausgabe}\label{sec:formattedOutput}
+Wir wollen nun auch die berechneten Ergebnisse in Erfahrung bringen. Dazu können wir den bereits bekannten Befehl \texttt{printf} benutzen. Betrachten wir folgendes Beispiel:
+
+\begin{codebox}[Beispiel: Ausgabe einer Berechnung mit \texttt{printf}]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+   double result = 5.0 / 7.0;
+
+   printf("5.0 / 7.0 = %lf\n", result);
+}
+\end{minted}
+\end{codebox}
+
+Die Ausgabe lautet:
+\begin{cmdbox}[Ausgabe einer Berechnung mit \texttt{printf}]
+5.0 / 7.0 = 0.714286
+\end{cmdbox}
+
+Wie oben besprochen wird zuerst in Zeile 4 das Ergebnis der Division zweier Fließkommazahlen berechnet und in der Variablen \texttt{result} gespeichert. Zur Ausgabe auf dem Bildschirm übergeben wir dem Befehl \texttt{printf} jetzt \emph{zwei} Argumente:
+
+Das erste Argument wird \emph{Format-String} genannt und ist in unserem Beispiel der Anteil:
+\begin{center}
+\mintinline{c}{"5.0 / 7.0 = %lf\n"}.
+\end{center}
+
+Ein Format-String ist eine Zeichenkette die \emph{Platzhalter} enthalten kann. Diese beginnen mit dem Zeichen \texttt{\%} gefolgt von einem oder mehreren Zeichen, die beschreiben, wofür Platz freigehalten werden soll. In diesem Fall steht der Platzhalter \texttt{\%lf}, was für eine \mintinline{c}{double}-Zahl steht. Diese Zahl wird hinter dem Format-String genannt und von diesem durch ein Komma abgetrennt. Weitere Platzhalter-Symbole sind in Tabelle \ref{tab:FormatOutNum} aufgelistet.
+
+In einem Format-String können beliebig viele Platzhalter stehen; für jeden Platzhalter muss eine entsprechende Einsetzung hinter dem Formatstring selbst genannt werden.
+\begin{codebox}[Beispiel: Ausgabe mehrerer Werte mit \texttt{printf}]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+   double f = 3.14;
+   int    g = 42;
+
+   printf(
+      "Ganzzahl i = %d, Fliesskommazahl d = %lf, weitere Zahl = %d",
+                    g,                      f,                  99);
+}
+\end{minted}
+\end{codebox}
+
+Werden hinter dem Formatstring zu viele oder zu wenige Werte angegeben, so meldet der Compiler eine Warnung:
+\begin{cmdbox}[Warnung bei zu wenigen Argumenten für den Formatstring]
+\begin{minted}{text}
+myProgram.c: In function ‘main’:
+myProgram.c:4:12: warning: format ‘%i’ expects a matching ‘int’ argument
+[-Wformat=]
+   printf("%i\n");
+           ~^
+\end{minted}
+\end{cmdbox}
+Das Programm wird jedoch \enquote{erfolgreich} kompiliert und ausgeführt. Anstelle des Platzhalters wird ein zufälliger Wert vom Speicher eingesetzt\footnote{Bugs dieser Art sind leider häufig. Der im Jahr 2014 entdeckte \emph{Heartbleed-Bug} in der OpenSSL-Library geht auf einen ähnlichen Mechanismus zurück. Hacker konnten \enquote{fehlerhafte Anfragen} an einen Server schicken und so den Speicherinhalt des Servers auslesen -- und damit \eg Zugangsdaten der User auslesen. Compiler-Warnungen sollten also sehr ernst genommen werden.}.
+
+Ähnliches stellen wir fest, wenn wir das folgende Beispiel betrachten:
+
+\begin{codebox}[Beispiel: Ausgabe mehrerer Werte mit \texttt{printf}]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+   printf("%d\n", 1.5);
+}
+\end{minted}
+\end{codebox}
+Der Formatstring \texttt{\%d} beschreibt die Ausgabe einer \emph{Ganzzahl}; als Wert für diesen Platzhalter wird aber eine Fließkommazahl angeboten. Die Compiler-Warnung:
+
+\begin{cmdbox}[Warnung bei falscher Zuordnung Platzhalter/Datensatz]
+\begin{minted}{text}
+myProgram.c: In function ‘main’:
+myProgram.c:4:12: warning: format ‘%d’ expects argument of type ‘int’, but
+argument 2 has type ‘double’ [-Wformat=]
+   printf("%d\n", 1.5);
+           ~^
+           %f
+\end{minted}
+\end{cmdbox}
+weist darauf hin, dass die Ausgabe mit \texttt{\%d} für Fließkommawerte ungeeignet ist (und weist auf die Möglichkeit hin, mit \texttt{\%f} auszugeben). Trotz dieses Fehlers kann das Programm umgesetzt und erfolgreich ausgeführt werden. Angezeigt wird aber nicht \texttt{1.5}, sondern \texttt{-2102427368}. Diese Zahl ergibt sich, wenn das Bitmuster der Zahl \texttt{1.5} als Ganzzahl interpretiert wird\footnote{Genauer: Die ersten 32 bit des Bitmusters; \texttt{1.5} ist eine double-Zahl und damit 64 bit breit. In jedem Fall ist diese Ausgabe \enquote{unsinnig}.}.
+
+Wir hatten zuvor schon \texttt{\textbackslash n} als Umschreibung des Zeilenumbruchs kennengelernt. Diese Umschreibung bestimmter Zeichen nennen wir \emph{Escape-Sequence}. Solche Escape-Sequenzen werden benutzt um Zeichen einzufügen, die Teil der C-Syntax sind und sonst nur schwer auf dem Bildschirm ausgegeben werden können. In diesem Kurs werden wir \texttt{\textbackslash n} (Zeilenumbruch), \texttt{\textbackslash \textbackslash} (Backslash) und \texttt{\textbackslash ''} (Anführungszeichen) häufiger sehen.
+
+In den Tabellen \ref{tab:FormatOutNum} und \ref{tab:FormatOutSpc} im Anhang sind die wichtigsten Codes für Platzhalter und Escape-Sequenzen aufgelistet.
+
+Formatstrings legen nicht nur den \emph{Datentyp} der Ausgabe fest. Zusätzlich kann eine Information hinterlegt werden, wie viel Platz auf dem Bildschirm benutzt werden soll. Auf diese Weise können tabellarische Ausgaben stattfinden. Zu diesem Zweck setzt man zwischen das \texttt{\%} und dem Platzhalter-Symbol (\eg \texttt{d} für Ganzzahl) eine Zahl:
+
+\begin{codebox}[Beispiel: Format-String mit Platzangabe (1)]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+   printf("Text %3d\n", 1);
+   printf("Text %3d\n", 10);
+   printf("Text %3d\n", 100);
+   printf("Text %3d\n", 1000);
+}
+\end{minted}
+\end{codebox}
+
+\begin{cmdbox}[Ausgabebeispiel: Format-String mit Platzangabe (1)]
+\begin{minted}{text}
+Text   1
+Text  10
+Text 100
+Text 1000
+\end{minted}
+\end{cmdbox}
+
+Sie sehen also dass die ersten drei Zeilen rechtsbündig ausgegeben. Dies liegt daran, dass mit \texttt{\%3d} drei Textzeichen für einen Ganzzahl-Wert vorgesehen werden. Die vierte Zeile enthält eine Zahl, die länger ist als die vorgesehenen drei Zeichen. Daher erfolgt die Ausgabe, als wäre keine Zahl eingefügt.
+
+Es gibt auch die Möglichkeit, Platz linksbündig zu reservieren. In diesem Fall gibt man negative Zahlen an:
+
+
+\begin{codebox}[Beispiel: Format-String mit Platzangabe (2)]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+   printf("Text %-3d Text\n", 1);
+   printf("Text %-3d Text\n", 10);
+   printf("Text %-3d Text\n", 100);
+   printf("Text %-3d Text\n", 1000);
+}
+\end{minted}
+\end{codebox}
+
+\begin{cmdbox}[Ausgabebeispiel: Format-String mit Platzangabe (2)]
+\begin{minted}{text}
+Text 1   Text
+Text 10  Text
+Text 100 Text
+Text 1000 Text
+\end{minted}
+\end{cmdbox}
+
+Bei Fließkommazahlen können wir zusätzlich zum Gesamtplatz für die Ausgabe auch angeben, wie viele Stellen hinter dem Komma angegeben werden sollen. Die Ausgabe wird dabei automatisch gerundet, wenn weniger Nachkommastellen angegeben werden als die auszugebende Zahl:
+
+\begin{codebox}[Beispiel: Format-String mit Platzangabe (3)]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+   printf("Text %5.3lf Text\n", 1.5);
+   printf("Text %5.3lf Text\n", 1.555);
+   printf("Text %5.3lf Text\n", 1.5555);
+   printf("Text %5.3lf Text\n", 15.0);
+}
+\end{minted}
+\end{codebox}
+
+\begin{cmdbox}[Ausgabebeispiel: Format-String mit Platzangabe (3)]
+\begin{minted}{text}
+Text 1.500 Text
+Text 1.555 Text
+Text 1.556 Text
+Text 15.000 Text
+\end{minted}
+\end{cmdbox}
