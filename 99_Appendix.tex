@@ -462,7 +462,16 @@
 \newcolumntype{O}{>{\centering\ttfamily\arraybackslash}m{.3  \linewidth}}
 \newcolumntype{E}{>{\centering         \arraybackslash}m{.65 \textwidth}}
 
-\vspace{12pt}
+\begin{tabularx}
+	{\linewidth}
+	{OE}
+
+	\normalfont	\bfseries Option &
+				\bfseries Effect
+	\tabcrlf
+\end{tabularx}
+
+\vspace{6pt}
 \textbf{Debugging and Optimization} \\
 (see \url{https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html}\\
  and \url{https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html})
@@ -509,7 +518,7 @@
 \label{tab:CompilerOptions}
 }
 
-\section{Escape-Sequenzes}
+\section{Escape-Sequences}
 \begin{table}[h!]
 \newcolumntype{E}{>{\centering\ttfamily\arraybackslash}m{.3  \linewidth}}
 \newcolumntype{F}{>{\centering         \arraybackslash}m{.65 \textwidth}}
@@ -526,7 +535,7 @@
 	\tabcrlf
 	
 	\textbackslash a &
-	\emph{alert} -- ring the beeper, if present
+	\emph{alert} -- play a sound on the beeper, if present
 	\\
 	
 	\textbackslash b &
@@ -581,7 +590,7 @@
 \caption{Escape-Sequenzen nach ISO/IEC 9899:TC3}
 \label{tab:Escape}
 \end{table}
-Siehe Seite 19 auf \url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf}
+See page 19 in \url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf}
 \FloatBarrier
 
 \section{Data Types} \label{sec:Datatypes}
@@ -718,263 +727,423 @@ Further details can be found online at cppreference.com:
 	11 & \&\& & Logical AND\\
 	12 & || & Logical OR\\
 	13 & ? : & Conditional evaluation (\emph{ternary operator})\\
-	14 & = \\
+	14 & = & value assignment \\
 	
 	\bottomrule[1pt]	
 \end{tabularx}
-\captionof{table}{Präzedenz der Operatoren in C} \label{tab:OperatorPrecedence}
+\captionof{table}{Precedence of operatorens in C} \label{tab:OperatorPrecedence}
 }
+
+Operations in the same priority group are evaluated from left to right.
 
 See also \url{https://en.cppreference.com/w/c/language/operator_precedence} for further details.
 
 
-\section{Formatierte Textausgabe}
-Die Format-Codes in Tabellen \ref{tab:FormatOutNum} und \ref{tab:FormatOutSpc} funktionieren sowohl mit \texttt{printf}, \texttt{sprintf}, \texttt{snprintf}, als auch mit \texttt{fprintf}.
+\section{Format Strings}
+The format codes presented in tables \ref{tab:FormatStringBase} and \ref{tab:FormatStringModifiers} work with all of \texttt{printf}, \texttt{sprintf}, \texttt{snprintf}, and \texttt{fprintf}. Further can they be used with \texttt{scanf}, \texttt{sscanf}, \texttt{snscanf}, and \texttt{fscanf}.
 
 %TODO add "%%" -- output the percentage sign
 
-Siehe auch \url{http://en.cppreference.com/w/c/io/fprintf}
+See also \url{http://en.cppreference.com/w/c/io/fprintf} \\
+and \url{http://en.cppreference.com/w/c/io/fscanf}.
 
-\newcommand*{\tabsec}{\\ \cline{2-4}}
-\newcommand*{\SLASH}{\char`\\}
-
-\begin{table}[h!]
-\newcolumntype{T}{>{\centering\ttfamily\arraybackslash}m{.15 \linewidth}}
-\newcolumntype{S}{>{\centering\ttfamily\arraybackslash}m{.10 \textwidth}}
-\newcolumntype{E}{>{\centering\ttfamily\arraybackslash}m{.35 \linewidth}}
-\newcolumntype{C}{>{\centering         \arraybackslash}m{.29 \linewidth}}
+{
+\newcolumntype{C}{>{\ttfamily\arraybackslash}m{.15\linewidth}}
+\newcolumntype{M}{                           m{.45\textwidth}}
+\newcolumntype{X}{>{\ttfamily\arraybackslash}m{.2 \textwidth}}
 
 \begin{tabularx}
 	{\linewidth}
-	{|T|S|E|C|}
+	{CMX}
 	\toprule[1.5pt]
 
-	\normalfont \bfseries Datentyp &
-		\normalfont \bfseries format string &
-		\normalfont \bfseries Beispiele &
-		\normalfont \bfseries Anmerkung
-\tabcrlf
+	\normalfont	\bfseries Symbol &
+				\bfseries Effect &
+				\bfseries Example
+	\tabcrlf
+\end{tabularx}
+
+\vspace{6pt}
+\textbf{Floating Point Numbers}
+
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CMX}
 	
-\multirow{7}{*}{
 	\makecell{
-		\texttt{float} \\
-		\normalfont oder \\
-		\texttt{double}
-	}
-} & 
-	\makecell{
-		\%f \\
-		\%lf 
-	} & 
+		\%f
+	} &
+		Decimal notation (usual human notation) with six decimal places precision.
+	&
 	\makecell{
 		0.700000 \\
-		1234567890123456768.000000
-	} &
-	Dezimalpunkt 
-\tabsec
+	 	1234567890123456768.000000
+	} \\
 	
-	& \%e &
 	\makecell{
-		7.0000000e-1 \\
-		1.234568e+18 
+		\%e, \%E
 	} &
-	Exponentialschreibweise mit \enquote{e}
-\tabsec
-
-	& \%E &
+		Scientific notation (Mantissa and Exponent).
+	&
 	\makecell{
-		7.0000000e-1 \\
-		1.234568E+18 
+		7.000000e-01 or 7.000000E-01 \\
+		1.234568e+18 or 1.234568E+18
+	} \\
+	
+	\makecell{
+		\%g, \%G
 	} &
-	Exponentialschreibweise mit \enquote{E}
-\tabsec
-
-	& \%g &
+		\enquote{Most convenient notation}, either decimal or scientific notation
+	&
 	\makecell{
-		0.7 \\
-		1.234568e+18 
+		0.700000 \\
+		1.234568e+18 or 1.234568E+18
+	} \\
+	
+	\makecell{
+		\%a, \%A
 	} &
-	Dezimal oder E-Schreibweise mit \enquote{e}
-\tabsec
-
-	& \%G &
+		Hexadecimal notation
+	&
 	\makecell{
-		0.7 \\
-		1.234568E+18 
-	} &
-	Dezimal oder E-Schreibweise mit \enquote{E}
-\tabsec
-
-	& \%a &
-	\makecell{
-		0x1.6666666666666p-1  \\
-		0x1.12210f47de981p+60 
-	} &
-	Hexadezimal mit Kleinbuchstaben
-\tabsec
-
-	& \%A &
-	\makecell{
-		0X1.6666666666666P-1  \\
+		0x1.6666666666666p-1 \\
 		0X1.12210F47DE981P+60
-	} &
-	Hexadezimal mit Großbuchstaben
-\tabcrlf
-
-long double &
-	\%Lf  &
-	\normalfont wie bei \texttt{float} und \texttt{double} &
-	Variationen (\texttt{\%Le}, ...) analog zu \texttt{float} und \texttt{double}
-\tabcrlf
-
-\multirow{2}{*}{char} & 
-	\%c &
-	A &
-	als ASCII-Zeichen, Werte von 0 bis 255
-\tabsec
+	} \\
 	
-	& \%hhi &
-	65 &
-	als Dezimalzahl, Werte von 0 bis 255
-\tabcrlf
-
-\multirow{6}{*}{\texttt{int}} &
 	\makecell{
-		\%d \\
-		\%i
+		\%lf, \\
+		\%le, \%lE, \\
+		\%lg, \%lG, \\
+		\%la, \%lA
 	} &
+	Same as above, but expects \texttt{double} expressions rather than \texttt{float}
+	&
+	\\
+	
+	\makecell{
+		\%Lf, \\
+		\%Le, \%LE, \\
+		\%Lg, \%LG, \\
+		\%La, \%LA
+	} &
+	Same as above, but expects \texttt{long double} expressions rather than \texttt{float}
+	&
+	\\
+\end{tabularx}
+
+\begin{tabularx}
+	{\linewidth}
+	{CMX}
+
+	\normalfont	\bfseries Symbol &
+				\bfseries Effect &
+				\bfseries Example
+	\tabcrlf
+\end{tabularx}
+
+\vspace{6pt}
+\textbf{Integers}
+
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CMX}
+	
+	\makecell{\%d, \%i}
+	&
+	Decimal representation (base 10, usual human notation)
+	&
 	\makecell{
 		-1 \\
 		2147483647
-	} &
-	Dezimal
-\tabsec
-
-	& \%u &
+	} \\
+	
+	\makecell{\%u}
+	&
+	Decimal representation (base 10, usual human notation), interpretation as unsigned value
+	&
 	\makecell{
 		4294967295 \\
 		2147483647
-	} &
-	Dezimal, ohne Vorzeichen 
-\tabsec
-
-	& \%o &
+	} \\
+	
+	\makecell{\%o}
+	&
+	Octal (base 8) notation, interpretation as unsigned value
+	&
 	\makecell{
 		37777777777 \\
 		17777777777
-	} &
-	Oktal, ohne Vorzeichen
-\tabsec
-
-	& \%x &
+	} \\
+	
+	\makecell{\%x, \%X}
+	&
+	Hexadecimal (base 16) notation, interpretation as unsigned value
+	&
 	\makecell{
-		ffffffff \\
-		7fffffff 
-	} &
-	Hexadezimal, ohne Vorzeichen, Kleinbuchstaben
-\tabsec
-
-	& \%X &
+		ffffffff or FFFFFFFF\\
+		7fffffff or 7FFFFFFF
+	} \\
+	
+	\makecell{\%c}
+	&
+	Output as character (ASCII representation modulo 256)
+	&
+	\\
+	
 	\makecell{
-		FFFFFFFF \\
-		7FFFFFFF 
-	} &
-	Hexadezimal, ohne Vorzeichen, Grpßbuchstaben
-\tabcrlf
-
-long long int &
-	\%lli, \%llx, ... &
+		\%hhd, \%hhi, \\
+		\%hhu, \\
+		\%hho, \\
+		\%hhx, \%hhX, \\
+		\%hhc
+	} 
+	&
+	As above, but expects an (unsigned) \texttt{char} rather than an \texttt{int}
+	&
+	\\
+	
 	\makecell{
-		-1 \\
-		9223372036854775807
-	} &
-	alle Formen wie bei \texttt{int}, jeweils mit Präfix \texttt{ll}
-\tabcrlf
-
-short int &
-	\%hi &
+		\%hd, \%hi, \%hu, \\
+		\%ho, \%hx, \%hX, \\
+		\%hc
+	} 
+	&
+	As above, but expects an (unsigned) \texttt{short} rather than an \texttt{int}
+	&
+	\\
+	
 	\makecell{
-		-1 \\
-		32767 
-	} &
-	Variationen analog zu int \\
-
-\bottomrule[1.5pt]
+		\%ld, \%li, \%lu, \\
+		\%lo, \%lx, \%lX, \\
+		\%lc
+	} 
+	&
+	As above, but expects an (unsigned) \texttt{long} rather than an \texttt{int}
+	&
+	\\
+	
+	\makecell{
+		\%lld, \%lli, \\
+		\%llu, \\
+		\%llo, \\
+		\%llx, \%llX, \\
+		\%llc
+	} 
+	&
+	As above, but expects an (unsigned) \texttt{long long} rather than an \texttt{int}
+	&
+	\\
 \end{tabularx}
 
-\caption{Codes für formatierte Textausgabe (Zahlen)} \label{tab:FormatOutNum}
-\end{table}
+\vspace{6pt}
+\textbf{Pointers}
 
-\begin{table}[h!]
-\newcolumntype{T}{>{\centering\ttfamily\arraybackslash}m{.16 \linewidth}}
-\newcolumntype{S}{>{\centering\ttfamily\arraybackslash}m{.10 \textwidth}}
-\newcolumntype{E}{>{\centering\ttfamily\arraybackslash}m{.34 \linewidth}}
-\newcolumntype{C}{>{\centering         \arraybackslash}m{.29 \linewidth}}
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CMX}
+	
+	\makecell{\%s}
+	&
+	\makecell{
+		Output as text, up to the first \\
+		\texttt{NULL} character\\
+		Expects a \texttt{char *}, \texttt{unsigned char *},\\
+		 \texttt{char[]} or a \texttt{unsigned char[]}
+	}
+	&
+	abcdefg
+	\\
+	
+	\makecell{\%p}
+	&
+	\makecell{
+		Output as hexadecimal number,\\
+		special output for nullptr (\texttt{(nil)})\\
+		Expects a \texttt{void *}
+	}
+	&
+	\makecell{
+	 	0x7fffc7a9dfb8 \\
+ 		(nil)
+	}
+	\\
+\end{tabularx}
+
+\vspace{6pt}
+\textbf{Misc}
+
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CMX}
+	
+	\makecell{\%\%}
+	&
+	\makecell{
+		Literal Percent Sign
+	}
+	&
+	\%
+	\\
+	
+	\bottomrule[1pt]	
+\end{tabularx}
+
+\captionof{table}{Format Strings, Basic Symbols} \label{tab:FormatStringBase}
+}
+
+\vspace{12pt}
+
+{
+\newcolumntype{C}{>{\ttfamily\arraybackslash}m{.13\linewidth}}
+\newcolumntype{M}{                           m{.4 \textwidth}}
+\newcolumntype{X}{>{\ttfamily\arraybackslash}m{.135\textwidth}}
 
 \begin{tabularx}
 	{\linewidth}
-	{|T|S|E|C|}
+	{CMXX}
 	\toprule[1.5pt]
 
-	\normalfont \bfseries Datentyp &
-		\normalfont \bfseries format string &
-		\normalfont \bfseries Beispiele &
-		\normalfont \bfseries Anmerkung
-\tabcrlf
-
-\multirow{5}{*}{\makecell{alle \\ Zahlen-Typen}} &
-	\%+\textit{code} &
-	\makecell{
-		-1 \\
-		+2147483647
-	} &
-	Ausgabe wie oben, immer mit Vorzeichen
-\tabsec
-
-	& \%N.M\textit{code} &
-	\makecell{
-		-0.70 \\
-	 	1234567890123456768.00
-	 } &
-	Vorgabe: Mindestens Platz für \texttt{N} Zeichen; davon \texttt{M} für Nachkommastellen,
-	rechtsbündig. Negative Zahlen für \texttt{N} und \texttt{M} machen die Ausgabe linksbündig.
-\tabsec
-
-	& \%0N.M\textit{code} &
-	\makecell{
-		-00.70 {\newline}
-		1234567890123456768.00
-	} &
-	Vorgabe: wie oben, aber leere Stellen werden mit 0 aufgefüllt\tabcrlf
-	
-\makecell{
-	{\ttfamily char*}, \\
-	{\ttfamily char[]}, \\
-	{\ttfamily unsigned~char*}
-} &
-	\%s &
-	abcdefg &
-	Als Zeichenkette; alle Zeichen von der adressierten Speicherstelle bis zum ersten 
-	\texttt{NULL}-Zeichen.
-\tabcrlf
-
-\makecell{
-	\textit{Datentyp} *\\
-	\textsf{(Pointer)}
-} & 
-	\%p  &
-	\makecell{
-		 0x7fffc7a9dfb8 \\
-		 (nil) 
-	} & 
-	Pointer auf beliebigen Datentyp, Ausgabe als Hexadezimalzahl.
-	\texttt{NULL} wird als \texttt{(nil)} ausgegeben.
-\\
-
-\bottomrule[1.5pt]
+	\normalfont	\bfseries Modifier &
+				\bfseries Effect &
+				\bfseries Example &
+				\bfseries Result
+	\tabcrlf
 \end{tabularx}
-\caption{Codes für formatierte Textausgabe (Spacing und Strings)} \label{tab:FormatOutSpc}
-\end{table}
+
+\textbf{Number Width}
+
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CMXX}
+	
+	{\color{grey}\%}N{\color{grey}d}
+	&
+	sets the minimal width for this expression to \texttt{N} characters, right alignment
+	&
+	\makecell{
+		\ttfamily "|\%5d|", 10 \\
+		\ttfamily "|\%9f|", 3.14
+	}
+	&
+	\makecell{
+		\ttfamily |~~~10| \\
+		\ttfamily | 3.140000|
+	}
+	\\
+	
+	{\color{grey}\%}-N{\color{grey}d}
+	&
+	sets the minimal width for this expression to \texttt{N} characters, left alignment
+	&
+	\makecell{
+		\ttfamily "|\%-5d|", 10 \\
+		\ttfamily "|\%-9f|", 3.14
+	}
+	&
+	\makecell{
+		\ttfamily |10~~~| \\
+		\ttfamily |3.140000 |
+	}
+	\\
+	
+	{\color{grey}\%}.N{\color{grey}f}
+	&
+	sets the precision (number of decimal places) for this expression to \texttt{N} characters (only floating point types)
+	&
+	\makecell{
+		\ttfamily "|\%.2f|", 3.14 \\
+		\ttfamily "|\%.2f|", 2.718
+	}
+	&
+	\makecell{
+		\ttfamily |3.14| \\
+		\ttfamily |2.72|
+	}
+	\\
+	
+\end{tabularx}
+
+\newpage
+\rowcolors{1}{white}{tabhighlight}
+\begin{tabularx}
+	{\linewidth}
+	{CMXX}
+
+	\normalfont	\bfseries Modifier &
+				\bfseries Effect &
+				\bfseries Example &
+				\bfseries Result
+	\tabcrlf
+\end{tabularx}
+
+\textbf{Leading Characters}
+
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CMXX}
+	
+	{\color{grey}\%}0N{\color{grey}d}
+	&
+	sets the minimal width for this expression to \texttt{N} characters and pads with leading zeros
+	&
+	\makecell{
+		\ttfamily "|\%05d|", 10 \\
+		\ttfamily "|\%09f|", 3.14
+	}
+	&
+	\makecell{
+		\ttfamily |00010| \\
+		\ttfamily |03.140000|
+	}
+	\\
+	
+	{\color{grey}\%}+N{\color{grey}d}
+	&
+	sets the minimal width for this expression to \texttt{N} characters and always prints a sign
+	&
+	\makecell{
+		\ttfamily "|\%+5d|", 10 \\
+		\ttfamily "|\%+5d|", -10
+	}
+	&
+	\makecell{
+		\ttfamily |~~+10| \\
+		\ttfamily |~~-10|
+	}
+	\\
+	
+	\makecell{
+		{\color{grey}\%} N{\color{grey}f} \\
+		\textrm{(whitespace)}
+	}
+	&
+	sets the minimal width for this expression to \texttt{N} characters of which one is reserved for a possible sign, even in case of overflow
+	&
+	\makecell{
+		\ttfamily "|\% 4f|",  3.14 \\
+		\ttfamily "|\% 4f|", -3.14
+	}
+	&
+	\makecell{
+		\ttfamily | 3.14| \\
+		\ttfamily |-3.14|
+	}
+	\\
+	
+	\bottomrule[1pt]	
+\end{tabularx}
+
+\captionof{table}{Format Strings, Modifier Symbols} \label{tab:FormatStringModifiers}
+}
+
+\newcommand*{\tabsec}{\\ \cline{2-4}}
+\newcommand*{\SLASH}{\char`\\}
 
 
 \FloatBarrier

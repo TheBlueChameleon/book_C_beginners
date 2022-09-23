@@ -107,7 +107,7 @@ To use variables in our code, we first have to \emph{declare} them. That means w
 The language C is \emph{case sensitive}, \ie there is a difference between \texttt{nameOfPlayer1} and \texttt{NameOfPlayer1}. By convention, variable names start with a lower case letter. If a variable comprises of several human language words (like \texttt{nameOfPlayer1}) one often applies \enquote{camel case}, \ie begin each new word in the symbol with an upper case letter (except for the first one). An alternative is \enquote{snake case}, where the individual words are separated by underscores (\texttt{name\_of\_player\_1}). Which of the two conventions you pick is up to you; again I only advise you to be consistent in your choice (otherwise you'll have a hard time remembering whether you spelled it \texttt{paragraph\_index} or \texttt{paragraphIndex}.)
 
 \begin{hintbox}[Good names]
-A common \enquote{mistake} among beginners is to use inexpressive names such as \texttt{x}, \texttt{y}, \texttt{a}, ... While this is no problem for the compiler (note the quotation marks around \enquote{mistake}), it makes codes harder to write, maintain and debug. Programming becomes quite complex very soon, and the last thing we want is loosing track of whether \texttt{a} is the total score or which meaning behind the variable \texttt{b}.
+A common \enquote{mistake} among beginners is to use inexpressive names such as \texttt{x}, \texttt{y}, \texttt{a}, ... While this is no problem for the compiler (note the quotation marks around \enquote{mistake}), it makes codes harder to write, maintain and debug. Programming becomes quite complex very soon, and the last thing we want is loosing track of whether \texttt{a} is the total score or which is the meaning behind the variable \texttt{b}.
 
 Instead, be as descriptive as possible when giving names. A guideline to follow is \emph{good code should read like prose text}. That certainly is only possible if the variables are named after human concepts like \texttt{repetitions}, \texttt{message}, \texttt{velocity\_x}, ...
 \end{hintbox}
@@ -130,12 +130,6 @@ int main () {
 \end{codebox}
 
 You may have noticed the similarity between the definition of the variable \texttt{count} and the function \texttt{main}. That is no coincidence! From the viewpoint of the compiler, the function \texttt{main} is a set of instructions to compute an \inC{int}. We'll learn more about this in chapters \ref{chp:funcs} and \ref{chp:OS-Link}.
-
-\begin{warnbox}[Avoid global variables]
-Note that the declaration of the variables \texttt{count}, \texttt{positionX} and \texttt{positionY} is \emph{within} the function \texttt{main}. We \emph{could} also define them outside of \texttt{main}; but this would potentially lead to a lot of trouble. We'll discuss the implications of that placement in chapter \ref{chp:funcs}. For now, just stick to the rule:
-
-Anything that is not an \texttt{\#include} line must be \emph{within} the braces that belong to \inC{int main}.
-\end{warnbox}
 
 \begin{warnbox}[No duplicates or redeclarations]
 Symbols that have been declared once cannot be declared again. In the following example, there are multiple \emph{forbidden} lines:
@@ -176,6 +170,12 @@ redeclaration.c:3:12: note: previous declaration of ‘x’ with type
 \end{cmdbox}
 \end{warnbox}
 
+\begin{warnbox}[Avoid global variables]
+Note that the declaration of the variables \texttt{count}, \texttt{positionX} and \texttt{positionY} is \emph{within} the function \texttt{main}. We \emph{could} also define them outside of \texttt{main}; but this would potentially lead to a lot of trouble. We'll discuss the implications of that placement in chapter \ref{chp:funcs}. For now, just stick to the rule:
+
+Anything that is not an \texttt{\#include} line must be \emph{within} the braces that belong to \inC{int main}.
+\end{warnbox}
+
 \section{Assignments} \label{sec:valueAssignment}
 We can assign values to our varibles with the \emph{operator} \texttt{=}:
 \begin{codebox}[assignments.c]
@@ -213,12 +213,14 @@ assignments.c:5:5: note: each undeclared identifier is reported only once
 \end{cmdbox}
 
 The last line (\emph{each undeclared identifier is reported only once for each function it appears in}) means that, albeit line 6 (\texttt{count = 8}) is equally faulty without declaration of the symbol \texttt{count}, it is not reported by the compiler because it has already uttered an error message related to the symbol \texttt{count}.
-
+\end{hintbox}
+%
+\begin{hintbox}[]
 A real life counterpart of this scenario would be this: I tell you to write the number 7 on \emph{the paper}. My desk is cluttered with different pieces of paper, so you would have no idea where I wanted you to put that note to. When I later tell you that \emph{the paper} means the blue post it on the left, it's already too late: you've written the number to some other piece of paper, because as a human, you can proactively make decisions. A computer does not have the capacity to make decisions of its own (remember our mantra), and hence, the only thing it can do is complain by means of an error message.
 \end{hintbox}
 
 
-\subsection{Combined declaration and assignment} \label{sec:valueAssignment}
+\subsection{Combined Declaration and Assignment} \label{sec:valueAssignment}
 Declaration and assignment can be done in a single statement:
 \begin{codebox}[combinedAssignments.c]
 \begin{minted}[linenos]{c}
@@ -249,7 +251,7 @@ Computations are written as \enquote{normal} expressions as we know them from ou
 \begin{codebox}[computations.c]
 \begin{minted}[linenos]{c}
 int main () {
-    int     count = 5 + 3;
+    int count = 5 + 3;
     int nextCount;    
     nextCount = (count - 3) * 7;
 }
@@ -356,8 +358,270 @@ In listing \ref{code:divisions} we'll find the following results:\vspace{-9pt}
 
 
 \section{Formatted Output}
-It's nice that we can make the computer do computations for us. But up to now, all we know is that the results are \emph{somewhere in memory}, which is not very useful for us as humans.
+It's nice that we can make the computer do computations for us. But up to now, all we know is that the results are \emph{somewhere in memory}, which is not very useful for us as humans. Luckily, the command \texttt{printf} can do more than print constant strings. It actually can also print the value of variables. For that, we use a new or extended syntax:
 
+\begin{codebox}[Syntax: printf]
+printf(formatString, commaSeparetedListOfExpressions);
+\end{codebox}
+
+In this, ...\vspace{-12pt}
+\begin{itemize}
+\setlength\itemsep{0pt}
+\item \texttt{formatString} is a string (\ie text between \texttt{"}double quotes\texttt{"}) that tells the computer what to print where. Essentially, it is regular text with special
+	characters that act as placeholders; the value of one or more variables will be substituted for these placeholders. Placeholders begin with a percent sign (\texttt{\%}) and will be
+	explained in more detail below.
+\item \texttt{commaSeparetedListOfExpressions} is, well, a comma separated list of expressions. That means, it can be one or several variables, constants or entire computations. This list 
+	may also be empty, \ie it can be ommitted.
+\end{itemize}
+
+By know we well know the line \inC{printf("Hello World!\n");}. In this, \inC{"Hello World!\n"} is the format string; it simply contains no placeholders and is consequently printed as-is.\\
+The \texttt{commaSeparetedListOfExpressions} is ommitted in this form, \ie there are no expressions to fill in.
+
+An example with a \emph{nonempty} list of expressions is the following:
+\begin{codebox}[formatStrings.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int data = 1;
+    printf("data = %d, constant = %d\n", data, 90 + 9);
+}
+\end{minted}
+\captionof{code}{A simple format string} \label{code:simpleFormatString}
+\end{codebox}
+
+\begin{cmdbox}[Output: formatStrings.c]
+data = 1, constant = 99
+\end{cmdbox}
+
+In this listing \ref{code:simpleFormatString}, we see two percent signs in the format string, which tells the computer that it has to fill in two values. Consequently, after the format string, there are two expressions: \texttt{data} and \inC{90 + 9}. So, a string representation of the current value of \texttt{data} (which is \inC{1}) is computed and replaces the first percent sign; likewise, a string representation of the constant value \inC{99} replaces the second placeholder.
+
+So what does the \texttt{d} after the percent signs mean? As we've seen before, there are numerous ways, the same information can be encoded, both in binary and as human-readable text. The computer needs to know both, what kind of bitpattern to expect and what kind of text to produce. In this case, \texttt{\%d} stands for \emph{expect an \inC{int} and render it as a decimal number}.
+
+In the appendix, tables \ref{tab:FormatOutNum} and \ref{tab:FormatOutSpc} you'll find an entire zoo of format codes that you may use in your format strings. Most of the time, you'll need only these four symbols:
+{
+\newcolumntype{N}{>{         \centering\arraybackslash} p{.25\linewidth}}
+\newcolumntype{R}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
+\begin{center}
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{.907\linewidth}
+	{NR|NR}
+\toprule[1.5pt]
+
+    \textbf{Data}     & \textrm{\textbf{Format Code}}  &  \textbf{Data}         & \textrm{\textbf{Format Code}}
+\tabcrlf
+    \texttt{int}egers & \%d                            &  single characters     & \%c \\
+    \texttt{double}s  & \%lf                           &  strings of characters & \%s \\
+
+\bottomrule[1.5pt]
+\end{tabularx}
+\end{center}
+\captionof{table}{Most common format string elements in C}\label{tab:formatStringCommon}
+}
+
+\begin{hintbox}[Literal Percent Sign]
+If you need to print a percent sign, you can do so by putting a double percent sign in your format string:
+\mint{c}{printf("The result is %lf%%.\n", result);}
+will give you an output like:\\
+\texttt{The result is 49.570000\%.}
+\end{hintbox}
+
+\begin{warnbox}[Matching Data Types]
+Always make sure that the data types in the format string match the data types of the actual expressions! That is, if you type \texttt{\%d} in your format string, you had better provide an \inC{int} value for that place holder. Likewise, make sure the number of expressions and their order matches that of the placeholders. If you disregard this rule, ...
+\begin{itemize}
+\item you'll get a compiler warning\footnote{only if you compile with the \texttt{-Wall} compiler option} (which is the nicer part of the outcome)
+\item you'll find utter BS on screen.
+\end{itemize}
+
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{warnbox}[nonmatchingFormat.c, leftupper=7mm]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int    integral = 1;
+    double decimal  = 1.0;
+    
+    printf("%lf\n", integral);
+    printf("%d\n", decimal);
+}
+\end{minted}
+\captionof{code}{Format mismatch}
+\end{warnbox}
+%
+\begin{cmdbox}[Output: nonmatchingFormat.c]
+0.000000 \\
+1100706464
+\end{cmdbox}
+\end{tcbraster}
+%
+\begin{cmdbox}[Compiler Warnings: nonmatchingFormat.c]
+\begin{minted}{text}
+nonmatchingFormat.c: In function ‘main’:
+nonmatchingFormat.c:7:15: warning: format ‘%lf’ expects argument of type 
+   ‘double’, but argument 2 has type ‘int’ [-Wformat=]
+    7 |     printf("%lf\n", integral);
+      |             ~~^     ~~~~~~~~
+      |               |     |
+      |               |     int
+      |               double
+      |             %d
+nonmatchingFormat.c:8:14: warning: format ‘%d’ expects argument of type 
+   ‘int’, but argument 2 has type ‘double’ [-Wformat=]
+    8 |     printf("%d\n", decimal);
+      |             ~^     ~~~~~~~
+      |              |     |
+      |              int   double
+      |             %f
+\end{minted}
+\end{cmdbox}
+
+Note how the compiler is really helpful here and highlights not only the line in which the error occured, but explicitly names the expected and given data types, as well as giving a recommendation which format string elements you should be using here.
+\end{warnbox}
+
+\begin{plusbox}[Undefined Behaviour]
+When the data type in the format string does not match the data type of the expression, it is very difficult to understand \emph{exactly} why any given (certainly nonsensical) output is generated. In fact, even if one does understand the inner workings of the command \texttt{printf}, it isn't even possible to predict which numbers are written on screen. \emph{One mechanism} that messes up the output here is the following:
+
+Remember that any piece of information is stored as a bit pattern of varying length. A \inC{double} value is a sequence of 64 bits, while an \inC{int} (usually) takes up 32 bits. A command like \texttt{printf("\%lf", ...);} consequently instructs the computer to read 64 bit from memory and interpret them as a double. Now, if we pass an \inC{int} here in the list of expressions, we provide too few information for the job. However, the computer ignores this fact; it simply starts reading bits from memory at a given starting point. We provided half of the data that are going to be read. But there are no empty cells: the computer continues reading behind the point where we put our data, and takes whatever information it finds there as part of a \inC{double} 
+number.
+
+You can imagine this like so:
+
+You are a journalist for a local newspaper. You and your colleagues all submit your articles, which are printed in the newspaper. In this parable, your article corresponds to the expression you want to print; your colleagues articles stand for other processes on your computer that you do not control directly but that all use space somewhere in memory. The entirety of memory is the printed newspaper.
+
+Now with the newspaper printed (the memory prepared), you tell a friend to read your article. Unfortunately, your friend is mentally challenged, so you have to tell him where to start, how long the article is, and which language it is written in. The \emph{where} information is contained in the expression list; the \emph{what and how long} is given in the format string. If you mistakenly tell your friend to read more than the length of your article, they will continue taking up words your colleagues have written and think that they belong to your article. Also, even if you tell them the correct length, they may not be able to make any sense of your work if you told them to expect the wrong language.
+
+Both, length and language are contained in the format string specification: \texttt{\%lf} stands for 64 bits worth of information (length) and \inC{double} format (language).
+\end{plusbox}
+
+\subsection{Controling Length and Alignment of the Output}
+By default, \texttt{printf} will write as many characters on screen as it takes to render the information stored in our variables. Sometimes, however, we want our output to have a nice tabular format. Compare these two outputs\footnote{Source: The CIA World Factbook, September 2022, \url{https://www.cia.gov/the-world-factbook/}}:
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{cmdbox}[Output 1: non-aligned]
+\begin{minted}{text}
+PERCENTAGE OF WIND POWER IN 2020:
+Germany: 23.9%
+France: 7.3%
+Spain: 22.1%
+United Kingdom: 25.2%
+\end{minted}
+\end{cmdbox}
+%
+\begin{cmdbox}[Output 2: aligned]
+\begin{minted}{text}
+PERCENTAGE OF WIND POWER IN 2020:
+Germany             : 23.9%
+France              :  7.3%
+Spain               : 22.1%
+United Kingdom      : 25.2%
+\end{minted}
+\end{cmdbox}
+\end{tcbraster}
+
+I think you will agree that the right hand side output looks nicer and allows for easier comparison and interpretation of the data by an end user. Of course we can achieve this look by putting an according number of white spaces into the format string in the \texttt{printf} statement:
+\begin{codebox}[manuallyAlignedOutput.c]
+\begin{minted}[linenos]{c}
+...
+
+double percentGermany = 23.9;
+double percentFrance = 7.3;
+double percentSpain = 22.1;
+double percentUK = 25.2;
+
+printf("%s             : %lf%%\n", "Germany", percentGermany);
+printf("%s              :  %lf%%\n", "France", percentFrance);
+printf("%s               : %lf%%\n", "Spain", percentSpain);
+printf("%s      : %lf%%\n", "United Kingdom", percentUK);
+\end{minted}
+\captionof{code}{Manually aligned output}
+\end{codebox}
+
+But you will agree that this piece of code doesn't look very nice. Much worse, if we want to display the same table for a different year, we have to tediously re-align the output. Rather than that, we can leave the \emph{padding with whitespaces} to be done automatically by the inner workings of \texttt{printf}.
+
+To do so, we can wedge additional information between the percent sign and the data type code. In the most simple case, this is an integer, specifying the \emph{field width} of the placeholder field:
+\vspace{-9pt}
+\mint{c}{printf("%20s: ...", "France");}
+\vspace{-9pt}
+instructs the computer to print a string (\texttt{\%s}) that is right aligned and 20 characters wide. If the actual string to be printed (in this case \inC{"France"}) is less than 20 characters wide, the rest is simply padded with white spaces. The resulting output hence is "\texttt{~~~~~~~~~~~~~~France: ...}"
+
+To produce a left-aligned string, one can simply flip the sign of the width information:
+\vspace{-9pt}
+\mint{c}{printf("%20s: ...", "France");}
+\vspace{-9pt}
+will produce the output "\texttt{France~~~~~~~~~~~~~~: ...}"
+
+The same modifier can also be applied to numbers:
+\vspace{-9pt}
+\mint{c}{printf("%20s: %10lf", "France", percentFrance);}
+\vspace{-9pt}
+results in the output "\texttt{France~~~~~~~~~~~~~~: ~7.300000\%}"
+
+This is already enough to produce nice tabular output; but maybe you don't like the fact that floating point numbers will always be printed with 6 digits after the decimal point. To change this behaviour, we can add an additional \emph{precision modifier} to the format string\footnote{of course, this only works for \inC{double} and \inC{float} values, not for \inC{int}s, strings or other data types}. This means, you can add a dot and another integer in the format string, after the field width information:
+\vspace{-9pt}
+\mint{c}{printf("%20s: %4.1lf", "France", percentFrance);}
+\vspace{-9pt}
+produces "\texttt{France~~~~~~~~~~~~~~: ~7.3\%}"
+
+Note that the \emph{field width} (in this case 4) counts the entire length of the output in characters, \emph{including the decimal point}. The format string \texttt{\%4.1f} instructs the computer to produce an output that is \emph{at least} 4 characters wide, of which one character will be the decimal point and one will be the digit after the decimal point. So there will be two digits left of the decimal point. Also remember that, if you're dealing with negative values, you might need to reserve one extra character.
+
+The complete code to produce the tabular output from the beginning of this section is thus:
+\begin{codebox}[autoalignedOutput.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    double percentGermany = 23.9;
+    double percentFrance = 7.3;
+    double percentSpain = 22.1;
+    double percentUK = 25.2;
+\end{minted}
+\end{codebox}
+%
+\begin{codebox}[]
+\begin{minted}[linenos, firstnumber=last]{c}
+    printf("PERCENTAGE OF WIND POWER IN 2020:");
+    printf("%-20s: %5.1lf\n", "Germany", percentGermany);
+    printf("%-20s: %5.1lf\n", "France", percentFrance);
+    printf("%-20s: %5.1lf\n", "Spain", percentSpain);
+    printf("%-20s: %5.1lf\n", "United Kingdom", percentUK);
+}
+\end{minted}
+\captionof{code}{Automatically aligned output}
+\end{codebox}
+
+Note that the field width information only gives the \emph{minimal} width; if a value is too large, \texttt{printf} will simply allocate more space for the output:
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{codebox}[oversizedOutput.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int small = 1, big = 1000000;
+
+    printf("small: |%3d|\n", small);
+    printf("big  : |%3d|\n", big);
+}
+\end{minted}
+\captionof{code}{Value too big for format specification}
+\end{codebox}
+%
+\begin{cmdbox}[Output 2: oversizedOutput.c]
+\begin{minted}{text}
+small: |  1|
+big  : |1000000|
+\end{minted}
+\end{cmdbox}
+\end{tcbraster}
+
+You will find a detailled list of allowed format codes and modifiers in the appendix, tables \ref{tab:FormatStringBase} and \ref{tab:FormatStringModifiers}.
 
 \section{Pointers}
 
@@ -365,7 +629,6 @@ It's nice that we can make the computer do computations for us. But up to now, a
 %TODO
 % essentially keep structure of chapter 2, ...
 % but introduce mem structure and pointers here already (take from chapter 3)
-% move xkcd: 1000 in here, after def: hex. ... or leave it in C3
 % C3 becomes: casting, pointer access, bit magic
 % C3: remember int x = 5.5 does implicit rounding
 % C3: introduce scanf
@@ -493,163 +756,3 @@ int main () {
 \end{codebox}
 \end{hintbox}
 
-\section{Formatierte Ausgabe}\label{sec:formattedOutput}
-Wir wollen nun auch die berechneten Ergebnisse in Erfahrung bringen. Dazu können wir den bereits bekannten Befehl \texttt{printf} benutzen. Betrachten wir folgendes Beispiel:
-
-\begin{codebox}[Beispiel: Ausgabe einer Berechnung mit \texttt{printf}]
-\begin{minted}[linenos]{c}
-#include <stdio.h>
-
-int main () {
-   double result = 5.0 / 7.0;
-
-   printf("5.0 / 7.0 = %lf\n", result);
-}
-\end{minted}
-\end{codebox}
-
-Die Ausgabe lautet:
-\begin{cmdbox}[Ausgabe einer Berechnung mit \texttt{printf}]
-5.0 / 7.0 = 0.714286
-\end{cmdbox}
-
-Wie oben besprochen wird zuerst in Zeile 4 das Ergebnis der Division zweier Fließkommazahlen berechnet und in der Variablen \texttt{result} gespeichert. Zur Ausgabe auf dem Bildschirm übergeben wir dem Befehl \texttt{printf} jetzt \emph{zwei} Argumente:
-
-Das erste Argument wird \emph{Format-String} genannt und ist in unserem Beispiel der Anteil:
-\begin{center}
-\mintinline{c}{"5.0 / 7.0 = %lf\n"}.
-\end{center}
-
-Ein Format-String ist eine Zeichenkette die \emph{Platzhalter} enthalten kann. Diese beginnen mit dem Zeichen \texttt{\%} gefolgt von einem oder mehreren Zeichen, die beschreiben, wofür Platz freigehalten werden soll. In diesem Fall steht der Platzhalter \texttt{\%lf}, was für eine \mintinline{c}{double}-Zahl steht. Diese Zahl wird hinter dem Format-String genannt und von diesem durch ein Komma abgetrennt. Weitere Platzhalter-Symbole sind in Tabelle \ref{tab:FormatOutNum} aufgelistet.
-
-In einem Format-String können beliebig viele Platzhalter stehen; für jeden Platzhalter muss eine entsprechende Einsetzung hinter dem Formatstring selbst genannt werden.
-\begin{codebox}[Beispiel: Ausgabe mehrerer Werte mit \texttt{printf}]
-\begin{minted}[linenos]{c}
-#include <stdio.h>
-
-int main () {
-   double f = 3.14;
-   int    g = 42;
-
-   printf(
-      "Ganzzahl i = %d, Fliesskommazahl d = %lf, weitere Zahl = %d",
-                    g,                      f,                  99);
-}
-\end{minted}
-\end{codebox}
-
-Werden hinter dem Formatstring zu viele oder zu wenige Werte angegeben, so meldet der Compiler eine Warnung:
-\begin{cmdbox}[Warnung bei zu wenigen Argumenten für den Formatstring]
-\begin{minted}{text}
-myProgram.c: In function ‘main’:
-myProgram.c:4:12: warning: format ‘%i’ expects a matching ‘int’ argument
-[-Wformat=]
-   printf("%i\n");
-           ~^
-\end{minted}
-\end{cmdbox}
-Das Programm wird jedoch \enquote{erfolgreich} kompiliert und ausgeführt. Anstelle des Platzhalters wird ein zufälliger Wert vom Speicher eingesetzt\footnote{Bugs dieser Art sind leider häufig. Der im Jahr 2014 entdeckte \emph{Heartbleed-Bug} in der OpenSSL-Library geht auf einen ähnlichen Mechanismus zurück. Hacker konnten \enquote{fehlerhafte Anfragen} an einen Server schicken und so den Speicherinhalt des Servers auslesen -- und damit \eg Zugangsdaten der User auslesen. Compiler-Warnungen sollten also sehr ernst genommen werden.}.
-
-Ähnliches stellen wir fest, wenn wir das folgende Beispiel betrachten:
-
-\begin{codebox}[Beispiel: Ausgabe mehrerer Werte mit \texttt{printf}]
-\begin{minted}[linenos]{c}
-#include <stdio.h>
-
-int main () {
-   printf("%d\n", 1.5);
-}
-\end{minted}
-\end{codebox}
-Der Formatstring \texttt{\%d} beschreibt die Ausgabe einer \emph{Ganzzahl}; als Wert für diesen Platzhalter wird aber eine Fließkommazahl angeboten. Die Compiler-Warnung:
-
-\begin{cmdbox}[Warnung bei falscher Zuordnung Platzhalter/Datensatz]
-\begin{minted}{text}
-myProgram.c: In function ‘main’:
-myProgram.c:4:12: warning: format ‘%d’ expects argument of type ‘int’, but
-argument 2 has type ‘double’ [-Wformat=]
-   printf("%d\n", 1.5);
-           ~^
-           %f
-\end{minted}
-\end{cmdbox}
-weist darauf hin, dass die Ausgabe mit \texttt{\%d} für Fließkommawerte ungeeignet ist (und weist auf die Möglichkeit hin, mit \texttt{\%f} auszugeben). Trotz dieses Fehlers kann das Programm umgesetzt und erfolgreich ausgeführt werden. Angezeigt wird aber nicht \texttt{1.5}, sondern \texttt{-2102427368}. Diese Zahl ergibt sich, wenn das Bitmuster der Zahl \texttt{1.5} als Ganzzahl interpretiert wird\footnote{Genauer: Die ersten 32 bit des Bitmusters; \texttt{1.5} ist eine double-Zahl und damit 64 bit breit. In jedem Fall ist diese Ausgabe \enquote{unsinnig}.}.
-
-Wir hatten zuvor schon \texttt{\textbackslash n} als Umschreibung des Zeilenumbruchs kennengelernt. Diese Umschreibung bestimmter Zeichen nennen wir \emph{Escape-Sequence}. Solche Escape-Sequenzen werden benutzt um Zeichen einzufügen, die Teil der C-Syntax sind und sonst nur schwer auf dem Bildschirm ausgegeben werden können. In diesem Kurs werden wir \texttt{\textbackslash n} (Zeilenumbruch), \texttt{\textbackslash \textbackslash} (Backslash) und \texttt{\textbackslash ''} (Anführungszeichen) häufiger sehen.
-
-In den Tabellen \ref{tab:FormatOutNum} und \ref{tab:FormatOutSpc} im Anhang sind die wichtigsten Codes für Platzhalter und Escape-Sequenzen aufgelistet.
-
-Formatstrings legen nicht nur den \emph{Datentyp} der Ausgabe fest. Zusätzlich kann eine Information hinterlegt werden, wie viel Platz auf dem Bildschirm benutzt werden soll. Auf diese Weise können tabellarische Ausgaben stattfinden. Zu diesem Zweck setzt man zwischen das \texttt{\%} und dem Platzhalter-Symbol (\eg \texttt{d} für Ganzzahl) eine Zahl:
-
-\begin{codebox}[Beispiel: Format-String mit Platzangabe (1)]
-\begin{minted}[linenos]{c}
-#include <stdio.h>
-
-int main () {
-   printf("Text %3d\n", 1);
-   printf("Text %3d\n", 10);
-   printf("Text %3d\n", 100);
-   printf("Text %3d\n", 1000);
-}
-\end{minted}
-\end{codebox}
-
-\begin{cmdbox}[Ausgabebeispiel: Format-String mit Platzangabe (1)]
-\begin{minted}{text}
-Text   1
-Text  10
-Text 100
-Text 1000
-\end{minted}
-\end{cmdbox}
-
-Sie sehen also dass die ersten drei Zeilen rechtsbündig ausgegeben. Dies liegt daran, dass mit \texttt{\%3d} drei Textzeichen für einen Ganzzahl-Wert vorgesehen werden. Die vierte Zeile enthält eine Zahl, die länger ist als die vorgesehenen drei Zeichen. Daher erfolgt die Ausgabe, als wäre keine Zahl eingefügt.
-
-Es gibt auch die Möglichkeit, Platz linksbündig zu reservieren. In diesem Fall gibt man negative Zahlen an:
-
-
-\begin{codebox}[Beispiel: Format-String mit Platzangabe (2)]
-\begin{minted}[linenos]{c}
-#include <stdio.h>
-
-int main () {
-   printf("Text %-3d Text\n", 1);
-   printf("Text %-3d Text\n", 10);
-   printf("Text %-3d Text\n", 100);
-   printf("Text %-3d Text\n", 1000);
-}
-\end{minted}
-\end{codebox}
-
-\begin{cmdbox}[Ausgabebeispiel: Format-String mit Platzangabe (2)]
-\begin{minted}{text}
-Text 1   Text
-Text 10  Text
-Text 100 Text
-Text 1000 Text
-\end{minted}
-\end{cmdbox}
-
-Bei Fließkommazahlen können wir zusätzlich zum Gesamtplatz für die Ausgabe auch angeben, wie viele Stellen hinter dem Komma angegeben werden sollen. Die Ausgabe wird dabei automatisch gerundet, wenn weniger Nachkommastellen angegeben werden als die auszugebende Zahl:
-
-\begin{codebox}[Beispiel: Format-String mit Platzangabe (3)]
-\begin{minted}[linenos]{c}
-#include <stdio.h>
-
-int main () {
-   printf("Text %5.3lf Text\n", 1.5);
-   printf("Text %5.3lf Text\n", 1.555);
-   printf("Text %5.3lf Text\n", 1.5555);
-   printf("Text %5.3lf Text\n", 15.0);
-}
-\end{minted}
-\end{codebox}
-
-\begin{cmdbox}[Ausgabebeispiel: Format-String mit Platzangabe (3)]
-\begin{minted}{text}
-Text 1.500 Text
-Text 1.555 Text
-Text 1.556 Text
-Text 15.000 Text
-\end{minted}
-\end{cmdbox}
