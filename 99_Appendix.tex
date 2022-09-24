@@ -530,7 +530,7 @@
 	{EF}
 	\toprule[1.5pt]
 
-	\normalfont	\bfseries Sequenz &
+	\normalfont	\bfseries Sequence &
 				\bfseries Funktion
 	\tabcrlf
 	
@@ -587,7 +587,7 @@
 	
 	\bottomrule[1.5pt]
 \end{tabularx}
-\caption{Escape-Sequenzen nach ISO/IEC 9899:TC3}
+\caption{Escape-Sequences according to ISO/IEC 9899:TC3}
 \label{tab:Escape}
 \end{table}
 See page 19 in \url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf}
@@ -661,7 +661,7 @@ Table \ref{tab:DatatypesExt} describes data types defined in the header \texttt{
 	
 \bottomrule[1.5pt]
 \end{tabularx}
-\captionof{table}{Standard-Datentypen der Sprache C} \label{tab:DatatypesExt}
+\captionof{table}{Fixed-width data types C} \label{tab:DatatypesExt}
 }
 
 Further details can be found online at cppreference.com: 
@@ -740,7 +740,7 @@ See also \url{https://en.cppreference.com/w/c/language/operator_precedence} for 
 
 
 \section{Format Strings}
-The format codes presented in tables \ref{tab:FormatStringBase} and \ref{tab:FormatStringModifiers} work with all of \texttt{printf}, \texttt{sprintf}, \texttt{snprintf}, and \texttt{fprintf}. Further can they be used with \texttt{scanf}, \texttt{sscanf}, \texttt{snscanf}, and \texttt{fscanf}.
+The format codes presented in tables \ref{tab:FormatStringBase} and \ref{tab:FormatStringModifiers} work with all of \texttt{printf}, \texttt{sprintf}, \texttt{snprintf}, and \texttt{fprintf}, as well as \texttt{scanf}, \texttt{sscanf}, \texttt{snscanf}, and \texttt{fscanf}.
 
 %TODO add "%%" -- output the percentage sign
 
@@ -777,8 +777,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		Decimal notation (usual human notation) with six decimal places precision.
 	&
 	\makecell{
-		0.700000 \\
-	 	1234567890123456768.000000
+		\texttt{0.700000} \\
+	 	\texttt{1234567890123456768.000000}
 	} \\
 	
 	\makecell{
@@ -787,8 +787,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		Scientific notation (Mantissa and Exponent).
 	&
 	\makecell{
-		7.000000e-01 or 7.000000E-01 \\
-		1.234568e+18 or 1.234568E+18
+		\texttt{7.000000e-01} or \texttt{7.000000E-01} \\
+		\texttt{1.234568e+18} or \texttt{1.234568E+18}
 	} \\
 	
 	\makecell{
@@ -797,8 +797,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		\enquote{Most convenient notation}, either decimal or scientific notation
 	&
 	\makecell{
-		0.700000 \\
-		1.234568e+18 or 1.234568E+18
+		\texttt{0.700000} \\
+		\texttt{1.234568e+18} or \texttt{1.234568E+18}
 	} \\
 	
 	\makecell{
@@ -807,8 +807,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		Hexadecimal notation
 	&
 	\makecell{
-		0x1.6666666666666p-1 \\
-		0X1.12210F47DE981P+60
+		\texttt{0x1.6666666666666p-1} \\
+		\texttt{0X1.12210F47DE981P+60}
 	} \\
 	
 	\makecell{
@@ -855,8 +855,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 	Decimal representation (base 10, usual human notation)
 	&
 	\makecell{
-		-1 \\
-		2147483647
+		\texttt{-1} \\
+		\texttt{2147483647}
 	} \\
 	
 	\makecell{\%u}
@@ -864,8 +864,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 	Decimal representation (base 10, usual human notation), interpretation as unsigned value
 	&
 	\makecell{
-		4294967295 \\
-		2147483647
+		\texttt{4294967295} \\
+		\texttt{2147483647}
 	} \\
 	
 	\makecell{\%o}
@@ -873,8 +873,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 	Octal (base 8) notation, interpretation as unsigned value
 	&
 	\makecell{
-		37777777777 \\
-		17777777777
+		\texttt{37777777777} \\
+		\texttt{17777777777}
 	} \\
 	
 	\makecell{\%x, \%X}
@@ -882,8 +882,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 	Hexadecimal (base 16) notation, interpretation as unsigned value
 	&
 	\makecell{
-		ffffffff or FFFFFFFF\\
-		7fffffff or 7FFFFFFF
+		\texttt{ffffffff} or \texttt{FFFFFFFF}\\
+		\texttt{7fffffff} or \texttt{7FFFFFFF}
 	} \\
 	
 	\makecell{\%c}
@@ -954,7 +954,7 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		 \texttt{char[]} or a \texttt{unsigned char[]}
 	}
 	&
-	abcdefg
+	\makecell{\texttt{abcdefg}}
 	\\
 	
 	\makecell{\%p}
@@ -966,8 +966,8 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 	}
 	&
 	\makecell{
-	 	0x7fffc7a9dfb8 \\
- 		(nil)
+	 	\texttt{0x7fffc7a9dfb8} \\
+ 		\texttt{(nil)}
 	}
 	\\
 \end{tabularx}
@@ -1146,107 +1146,6 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 \newcommand*{\SLASH}{\char`\\}
 
 
-\FloatBarrier
-\section{Formatierte Texteingabe}
-Die Format-Codes in Tabelle \ref{tab:FormatIn} funktionieren sowohl mit \texttt{scanf}, \texttt{sscanf}, \texttt{snscanf},  als auch mit \texttt{fscanf}.\\
-Siehe auch \url{http://en.cppreference.com/w/c/io/fscanf}
-
-\begin{table}[h!]
-\newcolumntype{T}{>{\centering\ttfamily\arraybackslash}m{.20 \linewidth}}
-\newcolumntype{S}{>{\centering\ttfamily\arraybackslash}m{.10 \linewidth}}
-\newcolumntype{C}{>{\centering         \arraybackslash}m{.62\linewidth}}
-\renewcommand*{\tabsec}{\\ \cline{1-2}}
-\newcommand*  {\tabSec}{\\ \cline{2-3}}
-
-\begin{tabularx}
-	{\linewidth}
-	{|T|S|C|}
-	\toprule[1.5pt]
-	
-\normalfont \bfseries Pointer für Datentyp &
-	\normalfont \bfseries format string &
-	\normalfont \bfseries Anmerkung
-	\tabcrlf
-	
-float &
-	\%f &
-	\multirow{3}{.75\linewidth}{
-	Alle Schreibweisen (Dezimalpunkt, exponential, hexadezimal) werdenautomatisch erkannt) 
-	}\tabsec
-
-double &
-	\%lf & \tabsec
-	
-long double &
-	\%Lf & \tabcrlf
-	
-\multirow{2}{*}{int} 
-	& \%i & 
-	automatische Erkennung der Basis \tabSec
-	
-	& \%d & 
-	dezimal \tabcrlf
-
-\multirow{3}{*}{unsigned int} 
-	& \%u & 
-	vorzeichenlos, dezimal \tabSec
-	
-	& \%o & 
-	vorzeichenlos, oktal \tabSec
-	
-	& \%x & 
-	vorzeichenlos, hexadezimal \tabcrlf
-
-\multirow{2}{*}{char} 
-	& \%hhi 
-	& Werte zwischen -128 und 127 \tabSec
-	
-	& \%c
-	& ein Zeichen \tabcrlf
-
-short int
-	& \%hi, \%hu, ...
-	& Variationen analog zu \texttt{int} und \texttt{unsigned int} \tabcrlf
-
-long int 
-	& \%li, \%lu, ...
-	& Variationen analog zu \texttt{int} und \texttt{unsigned int} \tabcrlf
-	
-
-long long int 
-	& \%lli, ...
-	& Variationen analog zu \texttt{int} und \texttt{unsigned int} \tabcrlf
-	
-\multirow{7}{*}{
-	\makecell{
-		{\ttfamily char*}, \\
-		{\ttfamily char[]}, \\
-		{\ttfamily unsigned~char*}
-	}
-} 
-	& \%s
-	& Zeichenkette beliebiger Länge. Leerzeichen und Tabulatoren werden als Text-Ende interpretiert.
-	\tabSec
-	
-	& \%Ns
-	& Zeichenkette mit maximaler Länge N. Leerzeichen und Tabulatoren werden als Text-Ende interpretiert.
-	\tabSec
-	
-	& \%[\textit{list}]s
-	& Zeichenkette beliebiger Länge. Nur Zeichen, die in \textit{list} aufgeführt sind, werden akzeptiert. Der Ausdruck \textit{list} kann entweder eine Aneinanderreihung aller erlaubten Zeichen sein, oder ein Ausdruck der Art \emph{von-bis}. Alles hinter dem ersten Zeichen, das nicht in \textit{list} genannt wurde, wird ignoriert.\newline
-	Beispiel 1: 
-	\texttt{\%[0-9a-fA-F]} erlaubt Eingabe von Hexadezimalen Ganzzahlen\newline
-	Beispiel 2:
-	\texttt{\%[ \SLASH ta-z]} erlaubt Eingabe von Kleinbuchstaben, dem Tabulator und dem Leerzeichen.
-	\\
-
-	\bottomrule[1.5pt]
-\end{tabularx}
-\caption{Codes für formattierte Texteingabe} \label{tab:FormatIn}
-\end{table}
-
-
-\FloatBarrier
 \section{UNIX/bash-Kommandos zum Formatieren}
 Die Ausgabe der Zeichenketten (\eg mit \texttt{printf}) in den Tabellen \ref{tab:bashFormatCol} und \ref{tab:bashFormatSpc} wird von den auf \emph{unixoiden Systemen} (\eg Linux, Mac OS) üblichen Konsolen als Änderung des Ausgabeformats interpretiert. Die Details sind abhängig von der Implementierung der Konsole. Beschrieben hier ist die auf  verbreitete Konsole \emph{bash}. Die beschriebenen Farben stellen die Standard-Einstellungen dar und können bei jedem Anwender individuell angepasst werden.
 

@@ -12,7 +12,7 @@ Within the cells, we find \emph{values}. As mentioned, they are, a priori, pure 
 
 The question \emph{what sort of information} is contained in a cell is called \emph{data type}. The data type is a name for both, the method of interpretation of the raw data in the cells, as well as the \emph{number of bytes per unit of information}. From the previous chapter, you remember how to interpret bit patterns as signed integers; to do so, you also need to know how many bytes to consider in your interpretation. A \emph{32bit signed integer} is thus a data type.
 
-The value we are looking for is in one of the enumerated cells. The \enquote{number of the cell} in which a given value is stored is its \emph{address}. An address itself can be stored as some unsigned integer. Adresses often are expressed as \emph{hexadecimal numbers}. That means, the number is written in base 16. You'll not only find the digits 0..9, but also A, B, ..., F (or, sometimes, the lower case letters a .. f). The digit 'A' then has the decimal value 10, 'B' is 11 and so on. The transformation back into base ten works just like described in section \ref{sec:BinaryNumbers}. To make sure a number is given in hexadecimal, it often carries the prefix \texttt{0x}. More often than not, the exact value of addresses is of little importance; if you ever see hexadecimal numbers, simply know that they are just another way of writing normal decimal numbers.
+The value we are looking for is in one of the enumerated cells. The \enquote{number of the cell} in which a given value is stored is its \emph{address}. An address itself can be stored as some unsigned integer. Adresses often are expressed as \emph{hexadecimal numbers}. That means, the number is written in base 16. You'll not only find the digits 0..9, but also A, B, ..., F (or, sometimes, the lower case letters a .. f). The digit 'A' then has the decimal value 10, 'B' is 11 and so on. The transformation back into base ten works just like described in section \ref{sec:BinaryNumbers}. To clarify that a number is given in hexadecimal, it often carries the prefix \texttt{0x}. More often than not, the exact value of addresses is of little importance; if you ever see hexadecimal numbers, simply know that they are just another way of writing normal decimal numbers.
 
 As humans, we prefer symbols over addresses. \emph{The value of cell 238} doesn't tell a lot about its content or what it means. In contrast, \emph{the value of \texttt{nameOfPlayer1}} clearly signifies some textual information. We call \texttt{nameOfPlayer1} a \emph{symbol}. It is a stand-in for the address of the cell(s), in which the name of player 1 can be found. The compiler \emph{binds} the symbols we as humans choose to the addresses in memory.
 
@@ -51,7 +51,7 @@ As humans, we prefer symbols over addresses. \emph{The value of cell 238} doesn'
   \draw [ld] (vc2.east) .. controls +(2.4,0) .. (c4.north);
 \end{tikzpicture}
 \end{center}
-\captionof{figure}{Variables in memory}
+\captionof{figure}{Variables in memory} \label{fig:memoryStructureBasic}
 \end{defbox}
 
 \begin{plusbox}[Powers of two in computing and why we use hexadecimal]
@@ -71,7 +71,7 @@ Powers of two appear so frequently, that some computer technicials expirience th
 \section{Declaring Variables} \label{sec:DeclareVars}
 To use variables in our code, we first have to \emph{declare} them. That means we have to tell the compiler that we want a variable and what kind of variable this should be. We do that with a statement of the form:
 \begin{codebox}[Syntax: Declaring variables]
-\texttt{dataType symbolName;}
+\texttt{dataType variableName;}
 \end{codebox}
 
 \texttt{dataType} stands for one of several registered keywords of the C programming language. Section \ref{sec:Datatypes} in the appendix lists all predefined data types. For the most part, we can limit ourselves to using one of these three:
@@ -87,13 +87,17 @@ To use variables in our code, we first have to \emph{declare} them. That means w
 	\textbf{\textrm{data type}} & \textbf{use} \tabcrlf
 	int                         & integers \\
 	double                      & floating point numbers \\
-	char                        & characters \\
+	char                        & characters\footnote{
+		\enquote{Character} means any one symbol, like \emph{A}, \emph{B}, \emph{C}, ... \emph{0}, \emph{1}, ..., \emph{!}, \emph{"}, etc. However, you've already encountered the fact that all of these
+		symbols can be substituted for a number -- their ASCII code. So, the datatype \inC{char} actually is just a form of an integer that exactly takes up one byte and thus can 
+		represent numbers from -128 through 127. They are most often meant to represent symbols in a longer text.
+	} \\
 \bottomrule[1.5pt]
 \end{tabularx}
 \captionof{table}{The most commonly used data types in C}
 \end{center}
 
-\texttt{symbolName} is an arbitrary identifyer we can choose, like \texttt{nameOfPlayer1}. It must abide to these rules: \vspace{-9pt}
+\texttt{variableName} is an arbitrary identifyer we can choose, like \texttt{nameOfPlayer1}. It must abide to these rules: \vspace{-9pt}
 \begin{itemize}
 \setlength\itemsep{0pt}
 \item Must only comprise of the characters \texttt{a..z}, \texttt{A..Z}, \texttt{0..9} or \texttt{\_}
@@ -116,7 +120,7 @@ Instead, be as descriptive as possible when giving names. A guideline to follow 
 In principle, you could use the data type \inC{double} for all your numbers, since any integer can be converted into a floating point value. However, operations involving integers are usually faster that such involving floating point numbers. The memory consumption for an \inC{int} also is (usually -- see appendix table \ref{tab:DatatypesStd}) only half as much as that of a \inC{double}. The most important reason to use integers over floating point values is, however, that the latter always accumulate rounding errors with each computation. Only integer math is guaranteed to be exact (unless there is an overflow, \ie the computed number becomes too big to be stored in an \inC{int} variable).
 \end{hintbox}
 
-A \emph{declaration} (\ie a line like \inC{int number;}) does two things: it \emph{reserves memory} (\ie it picks a number of consecutive cells in memory and tells the operating system that they are used now) and \emph{binds it to the symbol} (\ie the compiler knows that \texttt{symbolName} should refer to the content of the reserved memory cells).
+A \emph{declaration} (\ie a line like \inC{int number;}) does two things: it \emph{reserves memory} (\ie it picks a number of consecutive cells in memory and tells the operating system that they are used now) and \emph{binds the memory to the variable name} (\ie the compiler knows that \texttt{variableName} should refer to the content of the reserved memory cells).
 
 Multiple variables \emph{of the same type} can be declared in a single statement\footnote{However, this programming style is sometimes discouraged.}. To do so, we list them separated by commas. A valid declaration of variables could thus look like this:
 \begin{codebox}[declarations.c]
@@ -132,7 +136,9 @@ int main () {
 You may have noticed the similarity between the definition of the variable \texttt{count} and the function \texttt{main}. That is no coincidence! From the viewpoint of the compiler, the function \texttt{main} is a set of instructions to compute an \inC{int}. We'll learn more about this in chapters \ref{chp:funcs} and \ref{chp:OS-Link}.
 
 \begin{warnbox}[No duplicates or redeclarations]
-Symbols that have been declared once cannot be declared again. In the following example, there are multiple \emph{forbidden} lines:
+Variables that have been declared once cannot be declared again. In the following example, there are multiple \emph{forbidden} lines:
+\vspace{3pt}
+
 \begin{codebox}[redeclaration.c]
 \begin{minted}[linenos]{c}
 int main () {
@@ -145,7 +151,7 @@ int main () {
 \end{codebox}
 The problems are: \vspace{-6pt}
 \begin{itemize}
-\setlength\itemsep{-3pt}
+\setlength\itemsep{-0pt}
 \item Line 3: the variable \texttt{x} already exists (line 2) and cannot be re-typed to \inC{double}.
 \item Line 4: again, the variable \texttt{x} already exists; even repeating an identical declaration is not allowed.
 \end{itemize}
@@ -428,6 +434,7 @@ will give you an output like:\\
 \begin{warnbox}[Matching Data Types]
 Always make sure that the data types in the format string match the data types of the actual expressions! That is, if you type \texttt{\%d} in your format string, you had better provide an \inC{int} value for that place holder. Likewise, make sure the number of expressions and their order matches that of the placeholders. If you disregard this rule, ...
 \begin{itemize}
+\setlength\itemsep{0pt}
 \item you'll get a compiler warning\footnote{only if you compile with the \texttt{-Wall} compiler option} (which is the nicer part of the outcome)
 \item you'll find utter BS on screen.
 \end{itemize}
@@ -624,54 +631,358 @@ big  : |1000000|
 You will find a detailled list of allowed format codes and modifiers in the appendix, tables \ref{tab:FormatStringBase} and \ref{tab:FormatStringModifiers}.
 
 \section{Pointers}
+Now that we've familiarized ourselves with the type system in C and also have tools to output results on screen, let's introduce a new kind of information:
 
+In the beginning of this chapter, we've learned that all information in memory resides in enumerated cells; the numbers of the memory cells are now known to us as \emph{addresses}. Since addresses really are nothing other than numbers, we can store them in variables, \eg of type \inC{int}\footnote{or rather, of type \inC{long long int}. There are usually several gigabtyes worth of memory, so the number of a cell tends to be a very big number.}. However, knowing that a number is an address gives some extra context. There are operations that we can do with addresses that would make no sense with other numbers; and, vice versa, there are arithmetic operations that are considered not useful when dealing with addresses.
 
-%TODO
-% essentially keep structure of chapter 2, ...
-% but introduce mem structure and pointers here already (take from chapter 3)
-% C3 becomes: casting, pointer access, bit magic
-% C3: remember int x = 5.5 does implicit rounding
-% C3: introduce scanf
+To reflect this special context, C has a dedicated data type for adresses, or rather: an entire family of data types. These types are called \emph{pointer types}, and the variables that belong to that type are called \emph{pointers}. We declare them \emph{almost} like normal variables; the only difference is an asterisk (\texttt{*}) after the type name:
 
+\begin{codebox}[Syntax: Declaring pointer variables]
+\texttt{baseDataType * variableName;}
+\end{codebox}
 
-Wichtig ist, dass Variablen bereits deklariert sind \emph{bevor} auf sie verwiesen wird, \ie bevor sie in anderen Ausdrücken vorkommen. Folgendes Beispiel funktioniert daher nicht:
-\begin{codebox}[Beispiel: Fehlerhafter Code{,} Variablen zu spät deklariert]
+\texttt{baseDataType} is any type name like \inC{int} or \inC{double}. The word \texttt{\emph{base}DataType} is meant to represent the idea, that this pointer stores the address of a value of type \texttt{baseDataType}. Since \inC{int*} (say: \emph{pointer to \inC{int}}) is a data type in its own right, \inC{int} is considered the base of the data type.
+
+Like before, \texttt{variableName} is a new name conforming to the same rules as any other variable.
+
+\begin{defbox}[Dissection of the statement]
+Note that the asterisk is part of the type name. Declaring a pointer follows \emph{exactly the same syntax} as declaring any other variable.
+
+\begin{center}
+\begin{tikzpicture}
+  [
+    cell/.style={text width=8mm,
+      text height=4mm, draw=black, inner sep=1mm},
+    ld/.style={draw=blue,shorten >=2pt,->}
+  ]
+  
+  \node (schemeGen) at (0,3) {Syntax:};
+  \node (schemeXmp) at (0,2) {Example:};
+  \node (schemeDis) at (0,1) {Dissection:};
+
+  \node (declGen) at (7,3) {\texttt{dataType variableName;}};  
+  \node (declType) at (6,2) {\inC{int*}};  
+  \node (declName) at (7.5,2) {\inC{myPointer;}};  
+  
+  \node (dis1_1) at (5,1) {data type: \inC{int*}};
+  \node (dis1_2) at (9,1) {variable name: \texttt{myPointer}};
+
+  \node (dis2_1) at (4,0) {base data type: \inC{int}};
+  \node (dis2_2) at (7.5,0) {modifier: \texttt{*} (pointer)};
+
+  \draw [ld] (declType.south) -- (dis1_1.north);
+  \draw [ld] (declName.south) -- (dis1_2.north);
+  
+  \draw [ld] (dis1_1.south) -- (dis2_1.north);
+  \draw [ld] (dis1_1.south) -- (dis2_2.north);
+\end{tikzpicture}
+\end{center}
+\captionof{figure}{Variables in memory} \label{fig:memoryStructureBasic}
+\end{defbox}
+
+\begin{plusbox}[Higher order Pointers]
+Any data type can be used as a base data type. Pointer types, too, are data types. So you can also have pointers to pointers. This is only consequent: If some piece of information has an address and you store that address in memory, the address itself will have its own address.
+
+Such handling of meta-information is not uncommon in C. It takes some time to get used to this abstraction, so we'll take it slowly. However, I think it does not hurt to be prepared to encounter an \inC{int**} before we get to the point where we need them.
+\end{plusbox}
+
+\subsection{Pointer Specific Operations}
+Now that we have variables dedicated to storing addresses, we will first want to find suitable values to store in there. Of course, with pointers essentially being numbers, we could just pick any value that we fancy...
+
+\begin{warnbox}[unguardedAddress.c, leftupper=7mm]
 \begin{minted}[linenos]{c}
 int main () {
-  Ganzzahl = 7;
-  int Ganzzahl;
+    int* myPointer = 1000;
 }
 \end{minted}
+\captionof{code}{An unguared address}
+\end{warnbox}
+
+... but who guarantees that no other programm on the computer is currently using this address\footnote{... the operating system, usually. However, there are still good reasons not to do this.}? Rather than randomly poking around in memory, we rather only refer to \emph{properly allocated memory} (memory that is explicitly reserved for use by our programm). One way of doing so is by using the address-operator \texttt{\&} on an existing variable:
+
+\begin{codebox}[addressOperator.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int regularVariable = 0;
+    int* myPointer = &regularVariable;
+}
+\end{minted}
+\captionof{code}{Finding the address of an existing variable}
 \end{codebox}
-und erzeugt die folgende Fehlermeldung:
-\begin{cmdbox}[Fehlermeldungen des gcc]
+
+This will produce a memory structure like the following:
+
+\begin{defbox}[Memory Picture]
+\begin{center}
+\begin{tikzpicture}
+  [
+    cell/.style={text width=13mm,
+      text height=4mm, draw=black, inner sep=1mm},
+    ld/.style={draw=blue,shorten >=2pt,->}
+  ]
+  \node (c1) at (0.0,0) [cell] {\ttfamily 99};
+  \node (c2) at (1.5,0) [cell] {\ttfamily 0};
+  \node (c3) at (3.0,0) [cell] {\ttfamily 65536};
+  \node (c4) at (4.5,0) [cell] {\ttfamily -4};
+  \node (c5) at (6.0,0) [cell] {\ttfamily \color{red} 0x2800};
+  \node (c6) at (7.5,0) [cell] {\ttfamily ...};
+
+  \node (a1) [below=2mm of c1]            {\tiny 0x27fc};
+  \node (a2) [below=2mm of c2, color=red] {\tiny 0x2800};
+  \node (a3) [below=2mm of c3]            {\tiny 0x2804};
+  \node (a4) [below=2mm of c4]            {\tiny 0x2808};
+  \node (a5) [below=2mm of c5]            {\tiny 0x280c};
+  \node (a6) [below=2mm of c6]            {\tiny 0x2810};
+
+  \node (ptr) [below=8mm of c1] {\scriptsize Address of \texttt{regularVariable}};
+  \node (vc2) [above=6mm of c1] {\scriptsize Variable \texttt{myPointer}};
+  \node (vc0) [above=2mm of c1] {\scriptsize Variable \texttt{regularVariable}};
+
+  \draw [ld] (ptr.east) .. controls +(0.3,0) .. (a2.south);
+  \draw [ld] (vc0.east) .. controls +(0.4,0) .. (c2.north);
+  \draw [ld] (vc2.east) .. controls +(2.4,0) .. (c5.north);
+\end{tikzpicture}
+\end{center}
+\captionof{figure}{Variable and pointer in memory}
+\end{defbox}
+
+The inverse operation is \emph{dereference}: we can take a pointer and peek into the memory cell indicated by the stored address. This is done with the asterisk operator \texttt{*}:
+
+\begin{codebox}[dereferenceOperator.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int regularVariable = 7;
+    int* myPointer = &regularVariable;
+    
+    printf("address of 'regularVariable': %p",  myPointer);
+    printf("content of 'regularVariable': %d", *myPointer);
+    
+    *myPointer = 8;
+    
+    printf("content of 'regularVariable': %d", regularVariable);
+}
+\end{minted}
+\captionof{code}{Dereference} \label{code:dereference}
+\end{codebox}
+
+\begin{cmdbox}[Output: dereferenceOperator.c]
 \begin{minted}{text}
-myProgram.c: In function ‘main’:
-myProgram.c:2:4: error: ‘Ganzzahl’ undeclared (first use in this
-function)
-    Ganzzahl = 7;
-    ^~~~~~~~
-myProgram.c:2:4: note: each undeclared identifier is reported only once
-for each function it appears in
+address of 'regularVariable': 0x7ffca0962d1c
+content of 'regularVariable': 7
+content of 'regularVariable': 8
 \end{minted}
 \end{cmdbox}
-Jede Fehlermeldung beginnt mit einem Verweis auf die fehlerhafte Datei und die Funktion darin, in der das Problem aufgetreten ist (\texttt{myProgram.c: In function ‘main’:}). In der folgenden Zeile der Fehlerausgabe wird genauer spezifiziert in welcher Zeile, und an welcher Stelle der Fehler auftrat (\texttt{myProgram.c:2:4}, also  Zeile 2, Spalte 4) und welcher Fehler gefunden wurde (\texttt{‘Ganzzahl’ undeclared}). Schließlich gibt der Compiler noch die relevante Stelle aus und markiert diese erfreulicherweise.
 
-\begin{hintbox}[Zur Division mit Ganzzahl- und Fließkomma-Werten]
-Der Datentyp einer Division hängt vom Datentyp von Divisor und Dividend ab. Ist einer der beiden ein Fließkommawert, so wird auch das Ergebnis als Fließkommawert berechnet. Sind beide Werte Ganzzahlen, wird auch das Ergebnis als Ganzzahl berechnet und gegebenenfalls abgerundet. Betrachten wir folgendes Beispiel:
-\begin{codebox}[Beispiel: Division von Ganzzahlen und Fließkommazahlen]
-\begin{minted}[linenos]{c}
-double x = 3   / 2  ,
-       y = 3.0 / 2.0,
-       z = 3.0 / 2  ,
-       w = 3   / 2.0;
-\end{minted}
-\end{codebox}
-Die Variable \texttt{x} geht aus der Division zweier Ganzzahlen hervor, und wird damit zu \texttt{1.0} abgerundet. Bei der Berechnung von \texttt{y} hingegen gehen Fließkommazahlen in die Division ein; somit wird das Ergebnis nicht gerundet und als 1.5 gespeichert. Dasselbe gilt für \texttt{z} und \texttt{w}, da zumindest \emph{eine} der an der Division beteiligten Zahlen eine Fließkommazahl war.
+In line 7 we learn where in memory \texttt{regularVariable} is stored. It is a big number with no inherent meaning.
+
+Line 8 illustrates read-access with a pointer. Instead of \texttt{myPointer}, we use \texttt{*myPointer}, \ie we instruct the computer to look not at the memory cell containing \texttt{myPointer}, but at the cell \emph{referred to} by the content of \texttt{myPointer}. After this indirection, of course, we arrive at the cell containing \texttt{regularVariable}, because in line 5 we've initialized \texttt{myPointer} with the address of that very variable.
+
+Line 10 shows that pointers can also be used for write access: we put the value \inC{8} not into \texttt{myPointer} itself, but in the cell referred to by it -- again, this means the cell of \texttt{regularVariable}. Consequently, when we later (in line 12) look at \texttt{regularVariable} \emph{directly}, we find this change reflected.
+
+This example also shows us why we need an entire class of pointer data types: if a pointer is only a number, then dereferencing can only be done properly if the computer \enquote{knows} how to do that, \ie how many bytes should be taken into account and how to interpret the data found at the referenced address. This meta-information is of course given in the pointer base type.
+
+\begin{hintbox}[NULL pointer]
+Not always do we know right away the address we want to store in a pointer variable. As always, it is a good idea to store a default value in new variables. In the case of pointers, this should be \inC{NULL}:
+\vspace{3pt}
+
+\mint{c}{int* newPointer = NULL;}
+\vspace{-9pt}
+As the name suggests, this is simply the value \inC{0}, but in a layout that is compatible with pointers (remember that the same number can be represented by numerous bit patterns).
 \end{hintbox}
 
-\subsection{Shorthands}
+\begin{hintbox}[Overloaded Syntax]
+By now we've encountered the asterisk to mean three different things:
+\begin{itemize}
+\setlength\itemsep{0pt}
+\item Multiplication
+\item Part of a data type
+\item Dereferencing
+\end{itemize}
+
+With some practice, you will have no problem figuring out the meaning of the symbol from given context. Try to remember these contexts:
+\begin{itemize}
+\setlength\itemsep{0pt}
+\item Multiplication only happens between \enquote{normal} values, \ie regular, non-pointer variables or constants
+\item To be part of a data type, the asterisk needs to appear in a \emph{declaration}, \ie directly after a data type name such as \inC{int}.
+\item Dereferencing can only be done to pointers
+\end{itemize}
+
+To help with discerning the context, I advise you to use whitespaces in the following way:
+\begin{itemize}
+\setlength\itemsep{0pt}
+\item For multiplications, put a whitespace on both sides of the asterisk: \texttt{a * b}
+\item When declaring a pointer variable, leave no whitespace between the base type name and the pointer symbol: \inC{int* ptr;}
+\item For dereferencing, leave no whitespace between the operator and the pointer: \texttt{*ptr}
+\end{itemize}
+\end{hintbox}
+
+\begin{plusbox}[Generic Pointer Type]
+If you compile code listing \ref{code:dereference} with the recommended compiler flag \texttt{-Wall}, you'll notice a warning:
+\vspace{3pt}
+
+\begin{cmdbox}[Compiler output for dereferenceOperator.c]
+\begin{minted}{text}
+dereferenceOperator.c: In function ‘main’:
+dereferenceOperator.c:7:44: warning: format ‘%p’ 
+    expects argument of type ‘void *’, but argument 2 has type ‘int *’ 
+    [-Wformat=]
+    7 |     printf("address of 'regularVariable': %p\n",  myPointer);
+      |                                           ~^      ~~~~~~~~~
+      |                                            |      |
+      |                                            void * int *
+      |                                           %ls
+\end{minted}
+\end{cmdbox}
+
+We will learn in the next chapter how to avoid this warning. Still, we can already understand what this warning means:
+\end{plusbox}
+\begin{plusbox}[]
+The compiler tells us that the format string is mismatched for the variable we want to print: \texttt{myPointer} is of type \inC{int*}, while \texttt{\%p} expects an expression of type \inC{void*}. So far, we haven't encountered the type \inC{void} because it, well, isn't really a data type. In the context of pointers, it is used for \enquote{raw pointers}, with no added information. In other words, it is a pointer without base type. This was added to the language to allow constructs where the kind of pointer does not matter -- like here. Printing the address only requires knowing that it is a sort of number; there is no inherent difference between an \inC{int*} and a \inC{double*}. However, the C compiler is sometimes more strict than it needs to be and demands matching data types in every possible situation.
+
+Now that we understand where the warning comes from and that it does not really constitute a mistake, we can safely ignore it. This is, of course, still \emph{not a good practice}. Good code should never produce any warnings. So be looking forward to chapter \ref{chp:casting} where we learn to fix this problem.
+\end{plusbox}
+
+\subsection{Pointer Arithmetics}
+As mentioned before, pointers are but a special form of integers. Treating them as such allowed the inventors\footnote{Ken Thompson and Dennis Ritchie, if you wondered what their names are} of the C programming language to implement \enquote{alternative rules for doing maths with them}. For one, multiplication and  division simply do not exist with pointers. This freed up the asterisk symbol to mean dereference of pointers. The main reason, however, is that a product of pointers would virtually never have a practically meaningful result. Remember that pointers are the numbers of cells in memory; they tell you where some piece of information is found. Now, if you know where to find some number, what good would it be to double that address? It is very unlikely that you would find a memory cell that you \enquote{own} (\ie that you have allocated) at the address given by a product, let alone useful information therein. The same goes for division.
+
+For the same reason, the addition between two pointers is undefined. Adding an address to an address is the same as multiplying it by two, which we already found to yield no reasonable value.
+
+Things are different, however, for the addition of a pointer with an integer: Later in this course, we will learn how to manage lists of numbers. The simplest way of doing so is to put all its items in consecutive cells. Then, a pointer to the first item in the list is sufficient to find \emph{all} items of the list: you just have to \emph{add} an offset to that pointer. But remember: numbers can take up more than one byte. So, when treating pointers like normal numbers, just adding $n$ would not suffice to find the $n^{\text{th}}$ element of the list. You would have to multiply $n$ by the number of bytes per number.
+
+\begin{defbox}[Memory Picture]
+\begin{center}
+\begin{tikzpicture}
+  [
+    minicell/.style={text width= 3mm, text height=2mm, draw=black, inner sep=1mm},
+    widecell/.style={text width=18mm, text height=4mm, draw=black, inner sep=1mm},
+    ld/.style={draw=blue,shorten >=2pt,->}
+  ]
+
+  \node (lblCells)     at (-2, 8.0) {memory cells};
+  \node (lblCompounds) at (-2, 7.5) {values};
+  
+  \node (c0) at (0.0,8) [minicell] {};
+  \node (c1) at (0.5,8) [minicell] {};
+  \node (c2) at (1.0,8) [minicell] {};
+  \node (c3) at (1.5,8) [minicell] {};
+  \node (p0) [above=0mm of c0] {\tiny \color{blue} 0x27fb};
+  \node (p1) [above=2mm of c1] {\tiny 0x27fc};
+  \node (p2) [above=0mm of c2] {\tiny 0x27fd};
+  \node (p3) [above=2mm of c3] {\tiny 0x27fe};
+  \node (C0) at (0.75,7.5) [widecell] {\texttt{1989}};
+  
+  \node (c4) at (2.0,8) [minicell] {};
+  \node (c5) at (2.5,8) [minicell] {};
+  \node (c6) at (3.0,8) [minicell] {};
+  \node (c7) at (3.5,8) [minicell] {};
+  \node (p4) [above=0mm of c4] {\tiny 0x27ff};
+  \node (p5) [above=2mm of c5] {\tiny 0x2800};
+  \node (p6) [above=0mm of c6] {\tiny 0x2801};
+  \node (p7) [above=2mm of c7] {\tiny 0x2802};
+  \node (C1) at (2.75,7.5) [widecell] {\texttt{2015}};
+  
+  \node (c8) at (4.0,8) [minicell] {};
+  \node (c9) at (4.5,8) [minicell] {};
+  \node (cA) at (5.0,8) [minicell] {};
+  \node (cB) at (5.5,8) [minicell] {};
+  \node (p8) [above=0mm of c8] {\tiny 0x2803};
+  \node (p9) [above=2mm of c9] {\tiny 0x2804};
+  \node (pA) [above=0mm of cA] {\tiny 0x2805};
+  \node (pB) [above=2mm of cB] {\tiny 0x2806};
+  \node (C2) at (4.75,7.5) [widecell] {\texttt{58008}};
+  
+  \node (cC) at (6.0,8) [minicell] {};
+  \node (cD) at (6.5,8) [minicell] {};
+  \node (cE) at (7.0,8) [minicell] {};
+  \node (cF) at (7.5,8) [minicell] {};
+  \node (pC) [above=0mm of cC] {\tiny 0x2807};
+  \node (pD) [above=2mm of cD] {\tiny 0x2808};
+  \node (pE) [above=0mm of cE] {\tiny 0x2809};
+  \node (pF) [above=2mm of cF] {\tiny 0x280A};
+  \node (C2) at (6.75,7.5) [widecell] {...};
+  
+\end{tikzpicture}
+\end{center}
+\captionof{figure}{A list of four-byte integers in memory}
+
+A sequence of integers (1989, 2015, 58008, ...) is stored in memory. Each number takes up four bytes. The numbers are consecutive in memory, \ie there are no gaps in between the individual numbers. The address (\texttt{0x27fb}) of the first number of the list (1989) is known (\eg stored in a pointer variable).
+
+To get the address of the second number of the list, one would have to add the number of cells per list element (which is four) to the start address (\texttt{0x27fb}). More general, the adress of the $t^{\text{th}}$ element in the list is
+
+\[ \text{start address} + n \cdot \textrm{bytes per list element} \]
+\end{defbox}
+
+Adding less than the \enquote{width} of one block (\ie number of bytes per number) would result in a meaningless address. Reading from there would be like starting to read in the middle of a word and up to the middle of the next word.
+
+So, to avoid getting nonsensical addresses, the integer summand is automatically multiplied by the number of bytes of the pointer base type.
+
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{codebox}[pointerArithmetic.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    char c = 0;
+    int  i = 0;
+
+    printf("&c    : %p\n", &c    );
+    printf("&c + 1: %p\n", &c + 1);
+    printf("&i    : %p\n", &i    );
+    printf("&i + 1: %p\n", &i + 1);
+}
+\end{minted}
+\captionof{code}{Addition between Pointer and Integer} \label{code:ptrArithmetic}
+\end{codebox}
+%
+\begin{cmdbox}[Output: pointerArithmetic.c]
+\begin{minted}{text}
+&c    : 0x7ffcfb385723
+&c + 1: 0x7ffcfb385724
+&i    : 0x7ffcfb385724
+&i + 1: 0x7ffcfb385728
+\end{minted}
+\end{cmdbox}
+\end{tcbraster}
+
+In Example \ref{code:ptrArithmetic}, we see that the values of the expressions \texttt{\&c} and \texttt{\&c + 1} really only differ by 1 -- \inC{char}s take up one byte. On the other hand, the expressions \texttt{\&i} and \texttt{\&i + 1} differ by 4 -- because \texttt{i} is an \inC{int}, which takes up four bytes.
+
+The same holds for subtractions between pointers and integers: in expressions of the form \texttt{pointer - integer}, the value of \texttt{integer} will always be multiplied with the size of the pointer base type before performing the actual subtraction. In other words, it is possible to go backwards in lists with pointer arithmetics.
+
+Finally, the subtraction between \emph{two pointers of the same base type} is well defined. This operation implicitly divides the difference of the addresses by the width of the base type. In other words, it tells you how many values fit \enquote{between} the boundaries given by the pointers. For historical reasons, the result data type is \inC{long}, which by now is just another name for an \inC{int}. The proper format string code for \inC{long} expressions is \texttt{\%ld}:
+
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{codebox}[pointerDifference.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int i1 = 0;
+    int i2 = 0;
+
+    printf("&i - &c: %ld\n", &i - &c);
+}
+\end{minted}
+\captionof{code}{Subtracting two Pointers}
+\end{codebox}
+%
+\begin{cmdbox}[Output: pointerDifference.c]
+\begin{minted}{text}
+1
+\end{minted}
+\end{cmdbox}
+\end{tcbraster}
+
+\section{Shorthands}
 %TODO prefix and postfix form
+%TODO inc/dec on ptrs
 Häufig soll sich der Wert einer Variablen \emph{inkrementiert} (\enquote{hochgezählt}) werden. Dies kann codiert werden als:
 \begin{codebox}[Beispiel: Inkrementieren einer Variablen i]
 \begin{minted}[linenos]{c}
@@ -756,3 +1067,6 @@ int main () {
 \end{codebox}
 \end{hintbox}
 
+
+%TODO
+% C3 becomes: casting, promotion, scanf, bit magic
