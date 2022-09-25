@@ -3,6 +3,7 @@
 
 \emph{Useful} programs evolve over time. They compute some result or react to user input. To realize such dynamicity, C allows the existens of \emph{variables}, \ie stored information that can change over time. In this section we'll learn how to create and use variables and some of the \enquote{behind the scenes}, \ie what happens in memory when we use them.
 
+
 \section{Memory Structure}
 Imagine the memory as a long chain of enumerated cells. Each cell holds one byte's worth of information, \ie eight bits. These cells can never be empty; there's always \emph{some} information stored in them, albeit possibly nonsensical or useless. If we want to make use of this structure, someone or something will have to keep track of which cells hold which pieces of information, and how to interpret them.
 
@@ -67,6 +68,7 @@ Powers of two appear so frequently, that some computer technicials expirience th
 	[Decimal and binary round numbers]
 	{Decimal and binary round numbers. Source: \url{https://www.xkcd.com/1000/}}
 \end{plusbox}
+
 
 \section{Declaring Variables} \label{sec:DeclareVars}
 To use variables in our code, we first have to \emph{declare} them. That means we have to tell the compiler that we want a variable and what kind of variable this should be. We do that with a statement of the form:
@@ -181,6 +183,7 @@ Note that the declaration of the variables \texttt{count}, \texttt{positionX} an
 
 Anything that is not an \texttt{\#include} line must be \emph{within} the braces that belong to \inC{int main}.
 \end{warnbox}
+
 
 \section{Assignments} \label{sec:valueAssignment}
 We can assign values to our varibles with the \emph{operator} \texttt{=}:
@@ -327,6 +330,7 @@ Assignments are always made from the right to the left. I.\;e. on the right hand
 \end{warnbox}
 \end{tcbraster}
 
+
 \subsection{Divisions}
 When dividing two numbers, we need to be extra careful. For a computer there are \emph{two kinds of division}: \emph{integer division} and \emph{floating point division}. The names already give away the difference -- the result data type of the two operations is different. While the floating point division produces the result we as humans would consider correct, the integer division might round down to the nearest integer. Both operations are invoked by the same symbol (the division operator \texttt{/}). Integer division takes place when both operands (dividend and divisor) are \inC{int}-like types (appendix section \ref{sec:Datatypes} lists some other data types that behave like \inC{int}s in this respect). If either operand or both operands are floating point numbers, the floating point division will be executed.
 
@@ -361,6 +365,55 @@ In listing \ref{code:divisions} we'll find the following results:\vspace{-9pt}
 \item \texttt{result\_5} is of type \inC{int}. Although the computation itself is done as a floating point division and produces the intermediate result \inC{1.5}, the computer cannot 
 	store a \inC{double} result in an \inC{int} variable. Instead, this intermediate result is again rounded to \inC{1}. More on this in chapter \ref{chp:casting}.
 \end{itemize}
+
+
+\section{Order of operations}
+Expressions may become arbitrarily complex in C. We are not limited to a mere two \emph{arguments} (like in \inC{x + 2}. The variable \texttt{x} and the constant \inC{2} are arguments), but can evaluate entire chains of operations. The expression \inC{x + 1.2 - 5.0 + 2.2 * x - y / 7.3} is valid in C. For the most part, these expressions are parsed from the left to the right (\inC{x + 1.2} is evaluated before subtracting \inC{5.0}). However, some operations have higher priority than others. Multiplication and division are always evaluated before addition/subtraction, as is custom in \enquote{human maths}, too. You may use parentheses \texttt{()} to deviate from this behaviour. Hence, \inC{2 + 5 * 8} will give you \inC{42} 
+while \texttt{(2 + 5) * 8} will give you \inC{56}.
+
+Later on in this course, we'll learn about other operators. Thus, in C the rule \emph{multiplication before addition} is extended by a number of extra rules. In the appendix, you will find table \ref{tab:OperatorPrecedence}, which shows you which operators are evalued first. Of course you can always force a certain evaluation order by placing parentheses.
+
+A rarely used but nonetheless present oddity of the C programming language is that value assignments (\texttt{variable = expression}) themselves are considered \enquote{computations} and have a result (in the sense of \inC{1 + 2} has a result, which is \inC{3}). The usually intended update of a variable is formally only a \emph{side effect}. The \emph{result} of this \enquote{assignment computation} is the value of the assigned expression.
+
+Consider these lines:
+\begin{codebox}[chainAssignment.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int a, b, c, d;
+   
+    a = b = c = d = 2 + 5 * 8;
+}
+\end{minted}
+\captionof{code}{Assignment as result}
+\end{codebox}
+In the above example, there are three types of operator in line 3: \texttt{=}, \texttt{+} and \texttt{*}. Of these three, multiplication (\texttt{*}) has highest precedence, then comes addition (\texttt{+}) and last assignments (\texttt{=}) will be evaluated. Thus we get the following order of atomic operations:
+
+\begin{defbox}[Dissection of the chain assignment]
+\begin{align*}
+	\underbrace{
+		\texttt{a = }
+		\underbrace{
+			\texttt{b = }
+			\underbrace{
+				\texttt{c = }
+				\underbrace{
+					\texttt{d = }
+					\underbrace{
+						\texttt{2 + }
+						\underbrace{
+							\texttt{5 * 8}
+						}_{1}
+					}_{2}
+				}_{3}
+			}_{4}
+		}_{6}
+	}_{7}
+	\texttt{;}
+\end{align*}
+\captionof{figure}{Evaluation of a chain assignment}
+
+Since multiplication takes highest precedence, the subexpression \inC{5 * 8} is evaluated first and gives \inC{40}. Subsequently, \inC{2 + 40} is evaluated to \inC{42}. The third step then is assigning this value \inC{42} to the variable \texttt{d}, which in itself has the result \inC{42}. The steps four through 7 act on different variables, but otherwise are the same in principle. The last result (the assignment to \texttt{a}) is discarded. That means, the side effect (updating \texttt{a}) is executed, but the result \inC{42} lingers in the processor for a nanosecond before it is \enquote{forgotten}.
+\end{defbox}
 
 
 \section{Formatted Output}
@@ -503,6 +556,7 @@ Now with the newspaper printed (the memory prepared), you tell a friend to read 
 Both, length and language are contained in the format string specification: \texttt{\%lf} stands for 64 bits worth of information (length) and \inC{double} format (language).
 \end{plusbox}
 
+
 \subsection{Controling Length and Alignment of the Output}
 By default, \texttt{printf} will write as many characters on screen as it takes to render the information stored in our variables. Sometimes, however, we want our output to have a nice tabular format. Compare these two outputs\footnote{Source: The CIA World Factbook, September 2022, \url{https://www.cia.gov/the-world-factbook/}}:
 \begin{tcbraster}[raster columns=2,
@@ -533,17 +587,17 @@ United Kingdom      : 25.2%
 I think you will agree that the right hand side output looks nicer and allows for easier comparison and interpretation of the data by an end user. Of course we can achieve this look by putting an according number of white spaces into the format string in the \texttt{printf} statement:
 \begin{codebox}[manuallyAlignedOutput.c]
 \begin{minted}[linenos]{c}
-...
+    ...
 
-double percentGermany = 23.9;
-double percentFrance = 7.3;
-double percentSpain = 22.1;
-double percentUK = 25.2;
+    double percentGermany = 23.9;
+    double percentFrance = 7.3;
+    double percentSpain = 22.1;
+    double percentUK = 25.2;
 
-printf("%s             : %lf%%\n", "Germany", percentGermany);
-printf("%s              :  %lf%%\n", "France", percentFrance);
-printf("%s               : %lf%%\n", "Spain", percentSpain);
-printf("%s      : %lf%%\n", "United Kingdom", percentUK);
+    printf("%s             : %lf%%\n", "Germany", percentGermany);
+    printf("%s              :  %lf%%\n", "France", percentFrance);
+    printf("%s               : %lf%%\n", "Spain", percentSpain);
+    printf("%s      : %lf%%\n", "United Kingdom", percentUK);
 \end{minted}
 \captionof{code}{Manually aligned output}
 \end{codebox}
@@ -630,6 +684,7 @@ big  : |1000000|
 
 You will find a detailled list of allowed format codes and modifiers in the appendix, tables \ref{tab:FormatStringBase} and \ref{tab:FormatStringModifiers}.
 
+
 \section{Pointers}
 Now that we've familiarized ourselves with the type system in C and also have tools to output results on screen, let's introduce a new kind of information:
 
@@ -638,7 +693,7 @@ In the beginning of this chapter, we've learned that all information in memory r
 To reflect this special context, C has a dedicated data type for adresses, or rather: an entire family of data types. These types are called \emph{pointer types}, and the variables that belong to that type are called \emph{pointers}. We declare them \emph{almost} like normal variables; the only difference is an asterisk (\texttt{*}) after the type name:
 
 \begin{codebox}[Syntax: Declaring pointer variables]
-\texttt{baseDataType * variableName;}
+\texttt{baseDataType* variableName;}
 \end{codebox}
 
 \texttt{baseDataType} is any type name like \inC{int} or \inC{double}. The word \texttt{\emph{base}DataType} is meant to represent the idea, that this pointer stores the address of a value of type \texttt{baseDataType}. Since \inC{int*} (say: \emph{pointer to \inC{int}}) is a data type in its own right, \inC{int} is considered the base of the data type.
@@ -686,6 +741,7 @@ Any data type can be used as a base data type. Pointer types, too, are data type
 Such handling of meta-information is not uncommon in C. It takes some time to get used to this abstraction, so we'll take it slowly. However, I think it does not hurt to be prepared to encounter an \inC{int**} before we get to the point where we need them.
 \end{plusbox}
 
+
 \subsection{Pointer Specific Operations}
 Now that we have variables dedicated to storing addresses, we will first want to find suitable values to store in there. Of course, with pointers essentially being numbers, we could just pick any value that we fancy...
 
@@ -703,7 +759,7 @@ int main () {
 \begin{codebox}[addressOperator.c]
 \begin{minted}[linenos]{c}
 int main () {
-    int regularVariable = 0;
+    int  regularVariable = 0;
     int* myPointer = &regularVariable;
 }
 \end{minted}
@@ -753,7 +809,7 @@ The inverse operation is \emph{dereference}: we can take a pointer and peek into
 #include <stdio.h>
 
 int main () {
-    int regularVariable = 7;
+    int  regularVariable = 7;
     int* myPointer = &regularVariable;
     
     printf("address of 'regularVariable': %p",  myPointer);
@@ -843,6 +899,7 @@ The compiler tells us that the format string is mismatched for the variable we w
 
 Now that we understand where the warning comes from and that it does not really constitute a mistake, we can safely ignore it. This is, of course, still \emph{not a good practice}. Good code should never produce any warnings. So be looking forward to chapter \ref{chp:casting} where we learn to fix this problem.
 \end{plusbox}
+
 
 \subsection{Pointer Arithmetics}
 As mentioned before, pointers are but a special form of integers. Treating them as such allowed the inventors\footnote{Ken Thompson and Dennis Ritchie, if you wondered what their names are} of the C programming language to implement \enquote{alternative rules for doing maths with them}. For one, multiplication and  division simply do not exist with pointers. This freed up the asterisk symbol to mean dereference of pointers. The main reason, however, is that a product of pointers would virtually never have a practically meaningful result. Remember that pointers are the numbers of cells in memory; they tell you where some piece of information is found. Now, if you know where to find some number, what good would it be to double that address? It is very unlikely that you would find a memory cell that you \enquote{own} (\ie that you have allocated) at the address given by a product, let alone useful information therein. The same goes for division.
@@ -936,7 +993,7 @@ int main () {
     printf("&i + 1: %p\n", &i + 1);
 }
 \end{minted}
-\captionof{code}{Addition between Pointer and Integer} \label{code:ptrArithmetic}
+\captionof{code}{Addition between pointer and integer} \label{code:ptrArithmetic}
 \end{codebox}
 %
 \begin{cmdbox}[Output: pointerArithmetic.c]
@@ -970,7 +1027,7 @@ int main () {
     printf("&i - &c: %ld\n", &i - &c);
 }
 \end{minted}
-\captionof{code}{Subtracting two Pointers}
+\captionof{code}{Subtracting two pointers}
 \end{codebox}
 %
 \begin{cmdbox}[Output: pointerDifference.c]
@@ -980,93 +1037,306 @@ int main () {
 \end{cmdbox}
 \end{tcbraster}
 
+
 \section{Shorthands}
-%TODO prefix and postfix form
-%TODO inc/dec on ptrs
-Häufig soll sich der Wert einer Variablen \emph{inkrementiert} (\enquote{hochgezählt}) werden. Dies kann codiert werden als:
-\begin{codebox}[Beispiel: Inkrementieren einer Variablen i]
+A frequent action is to \emph{increment} a variable, \ie to increase the value by exactly one. We know already how to do that in code:
+\begin{codebox}[explicitIncrement.c]
 \begin{minted}[linenos]{c}
 int main () {
-   int i = 5;
-   i = i + 1;  // i hat jetzt den Wert 6
+    int i = 5;
+    i = i + 1;  // now i is 6
 }
 \end{minted}
+\captionof{code}{Incrementing a variable -- long version}
 \end{codebox}
 
-Daneben gibt es auch den \emph{Shorthand} (Kurzform) \texttt{variable++}:
-\begin{codebox}[Beispiel: Inkrementieren einer Variablen i mit Shorthand ++]
+Since this action is needed so often when programming, there is a shorter form that achieves the same effect:
+\begin{codebox}[explicitIncrement.c]
 \begin{minted}[linenos]{c}
 int main () {
-   int i = 5;
-   i++;       // i hat jetzt den Wert 6
+    int i = 5;
+    ++i;  // now i is 6
 }
 \end{minted}
+\captionof{code}{Incrementing a variable -- shorthand version}
 \end{codebox}
 
-In beiden Beispielen wird der Wert von \texttt{i} in Zeile 3 um 1 erhöht.
+In both codes, line three increments the variable \texttt{i}. 
 
-Analog dazu existiert der \emph{Dekrement}-Operator \texttt{variable-{}-}, der den Wert von \texttt{variable} um 1 verringert.
-
-Weiter existieren der Operator-Shorthand \texttt{variable += expression}. Zu \texttt{variable} wird der Wert von \texttt{expression} hinzugezählt und anschließend in \texttt{variable} gespeichert. \texttt{expression} darf dabei ein beliebig komplexer Ausdruck sein:
-\begin{codebox}[Beispiel: Inkrementieren einer Variablen i mit Shorthand \texttt{+=}]
+Analogously, there's also the \emph{decrement operator} \texttt{variable-{}-}, which reduces a variable's value by one. Further, there are shorthand variants for adding or subtracting an arbitrary number, or multiplying or dividing by it:
+\begin{codebox}[allShorthands.c]
 \begin{minted}[linenos]{c}
 int main () {
-   int i = 5,
-       j = 2;
-   i += 3 * j + 1;     // i = i + 3 * j + 1
+    int i = 0, j = 1;
+   
+    ++i;          // i = i + 1;
+    --i;          // i = i - 1;
+    i += 7;       // i = i + 7;
+    i -= j;       // i = i - j;
+    i *= j + 1;   // i = i * (j + 1);
+    i /= i - 10;  // i = i / (i - 10);
+    i %= 5;       // i = i % 5;
 }
 \end{minted}
+\captionof{code}{Shorthand versions} \label{code:shorthandsAll}
 \end{codebox}
-Hier wird zunächst der Ausdruck \texttt{3 * j + 1} ausgewertet zu \texttt{7}; als nächster Schritt wird die Summe \texttt{i + 7} berechnet, und diese dann in \texttt{i} gespeichert. Die Variable \texttt{i} hat also nach Zeile 4 den Wert 12.
 
-Analog existieren auch die Shorthands \texttt{-=}, \texttt{*=}, \texttt{/=} und \texttt{\%=}.
+In code \ref{code:shorthandsAll}, the variable \texttt{i} evolves as follows:
+\begin{center}
+\newcolumntype{L}{>{\centering         \arraybackslash}p{.15\linewidth}}
+\newcolumntype{V}{>{\centering\ttfamily\arraybackslash}m{.15\linewidth}}
+\newcolumntype{N}{>{\centering         \arraybackslash}p{.30\linewidth}}
 
-\begin{hintbox}[Inkrement und Dekrement: Prefix und Postfix]
-Die Operatoren \texttt{++} und \texttt{-{}-} können sowohl \emph{vor} als auch \texttt{hinter} einen Ausdruck gesetzt werden (wir sprechen von \emph{Prefix} und \emph{Postfix}). Für sich alleine ist in beiden Fällen der Effekt derselbe -- der Wert des Ausdrucks wird um 1 erhöht bzw. verringert. Kombiniert mit anderen Operationen ergeben sich aber Unterschiede. Betrachten wir folgendes Beispiel:
+\rowcolors{1}{white}{tabhighlight}
+\begin{tabularx}
+	{.68\linewidth}
+	{LVN}
+\toprule[1.5pt]
 
-\begin{codebox}[Beispiel: Unterschiede bei Prefix- und Postfix-Inkrement]
+	\textbf{line executed} & 
+	\textbf{\textrm{value of} i} &
+	\textbf{notes}
+\tabcrlf
+	
+	 2 &  0 & initialization \\
+	 4 &  1 & increment \\
+	 5 &  0 & decrement \\
+	 6 &  7 & adding a constant \\
+	 7 &  6 & subtracting a variable \\
+	 8 & 12 & \makecell{multiplying by an expression \\ \texttt{j + 1} evaluates to \texttt{2}} \\
+	 9 &  6 & \makecell{multiplying by an expression \\ \texttt{i - 10} evaluates to \texttt{2}} \\
+	10 &  1 & remainder of division 6 : 5 \\
+	
+\bottomrule[1.5pt]
+\end{tabularx}
+\end{center}
+
+Take particular note of the oder of events in line 9: first, the right hand side of the equals sign is evaluated. That means, \texttt{i} refers to the value \emph{before} it is overwritten, and consequently gives \inC{10}. Hence, the right hand side \inC{i - 10} becomes \inC{12 - 10} becomes \inC{2}. Only \emph{after} the right hand side is completely evaluated, the update part (computing the new value of \texttt{i} and overwriting \texttt{i}) is executed: the computer computes \inC{i / 2} and eventually stores this result in \texttt{i}.
+
+Like the assignment operator (\texttt{=}), the increment and decrement operators (\texttt{++}, \texttt{-{}-}) have a \emph{result} (apart from the \emph{side effect} of incrementing and decrementing), which is the \emph{value of the updated variable after the increment/decrement}:
+\begin{codebox}[prefixShorthand.c]
 \begin{minted}[linenos]{c}
 int main () {
-   int i, j;
-
-   // Postfix-Form
-   i = 5;
-   j = i++;		// i = 6, j = 5.
-
-   // Prefix-Form
-   i = 5;
-   j = ++i;		// i = 6, j = 6.
+    int i = 0, j = 0, ri, rj;
+   
+    ri = ++i;          // i =  1, ri =  1
+    rj = --j;          // j = -1, rj = -1
 }
 \end{minted}
+\captionof{code}{Catching the results of increment and decrement operator (prefix form)}
 \end{codebox}
 
-In der Postfix-Form (Zeile 6) wird zuerst der Wert von \texttt{i} gelesen und der Variablen \texttt{j} zugewiesen; danach wird \texttt{i} inkrementiert.
+These two operators also have a second form, in which the operator stands \emph{behind} the variable to update. This second form is therefore called \emph{postfix form}, as opposed to the formerly introduced \emph{prefix form}. In this \emph{postfix} form, increment/decrement has the same side effect as usual, but the \emph{result} is the value of the variable \emph{before} the update:
+\begin{codebox}[postfixShorthand.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int i = 0, j = 0, ri, rj;
+   
+    ri = i++;          // i =  1, ri = 0
+    rj = j--;          // j = -1, rj = 0
+}
+\end{minted}
+\captionof{code}{Catching the results of increment and decrement operator (postfix form)}
+\end{codebox}
 
-Bei der Prefix-Form (Zeile 10) dagegen wird zuerst \texttt{i} inkrementiert und danach der Wert von \texttt{i} in \texttt{j} gespeichert.
+\begin{hintbox}[Shorthand forms and pointers]
+The shorthands presented are really nothing more than abbreviations for their longer counterparts. Hence, pointer arithmetics apply here, too. That means, ...
+\begin{itemize}
+\item the increment/decrement operators (\texttt{++}, \texttt{-{}-}) move the pointer by the byte count of the pointer's base type)
+\item the addition-update and subtraction-update operators (\texttt{+=}, \texttt{-=}) do the same
+\item multiplication-update, division-update and modulo-update (\texttt{*=}, \texttt{/=}, \texttt{\%=}) do not exist for pointers.
+\end{itemize}
 \end{hintbox}
-%
-\begin{hintbox}[]
-Um den Code leicht les- und wartbar zu halten, empfehle ich, alle gedanklichen Schritte in abgeschlossene Befehle zu setzen. Äquivalent zum obigen Code ist der folgende, intuitiv leichter verständliche Code:
 
-\begin{codebox}[Beispiel: Äquivalente Codes]
-\begin{minted}[linenos]{c}
-int main () {
-   int i, j;
+\begin{hintbox}[The KISS principle]
+We've barely begun to learn how to use C as a calculator tool, and already covered pages worth of rules and special cases. Keeping all of this in your mind while working toward a greater goal (a program that does something useful) is all but trivial. So while you should \emph{know} about all these rules to be able to find bugs, it is best not to \emph{design} your code around them. Rather than tat, follow the KISS principle:
 
-   // zur Postfix-Form
-   i = 5;
-   j = i;
-   i++;		// i = 6, j = 5.
+\begin{center}
+	\emph{Keep It Simple, Stupid!}
+\end{center}
 
-   // zur Prefix-Form
-   i = 5;
-   i++;
-   j = i;		// i = 6, j = 6.
-}
-\end{minted}
-\end{codebox}
+In context of the above, I recommend you not to do chain assignments or to increment/decrement in the same line as you assign a value. If you follow this advice, the prefix- and postfix form are equivalent, and you have one less degree of freedom to worry about.
 \end{hintbox}
 
 
-%TODO
-% C3 becomes: casting, promotion, scanf, bit magic
+\section{Main Takeaways}
+\begin{defbox}[You should remember...]
+\textbf{Variables}
+\begin{itemize}
+\item have a name and a data type.
+\item have to be declared before using them.
+\item are declared with the syntax element \texttt{datatype variableName;}.
+\item should be initialized to a fixed value.
+\item can be updated with new variables.
+\item can be used in expressions.
+\end{itemize}
+
+\textbf{Expressions}
+\begin{itemize}
+\item can be evaluated to a single value.
+\item involve operators such as \texttt{+}, \texttt{-}, \texttt{*}, \texttt{/}, \texttt{\%} or \texttt{=}.
+\item What is computed depends on the data types of the arguments involved.
+\item In particular, there are two kinds of division (integer- and floating point division).
+\end{itemize}
+
+\textbf{Memory Structure and Pointers}
+\begin{itemize}
+\item Memory is organized in enumerated cells that take up one byte worth of information.
+\item Several cells can act together to store a bigger piece of information.
+\item Memory has to be \emph{allocated}, \ie marked for exclusive use by our program.
+\item Pointers store the number of one memory cell.
+\item Only pointers to reserved memory are valid.
+\item Addresses of variables can be found with the address operator \texttt{\&}.
+\item The value in a given address can be found with the dereference operator \texttt{*}.
+\end{itemize}
+\end{defbox}
+
+
+\newpage
+\section{Exercises and Solutions}
+\subsection*{Declarations}
+Write a program that contains
+\begin{itemize}
+\setlength{\itemsep}{0pt}
+\item a variable storing the value \inC{3.141592654}
+\item a pointer to that value
+\item prints that variable's value using the pointer
+\end{itemize}
+
+\subsection*{Debugging}
+The expected output of this program is \inC{7.5}. However, something went wrong. Fix the mistake(s).
+\begin{codebox}[exo3-2.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int result = 15 / 2;
+   
+    printf("%d\n", result);
+}
+\end{minted}
+\end{codebox}
+
+\subsection*{Dissection}
+Predict which number will be computed here:
+\begin{codebox}[exo3-3.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int x = 1,
+        y = 2,
+        z = 5;
+    int result = 3;
+    int* p = &x;
+    
+    result += x + y * z;
+    
+    z = *p + y;
+    *p = 3;
+    p = &y;
+    
+    result -= (x + *p) * z;
+    result += 100 / 8;
+    result %= 10;
+    ++result;
+   
+    printf("%d\n", result);
+}
+\end{minted}
+\end{codebox}
+
+\subsection*{Design}
+Start from the following code. Expand it such that it prints a nice looking high score table. Names should be left aligned in a column of 25 characters. Scores should be right aligned in a column of 7 characters.
+
+Note:  We haven't discussed the type \inC{char*} in detail. For now it's sufficient to know that you can use the format string \texttt{\%s} to print the text at this pointer's location. Format string modifications work here as usual.
+\begin{codebox}[exo3-3.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    char* name1 = "Dusky";
+    int  score1 = 99999;
+    char* name2 = "Joe";
+    int  score2 = 8888;
+    char* name3 = "Chameleon";
+    int  score3 = 777;
+   
+    printf("HIGHSCORES\n\n");
+    
+    // your code here
+}
+\end{minted}
+\end{codebox}
+
+
+\rule{\linewidth}{0.1mm}
+
+\subsection*{Solution: Declarations}
+\begin{codebox}[exo3-1.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    double value = 3.141592654;
+    double* pointer = &value;
+
+    printf("%lf\n", *pointer);
+}
+\end{minted}
+\end{codebox}
+
+\subsection*{Solution: Debugging}
+\begin{codebox}[exo3-2.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    double result = 15.0 / 2.0;
+   
+    printf("%lf\n", result);
+}
+\end{minted}
+\end{codebox}
+Changes made:
+\begin{itemize}
+\item Change the data type of \texttt{result} to \inC{double}
+\item Make at least one of the operands of the division in line 4 of type double by adding a \texttt{.0}
+\item Change the format string in line 6 to \texttt{\%lf}
+\end{itemize}
+
+\subsection*{Solution: Dissection}
+The final result is \texttt{2}.
+
+These steps of evolution happen throughout the program:
+\begin{itemize}
+\item Line 10: \texttt{result = 3 + 1 + (2 * 5) = 14}
+\item Line 12: \texttt{z = 1 + 2 = 3}
+\item Line 13: \texttt{x = 3}
+\item Line 16: \texttt{result = 14 - (3 + 2)  * 3 = -1}
+\item Line 17: \texttt{result = -1 + 12 = 11} (note how \texttt{100 / 8} is evaluated with integer division and rounded down to \texttt{12})
+\item Line 18: \texttt{result = 11 \% 10 = 1}
+\item Line 19: \texttt{result = 1 + 1 = 2}
+\end{itemize}
+
+\subsection*{Solution: Design}
+\begin{codebox}[exo3-3.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    char* name1 = "Dusky";
+    int  score1 = 99999;
+    char* name2 = "Joe";
+    int  score2 = 8888;
+    char* name3 = "Chameleon";
+    int  score3 = 777;
+   
+    printf("HIGHSCORES\n\n");
+    
+    printf("%-25s: %7d\n", name1, score1);
+    printf("%-25s: %7d\n", name2, score2);
+    printf("%-25s: %7d\n", name3, score3);
+}
+\end{minted}
+\end{codebox}
