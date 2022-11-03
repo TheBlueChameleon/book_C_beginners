@@ -13,7 +13,7 @@ The following lines show code that prints the text \texttt{Hello World} on scree
 #include <stdio.h>
 
 int main() {
-   printf("Hello World!\n");
+    printf("Hello World!\n");
 }
 \end{minted}
 \captionof{code}{A Hello World} \label{code:helloworld}
@@ -61,8 +61,8 @@ This is because (unlike literal strings) statements can be spread over multiple 
 \begin{codebox}[whitespaces.c]
 \begin{minted}[linenos]{c}
   #include     <stdio.h>
- int    main   (   )    {
-      printf   (   
+     int    main   (   )    {
+printf   (   
          "Hello World!\n"
 )   ;      }
 \end{minted}
@@ -130,7 +130,7 @@ int main () {
    /* This opens the block comment.
    /* All of this line is part of the comment that began one line above,
     * and it ends HERE. */
-    * this will be taken for proper code and does not compile. */
+    * this will be taken for proper code and hence does not compile. */
 }
 \end{minted}
 \end{warnbox}
@@ -242,13 +242,13 @@ int Main {
 	\item The command's name is \texttt{printf} (the \texttt{f} is missing)
 	\item The text to be printed needs to be put in \emph{double} quotes (\texttt{"}) rather than single quotes (\texttt{'})
 	\item The final semicolon (\texttt{;}) is missing
-	\item The comment hides the closing paren. Either use a closed block-quote (\texttt{/* .. */}) or move the comment behind the command (\texttt{printf(...); // \textbackslash n means ...}
+	\item The comment hides the closing paren. Either use a closed block-quote (\texttt{/* ... */}) or move the comment behind the command (\texttt{printf(...); // \textbackslash n means ...}
 	\item In total, the entire line should be \texttt{printf("Hello World!\textbackslash n"); // \textbackslash n means  a line break}
 	\item The command printf can only be used after it has been defined by \texttt{\#include}ing the header \texttt{stdio.h}.
 	\end{itemize}
 \item Line 3:
 	\begin{itemize}
-	\item The directive is called \texttt{\#include}
+	\item There is a spelling mistake: the directive is called \texttt{\#include}
 	\item The included file is given in \texttt{<}angle brackets\texttt{>}, not in \texttt{\{}curly brackets\texttt{\}}
 	\item The included file should be \texttt{stdio.h}, not \texttt{stdio.c}
 	\item In total, the line should be \texttt{\#include <stdio.h>}

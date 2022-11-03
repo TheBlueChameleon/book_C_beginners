@@ -27,17 +27,17 @@ Let's look at an example and go through it line by line:
 #include <stdio.h>
 
 int main () {
-    int a = 0, b = 0;
+    int first = 0, second = 0;
     
     printf("Please enter a first number: ");
-    scanf("%d", &a);
+    scanf("%d", &first);
     printf("Please enter a second number: ");
-    scanf("%d", &b);
+    scanf("%d", &second);
     
-    printf("The sum of the two is %d\n", a + b);
+    printf("The sum of the two is %d\n", first + second);
 }
 \end{minted}
-\captionof{code}{Using \texttt{scanf} to read values from the keyboard}
+\captionof{code}{Using \texttt{scanf} to read values from the keyboard} \label{code:scanfSimple}
 \end{codebox}
 \begin{itemize}
 \setlength\itemsep{0pt}
@@ -216,17 +216,322 @@ reVal = 8
 Indeed, there are \emph{eight} characters on screen: three for \texttt{foo}, one for the whitespace, three for \texttt{bar} and one for the line break \texttt{\textbackslash n} (Otherwise, \texttt{reVal = 8} would end up in the same line as \texttt{foo bar}).
 \end{hintbox}
 
-\subsection{The Keyboard Buffer}
+\subsection{The Keyboard Buffer} \label{sec:scanf_keyboardBuffer}
 So far we've said: \texttt{scanf} reads text from the keyboard, interprets it and writes the interpretation result to memory. Actually, that was a simplification. It is usually sufficient to think of the command in these terms, but to understand some quirks of the command, we should have a closer look. This will help us when debugging our code, as discussed in section \ref{sec:scanfMistakes}.
 
-The code behind the command \texttt{scanf}
+\begin{plusbox}[Involved content ahead]
+I conseder this entire section more advanced in scope than what I would like to cover at this point. What I do show you here doesn't have too much impact on our daily lives as programmers, but it can help you understand unexpected behaviour of your code.
 
-%TODO
-% what happens in %d @ "12.3" (gives 12, ".3" remains in buffer)
+It is okay if you don't understand all details here, but having a general understanding of the process behind taking input with \texttt{scanf} will be useful in the future. If the content of this section eludes you, feel free to go on to section \ref{sec:ScanfMultiValues} and come back here later in this course.
+\end{plusbox}
 
-% the %d%c%d disaster...
+The code behind the command \texttt{scanf} is actually only concerned with interpreting the input according to the format string. Reading text from the keyboard is actually delegated to other functions, that are provided by the operating system\footnote{I.\;e. Windows, Linux, Mac OS or whatever system you may be using.}. The OS, in turn,  writes all the text a user types into a \emph{keyboard buffer}, \ie a dedicated block of memory. Text in this buffer waits until some other routines like \texttt{scanf} accesses it and thereby takes it out of the buffer. See figure \ref{fig:scanfActionFlowchart} for a schematic representation of this chain of events.
+
+This buffer is not used by \texttt{scanf} alone. You might want your program to react to keyboard shortcuts without having to confirm each of them by pressing enter, to give only one example. So, since there are potentially multiple processes accessing this keyboard buffer, it is only reasonable to take only so much text out of the buffer as can be interpreted according to the format string. Any text that doesn't make sense in that respect \emph{remains in the buffer}. Only a portion is taken out of the buffer and interpreted. For example, when reading an integer value 
+(\texttt{scanf("\%d", \&intVar)})
+but entering text with a decimal point (\eg \texttt{12.3}), only the part up to the decimal point (\texttt{12}) is taken out of the buffer; the rest remains in the queue. Taking text out of the buffer happens character by character. So, for example, if the buffer contains the text \texttt{12.3}, first only the \texttt{1} is taken out of the buffer, then the \texttt{2}. When we arrive at the decimal point, \texttt{scanf} decides that it can't be part of an integer (\texttt{\%d}) and thus \emph{puts it back} into the buffer.
+
+A subsequent call to \texttt{scanf} then continues to interpret the text left in the keyboard buffer according to its format string. If, for example, in the given scenario we follow up with \texttt{scanf("\%lf", \&doubleVar);}, the text \texttt{.3} will be parsed. When a number begins with a point, the computer implicitly adds a zero to the left; hence, this text becomes the number \texttt{0.3}.
+
+\begin{defbox}[Action Flowchart]
+\begin{center}
+\begin{tikzpicture}
+	[
+		agent/.style={minimum width=1mm, text height=2mm, draw=black, inner sep=1mm},
+		data/.style={minimum width=1mm, text height=2mm, draw=blue, inner sep=1mm},
+		memory/.style={minimum width=1mm, text height=2mm, draw=green!60!black, inner sep=1mm},
+		action/.style={draw=violet,shorten >=2pt,->}
+	]
+  
+	\node (code)    at (6.5, 8.0) {Code};
+	\node (scanf)   at (6.5, 6.5) [agent] {\texttt{scanf}};
+	\node (buffer)  at (6.5, 3.5) [memory] {\color{green!60!black} buffer};
+
+	\node (osfunc)  at (1.0, 5.0) [agent] {OS-function};
+	\node (text)    at (2.0, 3.5) [data] {\color{blue} text};
+	\node (user)    at (0.0, 2.0) {User};
+
+	\node (portion) at (12.0, 5.0) [data] {\color{blue} portion};
+
+	\draw [action] (code.south) 
+		.. controls +(-0.3, -0.5) ..
+		node [text width=2.2cm, midway, align=left] 
+			{\color{violet} calls} 
+		(scanf.north);
+	\draw [action] (scanf.north) 
+		.. controls +(+0.3, +0.5) ..
+		node [text width=4.5cm, midway, align=right] 
+			{\color{violet} \phantom{aa}returns \color{blue}value} 
+		(code.south);
+	
+	\draw [action] (scanf.south west) 
+		-- 
+		node [text width=1.5cm, midway] 
+			{\color{violet} calls \\ \phantom{a}} 
+		(osfunc.north east);
+	
+	\draw [action] (osfunc.south) 
+		-- 
+		node [text width=2.7cm, midway] 
+			{\color{violet} catches} 
+		(text.north);
+	\draw [action] (user.north east) 
+		-- 
+		node [text width=1.8cm, midway] 
+			{\color{violet} types\\ \phantom{a}}
+		(text.south west);
+	
+	\draw [action] (osfunc.south) 
+		.. controls +(3.0, -1.3) ..
+		node [text width=3.0cm, midway, align=center] 
+			{\phantom{aaaa} \color{violet} writes \\
+			 \phantom{aaaa} {\color{blue} text} into
+			} 
+		(buffer.west);
+	
+	\draw [action] (scanf.south) 
+		--
+		node [text width=5cm, midway, align=center] 
+			{\color{violet} requests~~\color{blue}portion} 
+		(buffer.north);
+	
+	\draw [action] (buffer.east) 
+		.. controls +(2.5, 0.0) ..
+		node [text width=2.5cm, midway, align=left] 
+			{\color{violet} emits \\ \phantom{a}} 
+		(portion.south);
+	\draw [action] (portion.north) 
+		-- 
+		node [text width=5.5cm, midway, align=center] 
+			{\phantom{aaaaaaaaaa} \color{violet} is interpreted as \\ 
+			 \phantom{aaaaaaaaaaaaaa} \color{blue} value \\
+			 \phantom{a}
+			 }
+		(scanf.south east);
+\end{tikzpicture}
+\end{center}
+\captionof{figure}{\texttt{scanf} action flowchart} \label{fig:scanfActionFlowchart}
+\end{defbox}
+
+This means that, when calling \texttt{scanf}, there might be leftover text from an earlier keybord interaction with the user. When this is the case, the OS will not wait for the user to type any text, but rather forward the remaining content of the buffer (or even again only a portion thereof). Knowing this, we can understand why the following code behaves as it does:
+
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{codebox}[keyboardBuffer.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int i;
+    double d;
+
+    scanf("%d", &i);
+    scanf("%lf", &d);
+
+    printf("%d and %lf\n", i, d);
+}
+\end{minted}
+\captionof{code}{Remaining Text in the keyboard buffer}
+\end{codebox}
+%
+\begin{cmdbox}[Possible Output: keyboardBuffer.c]
+12.3 \\
+12 and 0.300000
+\end{cmdbox}
+\end{tcbraster}
+
+\begin{hintbox}[Use expressive names]
+Having trouble with the above example? There's a \texttt{d} in the format string, meaning \inC{int}eger and a variable \texttt{d} which is a \inC{double}. This is certainly confusing.
+
+I mentioned before that names should be as expressive as possible. My experience is that a good deal of students disregard this advice until they run into problems. So, if you belong to that crowd: here you are, home made problems. You're welcome.
+
+It is often said that good code should read like prose. This certainly is sometimes hard to achieve, especially here, where we often regard code that is only to illustrate a concept and does not come with any context attached to it; but we should always at least try to make an effort with our variables. So, maybe the above example becomes clearer in this form:
+
+\begin{codebox}[keyboardBuffer.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int preDecimalDot;
+    double postDecimalDot;
+
+    scanf("%d", &preDecimalDot);
+    scanf("%lf", &postDecimalDot);
+
+    printf("%d and %lf\n", preDecimalDot, postDecimalDot);
+}
+\end{minted}
+\captionof{code}{Remaining Text in the keyboard buffer (better variable names)}
+\end{codebox}
+\end{hintbox}
+
+Let us also look at this slightly more involved example:
+
+\begin{codebox}[enterExpression.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    char operator = 0;
+    double operand1 = -1, operand2 = -1;
+
+    printf("Please enter a simple expression (like 2+2): ");
+    scanf("%lf", &operand1);
+    scanf("%c" , &operator);
+    scanf("%lf", &operand2);
+
+    printf("%lf %c %lf\n", operand1, operator, operand2);
+}
+\end{minted}
+\captionof{code}{Reading two numbes and an operator with \texttt{scanf}} \label{code:scanf_lfclf}
+\end{codebox}
+(Remember, that the type \inC{char} stores one charcter; essentially one letter worth of information. Characters are internally stored as numbers between 0 and 255 and \enquote{translated} by means of the ASCII table.)
+
+Let's first assume, our user knows neither about the keyboard buffer nor what our code looks like internally. When running the code, they are very likely to follow our prompt verbatim:
+\begin{cmdbox}[Possible Output: enterExpression.c]
+Please enter a simple expression (like 2+2): 2+2 \\
+2.000000 + 2.000000
+\end{cmdbox}
+Looks good. We still want to take the time to understand what is happening here in detail:
+
+Although there are three \texttt{scanf} commands, the operating system requests text only once. We understand now, why this is so. When we hit line 8, there is nothing in the keyboard buffer. Consequently, the operating system waits till the user presses enter and puts everything up to that point into the keyboard buffer. Then, the portion of the entered text that meets the format string \texttt{\%lf} is interpreted as double. Since the symbol \texttt{+} cannot appear in the middle of a floating point number, interpretation stops there; only the first \texttt{2} is interpreted. Thereafter, line 9 is executed. Since the keyboard buffer is still not empty (it still contains \texttt{+2}), the operating system does not wait for user input; instead, the next portion is forwarded to \texttt{scanf}. Since only a single character was requested (\texttt{\%c}), \texttt{scanf} receives \texttt{+}. Finally, by line 10 we have a last \texttt{2} in the buffer, which eventually gets converted into a \inC{double} and stored in \texttt{operand2}.
+
+Now, what if the user likes seperating numbers from operators?
+\begin{cmdbox}[Possible Output: enterExpression.c]
+\begin{minted}{text}
+Please enter a simple expression (like 2+2): 2 + 2
+2.000000   -1.000000
+\end{minted}
+\end{cmdbox}
+
+Like before, the \texttt{scanf} in line 8 stops after the first \texttt{2}. However, this time, we don't get to the plus sign, because before that there's a whitespace (that cannot be part of a number, either). Consequently, line 9 takes that whitespace out of the queue and leaves \texttt{+ 2} in the buffer. When we arrive at line 10, we find this situation: a number may begin with a plus sign, but a whitespace still doesn't fit the bill. \texttt{+} at its own is not a number, so interpretation fails. The whitespaces is put back into the buffer (as it can't be part of a number), but the plus sign was already accepted as valid. So in the keyboard buffer we now find a whitespace followed by a \texttt{2}.
+
+One last execution example. We as coders and testers know that there actually are three calls to \texttt{scanf}. So what if we hit enter after each element of the input (\texttt{2}, enter, \texttt{+}, enter, \texttt{2}, enter)?
+
+\begin{cmdbox}[Possible Output: enterExpression.c]
+\begin{minted}{text}
+Please enter a simple expression (like 2+2): 2
++ 
+2.000000 
+ -1.000000
+\end{minted}
+\end{cmdbox}
+
+We don't even get the chance to enter a second number. The reason behind this is that the return key is written into the keyboard buffer as well. So, executing line 8 unfolds as following: The user (by means of the OS function) writes "\texttt{2}, enter" into the keyboard buffer. \texttt{scanf} then takes out the \texttt{2}, but leaves the enter in the line break. The \texttt{scanf} in line 9 reads this very character and thus leaves an empty keyboard buffer. Finally, in line 10 we are ready to take new input from the keyboard. As users we were unaware that we skipped a part of the questionaire and enter a \texttt{+}, which is an acceptable starting character for a number (and hence taken out of the keyboard buffer) but does not encode a complete number, which is why the interpretation step fails. We end up with this state of memory:
+{
+\newcolumntype{N}{>{\ttfamily\centering\arraybackslash} p{.25\linewidth}}
+\newcolumntype{R}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
+\begin{center}
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{.45\linewidth}
+	{NR}
+\toprule[1.5pt]
+
+    \textrm{\textbf{Variable}} & 
+    \textrm{\textbf{Value}}  
+\tabcrlf
+    operand1   & 2  \\
+    operator   & \textbackslash n \textrm{(newline)}  \\
+    operand2   & -1  \\
+
+\bottomrule[1.5pt]
+\end{tabularx}
+\end{center}
+}
+
+So... If line breaks are written into the keyboard buffer, too, how does example \ref{code:scanfSimple} work out? There we asked for two numbers in a row and got exactly what we asked for, with no issues. The reason for this is that the subroutine for interpreting numbers is written such that it ignores all whitespaces, tabulators or line breaks. When you read input with \texttt{\%d} or \texttt{\%lf}, leading characters belonging to this group are taken out of the buffer and simply discarded.
+
+We can activate the same behaviour for when we read characters: to do so, we simply put a whitespace in our format string before the \texttt{\%c}. This then translates to \enquote{read a single character, but ignore all whitespaces, tabulators or line breaks}. Knowing this we can get around all of the problems we just discussed by improving on code \ref{code:scanf_lfclf}:
+\begin{codebox}[enterExpressionImproved.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    char operator = 0;
+    double operand1 = -1, operand2 = -1;
+
+    printf("Please enter a simple expression (like 2+2): ");
+    scanf("%lf", &operand1);
+    scanf(" %c", &operator);
+    scanf("%lf", &operand2);
+
+    printf("%lf %c %lf\n", operand1, operator, operand2);
+}
+\end{minted}
+\captionof{code}{Reading two numbes and an operator with \texttt{scanf} (more stable version)} \label{code:scanf_lfclf_stable}
+\end{codebox}
+
+It takes a keen eye to spot the difference: codes \ref{code:scanf_lfclf} and \ref{code:scanf_lfclf_stable} are almost identical except for a single extra whitespace in the format string in line 9. And with this simple trick...
+\begin{cmdbox}[Possible Output: enterExpressionImproved.c]
+\begin{minted}{text}
+Please enter a simple expression (like 2+2): 2    +  2
+2.000000 + 2.000000
+\end{minted}
+\end{cmdbox}
+... user input is no longer a problem.
+
+\begin{hintbox}[Test your code independent from user input]
+If this chapter so far has taught you anything then that user input is a finnicky thing. Not only could it be that a user enters wrong or even nonsensical values; it isn't even always easy to see what constitutes a nonsensical value. This makes develloping algorithms difficult, as it's not immediately clear whether an unexpected result comes from a problem with the code itself or with the user input.
+
+For that reason, it is best to implement user input only at the very end of the devellopment process. Where values are needed, we can simply hard code the values of our variables and leave the \texttt{scanf} lines commented out. Only when we are sure that the algorithm itself does what we want it to do, we turn on interactivity.
+
+Code under devellopment might look like...
+\begin{codebox}[someAlgorithm-devellopment.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int input = 1337;        // reasonable value as stand-in for user input
+    // scanf("%d", &input)   // commented out for testing
+    
+    /* ... Your code under test here ... */
+}
+\end{minted}
+\captionof{code}{Code under devellopment -- \texttt{scanf} commented out}
+\end{codebox}
+\end{hintbox}
+%
+\begin{hintbox}[]
+... while the final version will be like:
+\vspace{6pt}
+
+\begin{codebox}[someAlgorithm-productive.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int input = 0;        // default value if the user enters BS
+    scanf("%d", &input)
+    
+    /* ... Your well tested code here ... */
+}
+\end{minted}
+\captionof{code}{Productive code -- \texttt{scanf} active}
+\end{codebox}
+\end{hintbox}
+
+\begin{defbox}[Main Takeaways for this section]
+To put the results of our deep dive in this section into a nutshell:
+\begin{itemize}
+\item \texttt{scanf} delegates text input to the operating sytem (OS) and only interprets values from a keyboard buffer.
+\item It takes out only so much text from the keyboard buffer as makes sense given the current format string.
+\item If there is leftover text in the keyboard buffer, it is interpreted directly. The user cannot enter any text in this case.
+\item Even the enter key leaves a line break character in the keyboard buffer.
+\item When you want to ignore separating characters like whitespaces in the user input, add a whitespace in the format string before the placeholder (before the percent sign).
+\end{itemize}
+\end{defbox}
 
 \subsection{Reading Multiple Values in Sequence} \label{sec:ScanfMultiValues}
+It should be noted that a \texttt{scanf} format string can hold more than one placeholder (\ie a percent sign \% followed by a type symbol like \texttt{d} or \texttt{lf}). This then has the same effect as several \texttt{scanf} commands with a single placeholder in sequence. The addresses to which the values are written are simply provided as a comma separated list, as with \texttt{printf}. Thus, the lines 8 through 10 from code \ref{code:scanf_lfclf_stable} can be condensed into the single line:
+\mint{c}{scanf("%lf %c%lf", &operand1, &operator, &operand2);}
+This saves some typing, but, however, comes at the cost of clarity and user friendliness.
+
+In section \ref{sec:scanf_keyboardBuffer} we discussed that a whitespace in the format string does make a difference. By consequence, the elements of a multi placeholder \texttt{scanf} format string are very dense and hard to grasp. This lends itself to all sorts of mistakes like type mismatches (cf. section \ref{sec:scanfMistakes}). A \texttt{scanf} line allows for many degrees of freedom: there are a multitude of variations that differ by only a single character but give a very different behaviour. Limiting the length of a \texttt{scanf} line reduces the amount of detail we as human programmers have to handle in our heads and reducing mental load is a good way to prevent making mistakes.
+
+Secondly, users of our program need to be guided on how to use it. If you start a program and you see nothing but a blinking cursor, you might infer that the program has crashed, when in reality in only runs a \texttt{scanf} command and waits for you to enter a value. So it's best to preface each \texttt{scanf} with a \texttt{printf} that tells the user what to enter. Of course you could write a prompt like \emph{Please enter three numbers}. But how to separate these three values? For a non-expert, options like pressing enter after each value (valid) or separating them with a comma (invalid) might come to mind. Instead of typing a lengthy human explanation how many values in which form the program expects, it's better to type slightly more commands and limit the complexity for the user. Because they, too, are humans, and will make more mistakes the more complex the task demanded from them becomes.
 
 \subsection{Common Mistakes} \label{sec:scanfMistakes}
 There are a number of mistakes that even experienced coders make from time to time. It is easy to write C-Code that does compile but has an unintended effect. Here, I want to discuss some of the most common mistakes one can make when using \texttt{scanf}.
@@ -249,11 +554,8 @@ There are three possible scenarios:
 	Segfaults and Stack Smashing are the most likely outcome of forgetting the ampersand.
 \end{itemize}
 
-It actually is difficult to synthesize the first two of the above scenarios; however, we can reliably reproduce \emph{segfaults} and \emph{stack smashing}. Note that the compiler already warns us that we've made a mistake:
-\begin{tcbraster}[raster columns=2,
-                  raster equal height,
-                  nobeforeafter,
-                  raster column skip=0.2cm]
+It actually is difficult to synthesize the first two of the above scenarios; however, we can reliably reproduce \emph{segfaults} and \emph{stack smashing}.
+
 \begin{warnbox}[segfault.c, leftupper=7mm]
 \begin{minted}[linenos]{c}
 #include <stdio.h>
@@ -269,29 +571,32 @@ int main () {
 \end{minted}
 \captionof{code}{Causing a segfault with \texttt{scanf}}
 \end{warnbox}
-%
+
+Executing this program simply ends in a crash:
 \begin{cmdbox}[Output: segfault.c]
+\begin{minted}{text}
+Enter a value: 0
+Segmentation fault (core dumped)
+\end{minted}
+\end{cmdbox}
+
+Note that the compiler already warns us that we've made a mistake:
+\begin{cmdbox}[Compiler Warnings: segfault.c]
 \begin{minted}{text}
 $ gcc -Wall -Wextra -Wpedantic 
     segfault.c -o segfault
 segfault.c: In function ‘main’:
-segfault.c:7:13: warning: format ‘%d’ 
-    expects argument of type ‘int *’,
-    but  argument 2 has type ‘int’ 
-    [-Wformat=]
+segfault.c:7:13: warning: format ‘%d’ expects argument of type ‘int *’,
+    but  argument 2 has type ‘int’ [-Wformat=]
     7 |     scanf("%d", value);
       |            ~^   ~~~~~
       |             |   |
       |             |   int
       |             int *
-$ ./segfault
-0
-Segmentation fault (core dumped)
 \end{minted}
 \end{cmdbox}
-\end{tcbraster}
+%$
 
-\vfill
 Stack smashing can only occur when the number is an \emph{almonst valid} address, \ie very close to a point in memory that we are allowed to access. Modern computers use 64bit addresses, while an \inC{int} is only a 32bit variable. Hence, the example below uses the data type \inC{long long int}, together with the format string \texttt{\%lld}, which stands for this data type. In its core, the example below has the same structure as the one above. Only the initial value is such an \emph{almost valid} address.
 
 \begin{warnbox}[stackSmashing.c, leftupper=7mm]
@@ -311,15 +616,10 @@ int main () {
 \end{warnbox}
 
 Again, the compiler tries to warn us:
-\begin{cmdbox}[Output: stackSmashing.c]
+\begin{cmdbox}[Compiler warnings: stackSmashing.c]
 \begin{minted}{text}
 $ gcc -Wall -Wextra -Wpedantic stackSmashing.c -o stackSmashing
 stackSmashing.c: In function ‘main’:
-\end{minted}
-\end{cmdbox}
-%
-\begin{cmdbox}[]
-\begin{minted}{text}
 stackSmashing.c:4:27: warning: initialization of ‘long long int’ from 
     ‘long long int *’ makes integer  from pointer without a cast 
     [-Wint-conversion]
@@ -332,7 +632,13 @@ stackSmashing.c:7:15: warning: format ‘%lld’ expects argument of type
       |               |   |
       |               |   long long int
       |               long long int *
-$ ./stackSmashing
+\end{minted}
+\end{cmdbox}
+%$
+
+Executing the code, we get what we deserve:
+\begin{cmdbox}[Output: stackSmashing.c]
+\begin{minted}{text}
 Enter a value: 0
 140732161677208
 *** stack smashing detected ***: terminated
@@ -443,61 +749,61 @@ To understand this, you have to know that \texttt{val1} and \texttt{val2} are (i
     ld/.style={draw=blue,shorten >=2pt,->}
   ]
   
-  \node (c0) at (0.0,8) [minicell] {};
-  \node (c1) at (0.5,8) [minicell] {};
-  \node (c2) at (1.0,8) [minicell] {};
-  \node (c3) at (1.5,8) [minicell] {};
-  \node (p0) [above=0mm of c0] {\tiny \color{blue} 0x27fb};
-  \node (p1) [above=2mm of c1] {\tiny 0x27fc};
-  \node (p2) [above=0mm of c2] {\tiny 0x27fd};
-  \node (p3) [above=2mm of c3] {\tiny 0x27fe};
-  \node (C0) at (0.75,7.5) [widecell] {\texttt{val1}};
+  \node (c0) at (0.0, 8) [minicell] {};
+  \node (c1) at (0.5, 8) [minicell] {};
+  \node (c2) at (1.0, 8) [minicell] {};
+  \node (c3) at (1.5, 8) [minicell] {};
+  \node (p0) [below=0mm of c0] {\tiny \color{blue} 0x27fb};
+  \node (p1) [below=2mm of c1] {\tiny 0x27fc};
+  \node (p2) [below=0mm of c2] {\tiny 0x27fd};
+  \node (p3) [below=2mm of c3] {\tiny 0x27fe};
+  \node (C0) at (0.75, 8.5) [widecell, align=center] {\texttt{val1}};
   
-  \node (c4) at (2.0,8) [minicell] {};
-  \node (c5) at (2.5,8) [minicell] {};
-  \node (c6) at (3.0,8) [minicell] {};
-  \node (c7) at (3.5,8) [minicell] {};
-  \node (p4) [above=0mm of c4] {\tiny 0x27ff};
-  \node (p5) [above=2mm of c5] {\tiny 0x2800};
-  \node (p6) [above=0mm of c6] {\tiny 0x2801};
-  \node (p7) [above=2mm of c7] {\tiny 0x2802};
-  \node (C1) at (2.75,7.5) [widecell] {\texttt{val2}};
+  \node (c4) at (2.0, 8) [minicell] {};
+  \node (c5) at (2.5, 8) [minicell] {};
+  \node (c6) at (3.0, 8) [minicell] {};
+  \node (c7) at (3.5, 8) [minicell] {};
+  \node (p4) [below=0mm of c4] {\tiny 0x27ff};
+  \node (p5) [below=2mm of c5] {\tiny 0x2800};
+  \node (p6) [below=0mm of c6] {\tiny 0x2801};
+  \node (p7) [below=2mm of c7] {\tiny 0x2802};
+  \node (C1) at (2.75, 8.5) [widecell, align=center] {\texttt{val2}};
   
-  \node (c8) at (4.0,8) [minicell] {};
-  \node (c9) at (4.5,8) [minicell] {};
-  \node (cA) at (5.0,8) [minicell] {};
-  \node (cB) at (5.5,8) [minicell] {};
-  \node (p8) [above=0mm of c8] {\tiny 0x2803};
-  \node (p9) [above=2mm of c9] {\tiny 0x2804};
-  \node (pA) [above=0mm of cA] {\tiny 0x2805};
-  \node (pB) [above=2mm of cB] {\tiny 0x2806};
-  \node (C2) at (4.75,7.5) [widecell] {...};
+  \node (c8) at (4.0, 8) [minicell] {};
+  \node (c9) at (4.5, 8) [minicell] {};
+  \node (cA) at (5.0, 8) [minicell] {};
+  \node (cB) at (5.5, 8) [minicell] {};
+  \node (p8) [below=0mm of c8] {\tiny 0x2803};
+  \node (p9) [below=2mm of c9] {\tiny 0x2804};
+  \node (pA) [below=0mm of cA] {\tiny 0x2805};
+  \node (pB) [below=2mm of cB] {\tiny 0x2806};
+  \node (C2) at (4.75, 8.5) [widecell] {...};
   
   \node (cC) at (6.0,8) [minicell] {};
   \node (cD) at (6.5,8) [minicell] {};
   \node (cE) at (7.0,8) [minicell] {};
   \node (cF) at (7.5,8) [minicell] {};
-  \node (pC) [above=0mm of cC] {\tiny 0x2807};
-  \node (pD) [above=2mm of cD] {\tiny 0x2808};
-  \node (pE) [above=0mm of cE] {\tiny 0x2809};
-  \node (pF) [above=2mm of cF] {\tiny 0x280A};
-  \node (C2) at (6.75,7.5) [widecell] {...};  
+  \node (pC) [below=0mm of cC] {\tiny 0x2807};
+  \node (pD) [below=2mm of cD] {\tiny 0x2808};
+  \node (pE) [below=0mm of cE] {\tiny 0x2809};
+  \node (pF) [below=2mm of cF] {\tiny 0x280A};
+  \node (C2) at (6.75, 8.5) [widecell] {...};  
 
+  \node (lblAddress)   at (-2, 7.5) {address of \texttt{val1}};
   \node (lblCells)     at (-2, 8.0) {memory cells};
-  \node (lblCompounds) at (-2, 7.5) {variables};
-  \node (lblAddress)   at (-2, 8.5) {address of \texttt{val1}};
+  \node (lblCompounds) at (-2, 8.5) {variables};
   
   \draw [ld] (lblAddress.east) .. controls +(0.3,0) .. (p0.west);
   \draw [
 	    thick,
 	    decoration={
 	        brace,
-	        %mirror,
-	        raise=1.0cm
+	        mirror,
+	        raise=0.8cm
 	    },
 	    decorate
 	] (c0.west) -- (c7.east) 
-node [pos=0.5,anchor=north,yshift=+1.7cm] {eight bytes for a \texttt{double} value}; 
+node [pos=0.5,anchor=south,yshift=-1.5cm] {eight bytes for a \texttt{double} value}; 
 \end{tikzpicture}
 \end{center}
 \captionof{figure}{Bleeding}
@@ -547,232 +853,232 @@ value 2 = 2
 
 At first, everything looks okay -- no compiler warnings. We can execute and run our code, and up to line 6 everything looks normal. Then we hit the \texttt{scanf} statement, which allows us to enter a value (in this case \texttt{1}). Strangely, though, after that we are not prompted to enter another value (line 9). Instead, the terminal allows us to directly enter \texttt{2}. Only then, line 9 is executed, \ie we are prompted to enter another value. However, when we get to lines 12 and 13, we see that this input has seemingly been ignored, and instead, the value \texttt{2} got into \texttt{val2}, even before line 10 (the only line writing to the address of \texttt{val2}) was exectued.
 
-%TODO
-How is this possible? You'll have to read the next section for some of the details; in essens, however, you can think of the line break as the format string equivalent of \enquote{put one value on hold}. 
+How is this possible? Of course, this has again to do with the keyboard buffer (cf. section \ref{sec:scanf_keyboardBuffer}). The line break in the format string (\texttt{\textbackslash n}) is understood as \enquote{put one value on hold}. That means, text is read from the keyboard but not interpreted at all. Rather than that, it is simply written to the keyboard buffer, ready to be picked up by a subsequent \texttt{scanf} call\footnote{There are some more fishy details here, but it's best to simply put no line breaks or non-placeholders into a format string at all. The sole exception, of course, are whitespaces.}.
 
 
-% what happens if we put line breaks or other non-format chars in there
+\section{Type Casting}
+So far we have a pretty good idea how data looks like in memory and how to get it there. We can also do computations and print the results on screen. For these operations to work properly, it is important to use the correct data types. As you can imagine, this can bring us in situations where we have information in one format, but need it in another. \emph{Type casting} is the operation that allows just that.
 
-% note: less user friendly
+\subsection{Explicit Type Casts}
+To do type casting, we need two things: a value (or expression) to cast into a new format, and the new format itself. The syntax for issuing a type cast is barely more than naming these two elements:
+\begin{codebox}[Syntax: Type Casting]
+\inC{(dataType) expression}
+\end{codebox}
+In which \texttt{dataType} is any data type as we've encountered them in chapter \ref{chp:expressions}, \eg \inC{int} or \inC{double*}, and \texttt{expression} is anything that can be evaluated.
+
+Let's look at an example:
+\begin{codebox}[Example: typecast.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int    n = 7;
+    double x = (double) n,
+           y = (double) (2 + 4 * n);
+}
+\end{minted}
+\captionof{code}{Typecasting}
+\end{codebox}
+Line 2 declares a \inC{int} variable \texttt{n} and assigns it the value \inC{7}. In line 3 we declare a \inC{double} variable \texttt{x} and assign it the result of a typecast: we cast the value of \texttt{n} to \inC{double}, \ie we compute \inC{7.0} from \inC{7}. Line 3 shows that we can combine this with regular computations, too: we first evaluate \inC{2 + 4 * n} to \inC{30}, and then cast it to \inC{double}, which then gives \inC{30.0}.
+
+Note that in line 4, parentheses around the expression are necessary, since type casting has very high operator precedence (\ie it is evaluated even before multiplication. See also table \ref{tab:OperatorPrecedence} in the appendix). If we forgot to put \inC{2 + 4 * n} in parentheses, the typecast would only apply to the first number. That means, we first convert \inC{2} to a \inC{double}, then the \inC{int} value of \inC{4 * n} is computed, and then the mixed type expression \inC{2.0 + 28} is resolved. You'll see in the next section how that turns out.
+
+While a type cast will leave as much information intact as possible, you may loose information in the process. Casting a \inC{double} into an \inC{int} can obviously not retain the fractional part of the number. Instead, the number is \emph{truncated} (rounded towards zero; the fractional part is simply forgotten):
+
+\begin{codebox}[Example: typecastPrecisionLoss.c]
+\begin{minted}[linenos]{c}
+int main () {
+    double x = +7.9,
+           y = -7.9;
+
+    int a = (int) x,  // +7
+        b = (int) y;  // -7
+}
+\end{minted}
+\captionof{code}{Typecasting with loss of precision}
+\end{codebox}
+
+As you see, this is different from rounding. We will see in chapter \ref{chp:maths} how to implement rounding\footnote{Some forum posts recommend adding \texttt{0.5} to positive numbers or subtracting that value from negative values before typecasting. That certainly works, but I will show you a nicer, better legible way later on.}.
+
+In a similar fashing, numbers that require more bits than the target type are truncated: Let's say we want to cast the \inC{int 257} to a \inC{char}. An \inC{int} can store 32 bits, so the value $257_{10} = 1~0000~0001_2$ with its nine bits fits snuggly into the provided space. A \inC{char} on the other hand only has space for eight bits. So anything to the left of the eighth bit is simply truncated. We get:
+
+\begin{codebox}[Example: typecastOverflow.c]
+\begin{minted}[linenos]{c}
+int main () {
+    char data = (char) 257; // data = 1
+}
+\end{minted}
+\captionof{code}{Typecasting with overflow}
+\end{codebox}
+
+\subsection{Implicit Type Casts}
+The C compiler tries to save you some typing by issuing some typecasts without you explicitly saying so. These implict type casts happen in two situations:
+\begin{itemize}
+\item Variable assignments
+\item Mixed type expressions
+\end{itemize}
+
+Let's say, in your code you write a line like \inC{double x = 7;}. The value \inC{7} is an \inC{int} (there's no decimal point). Hence, implicitly, the value \inC{7} is cast to \inC{7.0} before the assignment. Of course, the same limitations to casting apply as in the explicit form: casting to an integer data type will truncate the fractional part, and casting to a smaller data type will truncate the highest significant bits.
+
+In the case of mixed type expressions, the C compiler again tries to retain as much information as possible. The operands of an expression are implicitly cast to a common type that is wide enough (has enough bits of storage) to hold either operand, and to a floating point type if either of the operands is one. If you evaluate the expression \texttt{a + b}, where \texttt{a} and \texttt{b} are of different data types, then both of them will be cast to either the type of \texttt{a} or of \texttt{b} and follow this \enquote{hierarchy of promotions}:
+\begin{center}
+	\inC{char < short < int < long < long long < float < double < long double}
+\end{center}
+
+For example, ...
+\begin{codebox}[Example: promotion.c]
+\begin{minted}[linenos]{c}
+int main () {
+    double x = 8 / 5.0;
+}
+\end{minted}
+\captionof{code}{Implicit type cast with promotion}
+\end{codebox}
+
+The value \inC{8} is of type \inC{int}, while \inC{5.0} is of type \inC{double}. To perform the division, \inC{8} is implicitly cast to the \inC{double} value \inC{8.0} before the division takes place.
+
+\begin{plusbox}[Type Suffixes]
+You remember that, to represent floating point numbers in memory, you can use the data types \inC{double}, \inC{float} or \inC{long double}. If a decimal number (anything that contains a decimal point) appears in the code, it will be interpreted as a \inC{double} value by default, while integers will be treated as \inC{int}s. To deviate from this default behaviour, a suffix can be added to the number: \inC{1.2f} will be converted to a \inC{float} value rather than a double. Similarly, other data types have their proper suffixes, too.
+
+In the appendix you can find table \ref{tab:LiteralFormat} which lists all modifiers that can be added to a number literal. If a given type is not listed in this table, you'd need to explicitly typecast the literal, \eg \inC{(char)(7)}.
+\end{plusbox}
+
+In the previous example we've seen the expression \inC{(double) (2 + 4 * n)} and noted that, due to operator precedence, the second pair of parentheses is necessary. If we ommitted them, the explicit type cast would only apply to the \inC{2} while \inC{4 * n} remains an \inC{int} expression, making the entire expression mixed type. As we've seen before, the \inC{int} part is then promoted to a \inC{double}. So in principle, the final outcome is the same: the entire expression gets converted to \inC{double}. However, there are subtle differences: the computer has to do more work that way, and the result may accrue more rounding errors.
+
+In the example with parentheses, the computer sees two units of work: evaluating one \inC{int} expression and converting the result to \inC{double}. In the case without parenthesis, however, the steps are: converting \inC{2} to \inC{double}, evaluating \inC{4 * n} as \inC{int}, converting the result to \inC{double}, and then adding the two \inC{double} values together. Further, a \inC{double} expression takes slightly longer to evaluate -- adding floating point numbers is slower than adding integers.
+
+Floating point values \emph{always} come with a rounding error. It is small enough to give results that are good enough by far most of the time, but errors add up. Doing two conversions to \inC{double} means making the same error twice, so the result of \inC{(double)(2) + (double)(4 * n)} is\footnote{or rather \emph{can be} ... the details are a can of worms I don't want to open here.} twice as wrong.
 
 
-\section{Casting}
+\subsection{Type Casts with Pointers}
+We know pointers to be special integers, representing the number of a memory cell, together with an attached rule how to read the data there. Essentially being numbers, we can type-cast them, too. This of course only affects the pointer, not the information pointed to. Another way of explaining a pointer type cast is: changing the rules for how to read memory content.
 
+Let's look at an example:
+\begin{codebox}[Example: pointerCast.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int   value = 259;
+    int*  intPointer = &value;
+    char* charPointer = (char*) intPointer;
+
+    printf("direct access            : %d\n", value);
+    printf("access via int pointer   : %d\n", *intPointer);
+    printf("access via char pointer  : %d\n", *charPointer);
+
+    *charPointer = 4;
+    printf("direct access after write: %d\n", value);
+}
+\end{minted}
+\captionof{code}{Typecast with a pointer} \label{code:typecastPointer}
+\end{codebox}
+
+\begin{cmdbox}[Output: pointerCast.c]
+\begin{minted}{text}
+direct access            : 259
+access via int pointer   : 259
+access via char pointer  : 3
+direct access after write: 260
+\end{minted}
+\end{cmdbox}
+
+To make sense of this, let's look under the hood:
+\begin{defbox}[Memory Picture]
+\begin{center}
+\begin{tikzpicture}
+  [
+    minicell/.style={text width=18mm, text height=4mm, draw=black, inner sep=1mm},
+    widecell/.style={text width=78mm, text height=4mm, draw=black, inner sep=1mm},
+    ld/.style={draw=blue,shorten >=2pt,->}
+  ]
+  
+  \node (C0) at (3.0, 8.5) [widecell, align=center] {259 = $0...0~0001~0000~0011_2$};
+  \node (c0) at (0.0, 7.85) [minicell] {$0000\;0011_2$};
+  \node (c1) at (2.0, 7.85) [minicell] {$0000\;0001_2$};
+  \node (c2) at (4.0, 7.85) [minicell] {$0000\;0000_2$};
+  \node (c3) at (6.0, 7.85) [minicell] {$0000\;0000_2$};
+  \node (p0) [below=1mm of c0] {\tiny \color{blue} 0x27fb};
+  \node (p1) [below=1mm of c1] {\tiny 0x27fc};
+  \node (p2) [below=1mm of c2] {\tiny 0x27fd};
+  \node (p3) [below=1mm of c3] {\tiny 0x27fe};
+
+  \node (lblCompounds) at (-3.0, 8.5) {\inC{int value}};
+  \node (lblCells)     at (-3.0, 7.8) {byte sized cells};
+  \node (lblAddress)   at (-3.0, 7.1) {address of \texttt{value}};
+  
+  \draw [ld] (lblAddress.east) .. controls +(0.3,0) .. (p0.west);
+\end{tikzpicture}
+\end{center}
+\captionof{figure}{Distribution of an integer across memory cells}
+\end{defbox}
+
+The variable \texttt{value} is of type \inC{int} and thus takes up 32 bits or four bytes of memory. Its initial value, the number \texttt{259} requires at least nine bits to represent; the rest is padded with zeros. So, in total four chunks of eight bits are taken up by the variable \texttt{value}.
+
+An oddity of this distribution is that the cells are read \enquote{right to left}: the last eight bits form the first byte. The bits 0 through 7 of the value \texttt{259} are $0000~0011_2 = 3_{10}$ go into the first cell, while the bits 8 through 15 ($0000~0001_2 = 1_{10}$) go into the second cell, and so on.
+
+When in line 6 we cast \texttt{pointer} from an \inC{int*} to a \inC{char*}, we are chaning the rules what to do with the address: we are no longer evaluating a group of four bytes, but only a single byte. Both, \texttt{intPointer} and \texttt{charPointer} store the same address, but access via \texttt{charPointer} (line 10) applies a narrower scope than access via \texttt{intPointer} (line 9).
+
+Of course, these two views on the same block of memory can also be used for writing data. In line 12 we replace a single byte in memory by the value \inC{4}. This replaced byte is still part of the sequence that makes up \texttt{value}. By consequence, we should not be surprised to find that variable with a new value.
+
+\begin{plusbox}[Endianness]
+The fact that bytes are read from the right to the left is not an universal truth. It \emph{is} the standard on IA-32 and x86-64 processors, \ie Intel and ARM processors (among others) follow this rule, but there are other processor manufacturers, too\citationneeded[https://xkcd.com/993/].
+
+The presented way of distributing numbers across memory cells is the \emph{little endian} way, so called because numbers \emph{start with the little end}. Its counterpart consequently would be big endian. (And, just to make things interesting, there are also mixed endian or middle endian processors out there...)
+
+The word endian or endianness is actually inspired by Jonathan Swift's \emph{Gulliver's Travels}, where characters known as Lilliputians are divided into those breaking the shell of a boiled egg from the big end (Big-Endians) or from the little end (Little-Endians).
+
+Knowing the endianness of a processor is usually not necessary in the day to day business of a programmer; however it is relevant once a program is required to communicate with other machines which may use a different processor architecture (and endianness).
+\end{plusbox}
+
+Casting a pointer to a different type to change part of the value of a variable is rarely ever\footnote{but not never} useful. The example above was, again, only meant to illustrate a concept. The main take-away from this section up to here is this: while type-casts with \enquote{normal} variables compute a new value (a different representation of the same information), casting pointers does in fact not create a new bitpattern: an address remains an address. Instead, the effect of a pointer type cast is changing the rule of interpretation applied to the bits at the stored address.
+
+It should be noted that, for pointer casts, too, the implicit form is possible. In code \ref{code:typecastPointer}, we could in principle shorten line 6 to:
+\mint{c}{char* charPointer = intPointer}
+The program would work in exactly the same way as discussed above. The only difference is a compiler warning during compilation:
+\begin{cmdbox}[Compiler Output: pointerCast.c]
+\begin{minted}{text}
+./pointerCast.c: In function ‘main’:
+./pointerCast.c:6:25: warning: initialization of ‘char *’ from incompatible pointer 
+    type ‘int *’ [-Wincompatible-pointer-types]
+    6 |     char* charPointer = intPointer;
+      |                         ^~~~~~~~~~
+\end{minted}
+\end{cmdbox}
+
+The reason for this warning is that we usually don't want to mess around with the atoms of values. It is more likely to accidentally copy the wrong pointer into a variable, thereby forming a hard to locate bug in your code. If you actually need to typecast a pointer, it is best to be explicit about that\footnote{and maybe add a comment to tell a later reader \emph{why} you would need that}.
+
+\subsubsection{Void Pointers}
+If we've learned anything so far, then the fact that data types are very important for computers. Consequently, the C compiler is very strict: if a construct in the language requires a certain data type, the compiler will usually not be content if you provide anything but that data type. The warning you get from implicit pointer type casts would be one example for that.
+
+However, there are situations where it actually does not matter what kind of information can be found behind some pointer. When you tell the computer to copy 2000 bytes from one address to another, it does not matter if these 2000 bytes encode 500 \inC{int}s or 250 \inC{double}s. Only the addresses themselves (and the number 2000) are important. For situations like this, a dedicated data type exists: the \inC{void*}. You can think of this as an address \emph{without} rules of interpretation. You cannot dereference a \inC{void*} because there is no data type \inC{void}\footnote{but there is the keyword \inC{void}, which we will get to know better in chapter \ref{chp:funcs}}.
+
+%TODO does not participate in type checks:
+\begin{codebox}[Example: voidPointer.c]
+\begin{minted}[linenos]{c}
+int main () {
+    int   value = 259;
+    int*  intPointer = &value;
+    char* charPointer = intPointer;    // causes warning
+    
+    void* voidPointer = intPointer;    // does not cause warning
+    int* otherPointer = voidPointer;   // does not cause warning either
+}
+\end{minted}
+\captionof{code}{Implicit type casts with void pointers}
+\end{codebox}
+
+%TODO use with printf @ %p
+
+\section{Bitwise Operations}
 
 %TODO
 % C4 becomes: casting, promotion, scanf, bit magic
 
 % Exo: ask user for two int: number and bit ID; tell if set or not
 
+% exo when doing cppref: write function that rounds with arbitrary precision, i.e. round_to_decimal_places(x, n)
+
 % ----------------------------------
 
-%Damit ein Prozessor eine Information verarbeiten kann, muss diese in Form von Ketten aus 1 und 0 vorliegen -- also in \emph{binärer} Form. Aus einer Reihe von Bits geht jedoch nicht hervor, ob diese nun als Zahl, Text, Bild, \ldots interpretiert werden sollen\footnote{Da jede digitalisierbare Information auch als Zahl interpretiert werden kann, kommt es zu der bizarren Situation, dass manche (sehr große) Zahlen urheberrechtlich geschützte Werke beschreiben. Insbesondere ist es möglich, solche Zahlen als Primzahlen zu konstruieren. Diese Zahlen werden in Fachkreisen \emph{Illegale Primzahlen} genannt. Ob die gefundenen Primzahlen tatsächlich als illegal gelten, wurde bislang nicht vor Gericht verhandelt.}. In C (und den damit verwandten Sprachen) muss daher zu jeder Information ein \emph{Datentyp} mit angegeben werden\footnote{Andere Sprachen wie etwa Python versuchen, aus dem Kontext zu \enquote{erraten}, welche Art Information vorliegt. Bezug nehmend auf das Zitat zu Eingang des Kapitels nennt man solche Sprachen \emph{duck typed}. C dagegen ist \emph{strong typed}. Die Meinungen zu \emph{Duck-Typing} gehen teils weit auseinander und werden bisweilen recht emotional diskutiert.}.
-%
-%Wir wollen uns hier vertieft mit der Datenstruktur von Zahlen im Speicher beschäftigen, um im weiteren die Arbeitsweise vieler Befehle genau zu verstehen.
-%
-%\section{Daten im Speicher}
-%\subsection{Wertemenge und Vorzeichen bei Zahlen}\label{sec:DataRepresentation}
-%\label{sec:Datawidth}
-%In Abschnitt \ref{sec:BinaryNumbers} haben wir bereits gesehen wie positive Ganzzahlen und Schriftzeichen als binäre Werte dargestellt werden können. Ein Prozessor kann i.d.R. jedoch nur Einheiten von je 8 Bits (also ganze \emph{Bytes}) bzw. $2^n\cdot8$ Bits behandeln. Eine Gruppe aus 8 Bits kann einen von $2^8 = 256$ Werten darstellen, also beispielsweise den Zahlenbereich von 0 bis 255. Soll mit größeren Werte gearbeitet werden, müssen mehrere Bytes zu einer Einheit zusammengefasst werden. Zwei Bytes (16 Bits) erlauben also $2^{16} = 65\,536$ verschiedene Werte, bei 4 Bytes (32 Bits) sind dies bereits $2^{32} = 4\,294\,967\,296$ verschiedene Werte. Natürlich muss dem Compiler mitgeteilt werden, wie viele Bytes zu einer Einheit zusammengefasst werden. Dies geschieht über den \emph{Datentyp}. Wir haben bereits den Datentyp \mintinline{c}{int} kennengelernt. Eine Variable vom Typ \mintinline{c}{int} ist eine Ganzzahl, deren genaue Größe von der \emph{Architektur des Zielsystems} abhängt, also von der Art des Rechners, auf dem der Compiler läuft. Der Compiler entscheidet hier also, um ein möglichst effizient laufendes Programm zu erstellen. Üblicherweise werden \mintinline{c}{int}s als 32-bit-Variablen umgesetzt; für bestimmte Microcontroller oder ältere Prozessoren kann dies aber auch als 16-bit-Wert interpretiert werden. Neben \mintinline{c}{int} gibt es außerdem noch \mintinline{c}{short int} (16 bit), \mintinline{c}{char} (8 bit), \mintinline{c}{long int} (32 bit, auch auf älteren Prozessoren), und \mintinline{c}{long long int} (64 bit). Wo es wichtig ist, die \emph{Registerbreite} einer Ganzzahl-Variable exakt zu kennen, stehen noch andere Datentypen zur Verfügung -- Siehe die Tabellen \ref{tab:DatatypesStd} und \ref{tab:DatatypesExt} im Anhang.
-%
-%Negative Zahlen werden durch die Behandlung des Bits mit der höchsten Wertigkeit als \emph{Vorzeichen-Bits} dargestellt. Das bedeutet, dass ein Bit die Information positiv/negativ enthält anstatt zum normalen Teil der Zahl zu gehören. Um zu vermeiden, dass es eine \enquote{positive Null} gibt, die verschieden von der \enquote{negativen Null} ist, wird die Wertigkeit des Vorzeichenbits von der gesamten Zahl abgezogen. Dieses schwierig in Worte zu fassende Konzept wird klarer, wenn wir es anhand eines Beispiels betrachten:
-%
-%\begin{tcolorbox}
-%	[title=Darstellung einer vorzeichenbehafteten Zahl,
-%	 arc=0pt,
-%	 outer arc=0pt
-%	]
-%\begin{center}
-%\begin{tikzpicture}[
-%  flow/.style={draw=black,->,shorten >=2pt}
-%]
-%  \node (s7) at (0, 4.3) {\tiny 7};
-%  \node (s6) at (1, 4.3) {\tiny 6};
-%  \node (s5) at (2, 4.3) {\tiny 5};
-%  \node (s4) at (3, 4.3) {\tiny 4};
-%  \node (s3) at (4, 4.3) {\tiny 3};
-%  \node (s2) at (5, 4.3) {\tiny 2};
-%  \node (s1) at (6, 4.3) {\tiny 1};
-%  \node (s0) at (7, 4.3) {\tiny 0};
-%
-%  \node (n7) at (0, 4) {1};
-%  \node (n6) at (1, 4) {0};
-%  \node (n5) at (2, 4) {1};
-%  \node (n4) at (3, 4) {0};
-%  \node (n3) at (4, 4) {1};
-%  \node (n2) at (5, 4) {0};
-%  \node (n1) at (6, 4) {1};
-%  \node (n0) at (7, 4) {0};
-%
-%  \node (e7) at (8.5, 0.0) {$\mathtt{-1 \times 2^7 = -128}$};
-%  \node (e6) at (8.5, 0.5) {$\mathtt{ 0 \times 2^6 = ~~~0}$};
-%  \node (e5) at (8.5, 1.0) {$\mathtt{ 1 \times 2^5 = ~~32}$};
-%  \node (e4) at (8.5, 1.5) {$\mathtt{ 0 \times 2^4 = ~~~0}$};
-%  \node (e3) at (8.5, 2.0) {$\mathtt{ 1 \times 2^3 = ~~~8}$};
-%  \node (e2) at (8.5, 2.5) {$\mathtt{ 0 \times 2^2 = ~~~0}$};
-%  \node (e1) at (8.5, 3.0) {$\mathtt{ 1 \times 2^1 = ~~~2}$};
-%  \node (e0) at (8.5, 3.5) {$\mathtt{ 0 \times 2^0 = ~~~0}$};
-%
-%  \draw[flow] (n7.south) |- (e7.west);
-%  \draw[flow] (n6.south) |- (e6.west);
-%  \draw[flow] (n5.south) |- (e5.west);
-%  \draw[flow] (n4.south) |- (e4.west);
-%  \draw[flow] (n3.south) |- (e3.west);
-%  \draw[flow] (n2.south) |- (e2.west);
-%  \draw[flow] (n1.south) |- (e1.west);
-%  \draw[flow] (n0.south) |- (e0.west);
-%\end{tikzpicture}
-%\end{center}
-%\end{tcolorbox}
-%Für die Bits 0 bis 6 ändert sich nichts an der Interpretation, die bereits in Abschnitt \ref{sec:BinaryNumbers} besprochen wurde. Lediglich das Bit 7 wird nun als Vorzeichenbit interpretiert und erhält somit seine \emph{negative Wertigkeit}. Es ergibt sich ein Wert von $-128 + 32 + 8 + 2 = -86$.
-%
-%\mintinline{c}{int}s sind \emph{vorzeichenbehaftet}. Will man nur positive Zahlen speichern, kann man bei der Deklaration der Variablen den \emph{Modifier} \mintinline{c}{unsigned} benutzen:
-%\begin{codebox}[Beispiel: Deklaration einer vorzeichenlosen Ganzzahl]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   unsigned int positiv = 9;
-%}
-%\end{minted}
-%\end{codebox}
-%
-%Was geschieht nun, wenn man einer \mintinline{c}{unsigned}-Variable einen negativen Wert zuweisen will? Betrachten wir das Beispiel:
-%\begin{codebox}[Beispiel: Zuweisung einer negativen Zahl zu einer unsigned-Variable]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   unsigned char positiv = -1;
-%}
-%\end{minted}
-%\end{codebox}
-%Hier wird der Compiler zuerst das Bitmuster der Zahl \texttt{-1} mit einer Breite von 8 Bit erzeugen, da ein \mintinline{c}{char} geschrieben werden soll. Dieses Bitmuster lautet \texttt{11111111}. Da die Variable \texttt{positiv} aber ein \mintinline{c}{unsigned char} ist, wird dieses Bitmuster nun als positive Zahl interpretiert und im Folgenden als \texttt{255} gelesen.
-%
-%Für die Darstellung von Kommazahlen (in der Literatur meist \emph{Fließkommazahlen} genannt) stehen die Datentypen \mintinline{c}{float} (32 bit), \mintinline{c}{double} (64 bit) und \mintinline{c}{long double} (80 bit) zur Verfügung, die im Detail selten verstanden werden müssen. Durch die größere Datenmenge bei \mintinline{c}{double}s und \mintinline{c}{long double}s fallen Rundungsfehler bei der Arbeit mit diesen Typen weniger ins Gewicht, jedoch sind Berechnungen hier zeitaufwändiger. In den meisten Fällen ist \mintinline{c}{double} der am besten geeignetste Datentyp beim Umgang mit Fließkommazahlen.
-%
-%Es gibt keine vorzeichenlosen Fließkommazahlen.
-%
-%KursteilnehmerInnen, die sich weiter für den Aufbau von Fließkommawerten interessieren, können nach dem Stichwort \emph{Standard IEEE 754} suchen. Insbesondere finden Sie unter der Adresse \url{https://steve.hollasch.net/cgindex/coding/ieeefloat.html} eine einsteigerfreundliche Erklärung. Im Kurs \emph{Numerik} der Universität Regensburg wird die Darstellung von Fließkommazahlen ebenfalls behandelt.
-%
-%
-%\subsection{Adressierung -- Pointer} \label{sec:Pointer}
-%Man kann sich den Arbeitsspeicher als langes Band von kleinen, nummerierten Speicherzellen vorstellen. Jede Zelle fässt genau ein Byte. Um einen Wert zu lesen oder zu schreiben muss dem Prozessor die Nummer der Zelle mitgeteilt werden, die verändert wird. Diese Nummer wird \emph{Adresse} oder \emph{Pointer} genannt. Wenn wir im Code Variablen benutzen, übersetzt der Compiler diese in Adressen. Für die einfachsten Aufgaben kann der Compiler die Speicherverwaltung komplett übernehmen. Wir werden jedoch schon in Kapitel \ref{chp:Input} Situationen kennen lernen, wo wir diese Speicherstruktur kennen müssen.
-%
-%\begin{tcolorbox}[title=Speicherbild]
-%\begin{center}
-%\begin{tikzpicture}
-%  [
-%    cell/.style={text width=8mm,
-%      text height=4mm, draw=black, inner sep=1mm},
-%    ld/.style={draw=blue,shorten >=2pt,->}
-%  ]
-%  \node (c1) at (0,0) [cell] {\ttfamily 99};
-%  \node (c2) at (1,0) [cell] {\ttfamily 1};
-%  \node (c3) at (2,0) [cell] {\ttfamily 255};
-%  \node (c4) at (3,0) [cell] {\ttfamily 0};
-%  \node (c5) at (4,0) [cell] {\ttfamily 80};
-%  \node (c6) at (5,0) [cell] {\ttfamily ...};
-%
-%  \node (labelMem) at (8,  1) {Symbole im Code};
-%  \node (labelMem) at (8,  0) {Werte im Speicher};
-%  \node (labelMem) at (8, -1) {Adressen};
-%
-%  \node (a1) [below=2mm of c1]            {\tiny 0x27ff};
-%  \node (a2) [below=2mm of c2, color=red] {\tiny 0x2800};
-%  \node (a3) [below=2mm of c3]            {\tiny 0x2801};
-%  \node (a4) [below=2mm of c4]            {\tiny 0x2802};
-%  \node (a5) [below=2mm of c5]            {\tiny 0x2803};
-%  \node (a6) [below=2mm of c6]            {\tiny 0x2804};
-%
-%  \node (ptr) [below=8mm of c1] {\scriptsize Adresse von \texttt{x}};
-%  \node (vc2) [above=6mm of c1] {\scriptsize Variable \texttt{x}};
-%  \node (vc0) [above=2mm of c1] {\scriptsize Variable \texttt{y}};
-%
-%  \draw [ld] (ptr.east) .. controls +(0.3,0) .. (a2.south);
-%  \draw [ld] (vc0.east) .. controls +(0.4,0) .. (c2.north);
-%  \draw [ld] (vc2.east) .. controls +(2.4,0) .. (c4.north);
-%\end{tikzpicture}
-%\end{center}
-%\end{tcolorbox}
-%
-%Adressen sind Zahlen und können damit auch im Speicher als binäre Werte abgebildet werden. Abhängig von der \emph{Prozessorarchitektur} handelt es sich dabei um 32-bit oder 64-bit Ganzzahlen. Meist werden diese nicht als \emph{Dezimalzahlen}, sondern als \emph{Hexadezimalzahlen} angegeben (\ie mit den \enquote{Ziffern} \texttt{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F}. Siehe Abschnitt \ref{sec:NumSystems} für weitere Details hierzu.
-%
-%Neben der Information, wo im Speicher eine bestimmte Information liegt, muss natürlich auch bekannt sein, wie diese zu interpretieren ist. Daher wird an dieser Stelle zu jedem Datentyp ein zugehöriger \emph{Pointer} eingeführt, also ein Datentyp, der die Adresse einer Information enthält.
-%
-%Pointer können ebenfalls in Variablen gespeichert werden. Die Deklaration erfolgt wie schon in Abschnitt \ref{sec:DeclareVars}. Der einzige Unterschied ist, dass ein Pointer-Typ gegenüber seinem \emph{Basistyp} durch ein Sternchen \texttt{*} ausgezeichnet wird.
-%
-%\begin{codebox}[Beispiel: Deklaration von Pointer-Variablen]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   int   normaleVariable;
-%   int * pointer;
-%}
-%\end{minted}
-%\end{codebox}
-%
-%Um die Adresse anderer Variablen in Erfahrung zu bringen bedienen wir uns des Adress-Operators \texttt{\&}:
-%
-%\begin{codebox}[Beispiel: Deklaration von Pointer-Variablen]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   int   normaleVariable;
-%   int * pointer = &normaleVariable;
-%}
-%\end{minted}
-%\end{codebox}
-%
-%Wir sagen also, \texttt{pointer} \enquote{zeigt auf} \texttt{normaleVariable}, \ie in der Variablen \texttt{pointer} ist die Information gespeichert, wo \texttt{normaleVariable} im Speicher zu finden ist.
-%
-%Pointer können \emph{dereferenziert} werden; das heißt, anstatt mit der Adresse selbst zu arbeiten, behandeln wir den Wert, auf den der Pointer zeigt. Dies kann sowohl lesend als auch schreibend stattfinden. Wir benutzen den \emph{Dereferenzierungs-Operator} \texttt{*}:
-%
-%\begin{codebox}[Beispiel: Dereferenzierung eines Pointers]
-%\begin{minted}[linenos]{c}
-%#include <stdio.h>
-%
-%int main () {
-%   int   normaleVariable = 5;
-%   int * pointer = &normaleVariable;
-%
-%   printf("normaleVariable = %d\n", normaleVariable);
-%   printf("*pointer        = %d\n", *pointer);
-%   printf("Adresse von normaleVariable: %p\n", pointer);
-%
-%   *pointer = 8;
-%   printf("normaleVariable = %d\n", normaleVariable);
-%}
-%\end{minted}
-%\end{codebox}
-%
-%Wir legen zuerst eine normale Variable mit Wert \texttt{5} an, sowie einen Pointer, der auf diese Variable zeigt. Wenn über den \emph{dereferenzierten Pointer} \texttt{*pointer} in Zeile 8 ein lesender Zugriff stattfindet, passiert genau dasselbe, als würde direkt mit der Variablen \texttt{normaleVariable} selbst gearbeitet werden: \texttt{printf} liest den Wert \texttt{5} aus dem Speicher.
-%Ebenso ändert auch der Zugriff über \texttt{*pointer} in Zeile 11 tatsächlich den Wert von \texttt{normaleVariable}. Die Ausgabe des Wertes von \texttt{pointer} selbst (also ohne Dereferenzierungs-Operator \texttt{*}) in Zeile 9 liefert eine große Zahl in Hexadezimal-Darstellung, die mit dem \emph{Wert} von \texttt{normaleVariable} nichts zu tun hat.
-%
-%Folglich lautet die Ausgabe:
-%
-%\begin{cmdbox}[Ausführungsbeispiel: Dereferenzierung eines Pointers]
-%\begin{minted}{text}
-%normaleVariable = 5
-%*pointer        = 5
-%Adresse von normaleVariable: 0x7ffdea635c5c
-%normaleVariable = 8
-%\end{minted}
-%\end{cmdbox}
-%
-%\begin{warnbox}[Große Bedeutung von Pointern in C]
-%In der Sprache C ist der Umgang mit Pointern üblich, aber zugleich auch eine der größten Fehlerquellen. Verinnerlichen Sie daher die soebenen gezeigten Konzepte; wir werden hierauf immer wieder aufbauen.
-%\end{warnbox}
-%
-%\FloatBarrier
-%\begin{figure}
-%\begin{center}
-%\includegraphics[width=.5\linewidth]{./gfx/xkcd-pointers}
-%\caption[Pointer im echten Leben]{Pointer im echten Leben. Quelle: \url{https://xkcd.com/138/}}
-%\end{center}
-%\end{figure}
-%\FloatBarrier
-%
-%\begin{plusbox}
-%Während C++ ebenfalls Pointer zur Verfügung stellt, die sich dort genauso verhalten wie in der Sprache C, gilt das Paradigma, in C++ \emph{keine} Pointer zu verwenden. C++ kennt andere Konzepte, die Pointer ersetzen (bzw. verstecken) und die helfen, häufige Fehler bei der Arbeit mit Pointern zu vermeiden. Im Rahmen dieses Kurses können leider nur Stichworte genannt werden; sehen Sie dies als Motivation, einen C++-Kurs zu besuchen.
-%
-%Auch wenn C++-Code \idR keine Verwendung von Pointern macht ist die Kenntnis des Konzepts auch dort sehr wichtig, da der gesamte \enquote{Unterbau} der Sprache auf den hier präsentierten Techniken beruht.
-%\end{plusbox}
-%
 %\section{Bitweise Logik und Bit-Shifting} \label{sec:BitwiseOperator}
 %Für Elektronik-Anwendungen ist es oft nötig, einzelne Schalter an- oder auszuschalten. Meist geschieht dies über eine Zustandsvariable, die an einen \emph{Port} (ein Anschluss, über den Daten fließen können) gesendet wird. Diese Zustandsvariable ist dann \idR eine Ganzzahl-Variable, in der jedes Bit für einen eigenen Schalter steht. Wir benötigen also Mittel, um einzelne Bits zu manipulieren.
 %
@@ -855,59 +1161,7 @@ How is this possible? You'll have to read the next section for some of the detai
 %Dies gilt nur für Ganzzahlen, nicht aber für Fließkommazahlen.
 %\end{hintbox}
 %
-%\section{Typecasting} \label{sec:Casting}
-%Es ist gelegentlich notwendig, einen Wert von einem Datentyp in einen anderen umzuwandeln. Bei einer solchen Umwandlung kann sich das Bitmuster ändern, beispielsweise wenn die Ganzzahl \texttt{3} in die Fließkommazahl \texttt{3.0} umgewandelt wird.
-%
-%Eine solche Umwandlung wird als \emph{Typecasting} bezeichnet. Die Syntax hierzu ist simpel:
-%\begin{codebox}[Syntax: Typecasting]
-%\texttt{(Ziel-Datentyp) Ausdruck}
-%\end{codebox}
-%\texttt{Ziel-Datentyp} ist ein beliebiger Datentyp, wie beispielsweise in Anhang \ref{sec:Datatypes} beschrieben. Wie üblich kann \emph{Ausdruck} ein einfacher Wert, eine Variable oder ein komplexer Ausdruck sein.
-%
-%Ein Grund, den Datentyp zu ändern wurde zum Ende von Abschnitt \ref{sec:OperatorsArithmetic} bereits angeprochen: Operationen wie die Division verhalten sich unterschiedlich, abhängig davon, ob eine Fließkommazahl oder eine Ganzzahl an der Operation beteiligt ist. Solche \emph{Datentyp-spezifischen} Szenarios sind in C sehr häufig.
-%
-%\begin{codebox}[Beispiel: Typecasting int zu double]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   int x = 7, y = 5;
-%   double z = (double) x / y;
-%}
-%\end{minted}
-%\end{codebox}
-%
-%\begin{hintbox}[Reihenfolge der Operationen]
-%Der Compiler arbeitet \enquote{von links nach rechts}, beachtet aber, dass manche Operationen \enquote{Vorrang} vor anderen haben (\eg Punkt-vor-Strich). Im obigen Beispiel wird also zuerst der Typecast der Variablen \texttt{x} durchgeführt, und dann der zum \mintinline{c}{double} konvertierte Wert von \texttt{x} durch \texttt{y} geteilt. Damit erhält \texttt{z} den Wert \texttt{1.2}.
-%
-%Im folgenden Beispiel dagegen erhält \texttt{z} den Wert 1.0:
-%\begin{codebox}[Beispiel: Fehlerhaftes Typecasting int zu double]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   int x = 7, y = 5;
-%   double z = (double) (x / y);
-%}
-%\end{minted}
-%\end{codebox}
-%Durch die Klammern interpretiert der Compiler Zeile 3 als: \enquote{Caste das Ergebnis von \texttt{x / y} zu \mintinline{c}{double}}. Da das Ergebnis von \texttt{x / y} aus der Division zweier \mintinline{c}{int}-Werte hervorgeht, wird hier gerundet und \texttt{z} erhält den (\idR falschen) Wert \texttt{1.0}.
-%\end{hintbox}
-%
-%\section{Hierarchie der Operatoren} \label{sec:OperatorHierarchy}
-%Ausdrücke werden vom Compiler \enquote{von links nach rechts} ausgewertet, wobei die Vorrangigkeit mancher Operatoren beachtet wird. Die Vorrangigkeit kann Tabelle \ref{tab:OperatorPrecedence} im Anhang entnommen werden. Wo immer Unsicherheiten bestehen, kann durch Setzen von (runden Klammern) Sicherheit geschaffen werden.
-%
-%\section{Zahlenformate -- Hexadezimalsystem} \label{sec:NumSystems}
-%Gleich zu Beginn dieses Kurses in Abschnitt \ref{sec:BinaryNumbers} haben wir das \emph{Binärsystem} (oder auch \emph{Dualsystem}) kennen gelernt, das neben dem uns vertrauten \emph{Dezimalsystem} steht\footnote{Übrigens: Das Dezimalsystem wäre völlig unbrauchbar, wenn der Mensch nicht zufällig zehn Finger hätte. (Kalenderspruch)}. Nach der dort gezeigten Idee lassen sich Zahlen in beliebigen \emph{Zahlensystemen} bzw. mit beliebiger \emph{Basis} (also Anzahl von verschiedenen Ziffern im Zahlensystem) darstellen. Von besonderer Bedeutung ist das \emph{Hexadezimalsystem} mit 16 Ziffern:
-%
-%\begin{center}
-%\texttt{0 1 2 3 4 5 6 7 8 9 A B C D E F}
-%\end{center}
-%
-%Um eine Zahl als \emph{hexadezimal} zu kennzeichnen wird häufig der Präfix \texttt{0x} vorangestellt. Der Ausdruck\footnote{Andere verbreitete Schreibweisen sind \texttt{10h}, \texttt{$10_{16}$} oder \texttt{$10_{hex}$}} \texttt{0x10} entspricht also der \emph{Dezimalzahl} 16. Groß- und Kleinschreibung wird hier nicht unterschieden, es gilt \texttt{0xab} = \texttt{0XAB}.
-%
-%Die weiteren Informationen in diesem Abschnitt sind für besonders interessierte KursteilnehmerInnen gedacht und müssen für den Kurserfolg nicht im Detail verstanden werden. Sie werden diese Idee aber in der IT-Welt immer wieder antreffen und Nutzen aus dem Verständnis ziehen.
-%
-%Die Darstellung von Zahlen bzw. allgemeiner von Bitfolgen im Hexadezimalsystem ist mitunter von Vorteil\footnote{Historische Bedeutung hat in diesem Kontext auch noch das \emph{Oktalsystem}, das die Ziffern \texttt{0..7} verwendet. Heute lebt es fast nur noch in dem Witz fort: \emph{Why do programmers confuse Halloween and Christmas? Because Oct 31 = Dec 25...}}. Wir haben bereits gehört, dass ein Computer nur Gruppen von Bits behandeln kann. Ein Byte, also eine Gruppe von 8 Bit erlaubt, wie in Abschnitt \ref{sec:Datawidth} erwähnt, 256 verschiedene Werte. Im Hexadezimalsystem wird daraus der \enquote{runde} Wert \texttt{0x100}. Ähnlich ist die Zahl der mit 16 Bit darstellbaren Zahlen gleich \texttt{0x10000} und für 32 bit erhalten wir \texttt{0x100000000} verschiedene Möglichkeiten. Dies ist kein Zufall -- Die Zahl 16 (also die Basis des Hexadezimalsystems) ist eine Potenz der Zahl 2 (also der Basis des Binärsystems). Es besteht eine \enquote{direkte Verwandschaft} zwischen Binärzahlen und Hexadezimalzahlen.
-%
-%Eine Zahl, die mit $n$ Bit dargestellt wird, kann also mit $\frac{n}{4}$ Hexadezimal-Ziffern geschrieben werden. Dies ist offensichtlich praktischer als lange Ketten von 1en und 0en zu schreiben.
-%
+
 %\begin{hintbox}[Farben als Hexadezimal-Werte]
 %In der Computertechnik werden Farben häufig mit \emph{Hex-Codes} beschrieben. Dies sind sechsstellige Kombinationen aus Ziffern und den Buchstaben A bis F. Tatsächlich sind diese Codes drei aneinander gereihte Hexadezimalzahlen. Diese beschreiben jeweils den Rot-, Grün- und Blau-Anteil einer Farbe. Der Dezimalwert 255 (bzw. die Hexadezimalzahl \texttt{0xFF}) beschreibt dabei \enquote{volle Intensität}, 0 (oder \texttt{0x00} dagegen sagt aus, von der Teilfarbe kommt kein Beitrag. Damit kann die Farbe Orange dann ausgedrückt werden als \texttt{0xFF7F00}: Volle Intensität Rot (\texttt{FF}), halbe Intensität Grün (\texttt{7F}) und Blau-Anteil 0 (\texttt{00}).
 %

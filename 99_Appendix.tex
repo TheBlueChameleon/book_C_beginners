@@ -408,7 +408,7 @@
 
 \vspace{12pt}
 \textbf{Principal operations} \\
-(See \url{https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html})
+See \url{https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html}
 
 \rowcolors{1}{tabhighlight}{white}
 \begin{tabularx}
@@ -437,7 +437,7 @@
 
 \vspace{12pt}
 \textbf{Warnings and Errors} \\
-(see \url{https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html})
+See \url{https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html}
 
 \begin{tabularx}
 	{\linewidth}
@@ -458,23 +458,13 @@
 	Make all warnings into errors.
 \end{tabularx}
 
-\newpage
 \newcolumntype{O}{>{\centering\ttfamily\arraybackslash}m{.3  \linewidth}}
 \newcolumntype{E}{>{\centering         \arraybackslash}m{.65 \textwidth}}
 
-\begin{tabularx}
-	{\linewidth}
-	{OE}
-
-	\normalfont	\bfseries Option &
-				\bfseries Effect
-	\tabcrlf
-\end{tabularx}
-
 \vspace{6pt}
 \textbf{Debugging and Optimization} \\
-(see \url{https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html}\\
- and \url{https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html})
+See \url{https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html}\\
+and \url{https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html}
 
 \rowcolors{1}{tabhighlight}{white}
 \begin{tabularx}
@@ -489,10 +479,21 @@
 	The higher the number, the more aggressive the compiler will try to optimize the code, resulting in longer compilation time.
 \end{tabularx}
 
+\newpage
+
+\begin{tabularx}
+	{\linewidth}
+	{OE}
+
+	\normalfont	\bfseries Option &
+				\bfseries Effect
+	\tabcrlf
+\end{tabularx}
+
 \vspace{12pt}
 \textbf{Using Libraries} \\
-(see \url{https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html}\\
- and \url{https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html})
+See \url{https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html}\\
+and \url{https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html}
 
 \rowcolors{1}{tabhighlight}{white}
 \begin{tabularx}
@@ -518,80 +519,6 @@
 \label{tab:CompilerOptions}
 }
 
-\section{Escape-Sequences}
-\begin{table}[h!]
-\newcolumntype{E}{>{\centering\ttfamily\arraybackslash}m{.3  \linewidth}}
-\newcolumntype{F}{>{\centering         \arraybackslash}m{.65 \textwidth}}
-
-\rowcolors{1}{white}{tabhighlight}
-
-\begin{tabularx}
-	{\linewidth}
-	{EF}
-	\toprule[1.5pt]
-
-	\normalfont	\bfseries Sequence &
-				\bfseries Funktion
-	\tabcrlf
-	
-	\textbackslash a &
-	\emph{alert} -- play a sound on the beeper, if present
-	\\
-	
-	\textbackslash b &
-	\emph{backspace} -- move the text cursor one column to the left
-	\\
-		
-	\textbackslash f &
-	\emph{form feed} -- move the text cursor one row down
-	\\
-		
-	\textbackslash n &
-	\emph{newline} -- move the text cursor to the beginning of the next line
-	\\
-		
-	\textbackslash r &
-	\emph{carriage return} -- move the text cursor to the beginning of the current line
-	\\
-	
-	\textbackslash t &
-	\emph{horizontal tab} -- move the text cursor to the next tab stop to the right
-	\\
-	
-	\textbackslash v &
-	\emph{vertical tab} -- move the text cursor down to the next vertical tab stop 
-	\\
-		
-	\textbackslash \textbackslash  &
-	\emph{backslash} -- the character \texttt{\textbackslash} itself
-	\\
-		
-	\textbackslash '' &
-	\emph{double quote} -- the character \texttt{''} itself
-	\\
-		
-	\textbackslash x\texttt{hh} &
-	\emph{ASCII character} -- inserts the character with ASCII code \texttt{0xhh}, where \texttt{hh}
-							  is a hexadecimal value between \texttt{00} and \texttt{FF}
-	\\
-		
-	\textbackslash u\texttt{hhhh} &
-	\emph{unicode character} -- inserts the character with code point \texttt{0xhhhh}, where \texttt{hhhh}
-							  is a hexadecimal value between \texttt{0000} and \texttt{FFFF}
-	\\
-		
-	\textbackslash U\texttt{hhhhhhhh} &
-	\emph{unicode character} -- nserts the character with code point \texttt{0xhhhhhhhh} where \texttt{hhhhhhhh}
-							  is a hexadecimal value between \texttt{00000000} and \texttt{FFFFFFFF}
-	\\
-	
-	\bottomrule[1.5pt]
-\end{tabularx}
-\caption{Escape-Sequences according to ISO/IEC 9899:TC3}
-\label{tab:Escape}
-\end{table}
-See page 19 in \url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf}
-\FloatBarrier
 
 \section{Data Types} \label{sec:Datatypes}
 In table \ref{tab:DatatypesStd} you'll find the data types that are always defined in C. Sometimes, the specific meaning of data types depends on the plattform (\ie the kind of machine on which your code runs); if so, the values are shown in grey. The given values refer to the usual interpretation for modern desktop computers, but can be substantially different for older machines, different microprocessors or even compiler versions.
@@ -635,8 +562,8 @@ In table \ref{tab:DatatypesStd} you'll find the data types that are always defin
 \bottomrule[1.5pt]
 \end{tabularx}
 \captionof{table}{Standard data types in C} \label{tab:DatatypesStd} 
-\phantom{x}\\
 
+\vspace{12pt}
 Table \ref{tab:DatatypesExt} describes data types defined in the header \texttt{stdint.h}. They behave the same on all plattforms.
 
 \rowcolors{1}{white}{tabhighlight}
@@ -664,23 +591,150 @@ Table \ref{tab:DatatypesExt} describes data types defined in the header \texttt{
 \captionof{table}{Fixed-width data types C} \label{tab:DatatypesExt}
 }
 
-Further details can be found online at cppreference.com: 
+Further details can be found online at cppreference.com. See:
 \begin{itemize}
-\item Standard data types: \url{https://en.cppreference.com/w/c/language/types}
-\item Integer definitions: \url{https://en.cppreference.com/w/c/types/integer} \\
-	(as defined in header \texttt{stdint.h})
+\item \url{https://en.cppreference.com/w/c/language/types} for information on the standard data types
+\item \url{https://en.cppreference.com/w/c/types/integer} for information on the special integer types as defined in header \texttt{stdint.h}
 \end{itemize}
 
-\newpage
+
+\section{Number Literals}
+Converting the textual code into number values needs to identify the number system (decimal, octal, hexadecimal) as well as the target data type (\inC{int}, \inC{double}, ...). This is realized by means of prefixes and suffixes:
+{
+\newcolumntype{C}{>{\centering\ttfamily\arraybackslash}m{.30 \linewidth}}
+\newcolumntype{Z}{>{\centering\ttfamily\arraybackslash}m{.30 \textwidth}}
+
+\begin{tabularx}
+	{\linewidth}
+	{CXZ}
+	\toprule[1.5pt]
+
+	\normalfont \bfseries Code &
+	\centering  \bfseries Meaning &
+	\normalfont \bfseries Example
+	\tabcrlf
+\end{tabularx}
+
+\vspace{6pt}
+\textbf{Integer Prefixes} \\
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CXZ}
+	\textrm{(nothing)} & 
+	\centering decimal value &
+	12\textrm{,} -1989 
+	\\
+	
+	0 &
+	\centering octal value &
+	014\textrm{,} -03705
+	\\
+	
+	0x\textrm{,} 0X &
+	\centering hexadecimal value &
+	0xC\textrm{,} -0X7c5
+\end{tabularx}
+
+\vspace{12pt}
+\textbf{Integer Suffixes} \\
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CXZ}
+	\textrm{(nothing)} & 
+	\centering \texttt{int} &
+	12\textrm{,} -1989 
+	\\
+	
+	u\textrm{,} U &
+	\centering \texttt{unsigned int} &
+	12u\textrm{,} 4294965307u
+	\\
+	
+	l\textrm{,} L &
+	\centering \texttt{long int} &
+	12l\textrm{,} -1989L
+	\\
+	
+	ll\textrm{,} LL &
+	\centering \texttt{long long int} &
+	12ll\textrm{,} -1989LL
+	\\
+	
+	ul\textrm{,} lu\textrm{,} UL\textrm{,} LU &
+	\centering \texttt{unsigned long int} &
+	12ll\textrm{,} -1989LL
+	\\
+	
+	ull\textrm{,} llu\textrm{,} ULL\textrm{,} LLU &
+	\centering \texttt{unsigned long long int} &
+	12llu\textrm{,} -1989ULL
+\end{tabularx}
+
+\vspace{12pt}
+\textbf{Floating Point Number Prefixes} \\
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CXZ}
+	\textrm{(nothing)} & 
+	\centering decimal value &
+	1.2
+	\\
+	
+	0x\textrm{,} 0X &
+	\centering hexadecimal value &
+	0x1.33333333333333333333
+\end{tabularx}
+
+\vspace{12pt}
+\textbf{Floating Point Number Suffixes} \\
+\rowcolors{1}{tabhighlight}{white}
+\begin{tabularx}
+	{\linewidth}
+	{CXZ}
+	
+	\textrm{(nothing)} & 
+	\centering \texttt{double} &
+	1.2
+	\\
+	
+	f & 
+	\centering \texttt{float} &
+	1.2f
+	\\
+	
+	\centering \texttt{L} & 
+	\centering \texttt{long double} &
+	1.2L
+	\\
+	
+	\bottomrule[1.5pt]
+\end{tabularx}
+
+\captionof{table}{Compiler Options}
+\label{tab:LiteralFormat}
+}
+Note that floating point values are characterized by a decimal point, followed by zero or more digits. That means, the texts \texttt{1.0}, \texttt{1.000} and \texttt{1.} are all equivalent and represent \inC{double} values. The text \texttt{1} on the other hand is different in that it represents an \inC{int}.
+
+See also:
+\begin{itemize}
+\item \url{https://en.cppreference.com/w/c/language/expressions}
+\item \url{https://en.cppreference.com/w/cpp/language/integer_literal}
+\item \url{https://en.cppreference.com/w/cpp/language/floating_literal}
+\end{itemize}
+\vfill
+
 \section{Precedence of Operators}
 {
 	\rowcolors{1}{white}{tabhighlight}
-	\newcolumntype{P}{>{\centering \arraybackslash          } p{.2 \linewidth}}
-	\newcolumntype{C}{>{\centering \arraybackslash \ttfamily} p{.2 \linewidth}}
-	\newcolumntype{D}{>{\centering \arraybackslash          } p{.5\linewidth}}
+	\newcolumntype{P}{>{\centering \arraybackslash          } p{.20\linewidth}}
+	\newcolumntype{O}{>{\centering \arraybackslash \ttfamily} p{.20\linewidth}}
+	\newcolumntype{D}{>{\centering \arraybackslash          } p{.52\linewidth}}
 \begin{tabularx}
 		{\linewidth}
-		{PCD}
+		{POD}
 		\toprule[1pt]
 
 	\textbf{Priority} & \normalfont\textbf{Operator} & \textbf{Description} \tabcrlf
@@ -739,106 +793,97 @@ Operations in the same priority group are evaluated from left to right.
 See also \url{https://en.cppreference.com/w/c/language/operator_precedence} for further details.
 
 
-\section{Format Strings}
-The format codes presented in tables \ref{tab:FormatStringBase} and \ref{tab:FormatStringModifiers} work with all of \texttt{printf}, \texttt{sprintf}, \texttt{snprintf}, and \texttt{fprintf}, as well as \texttt{scanf}, \texttt{sscanf}, \texttt{snscanf}, and \texttt{fscanf}.
-
-%TODO add "%%" -- output the percentage sign
-
-See also \url{http://en.cppreference.com/w/c/io/fprintf} \\
-and \url{http://en.cppreference.com/w/c/io/fscanf}.
-
+\section{Escape-Sequences}
 {
-\newcolumntype{C}{>{\ttfamily\arraybackslash}m{.15\linewidth}}
-\newcolumntype{M}{                           m{.45\textwidth}}
-\newcolumntype{X}{>{\ttfamily\arraybackslash}m{.2 \textwidth}}
+\newcolumntype{E}{>{\centering\ttfamily\arraybackslash}m{.3  \linewidth}}
+\newcolumntype{F}{>{\centering         \arraybackslash}m{.65 \textwidth}}
+
+\rowcolors{1}{white}{tabhighlight}
 
 \begin{tabularx}
 	{\linewidth}
-	{CMX}
+	{EF}
+	\toprule[1.5pt]
+
+	\normalfont	\bfseries Sequence &
+				\bfseries Effect
+	\tabcrlf
+	
+	\textbackslash a &
+	\emph{alert} -- play a sound on the beeper, if present
+	\\
+	
+	\textbackslash b &
+	\emph{backspace} -- move the text cursor one column to the left
+	\\
+		
+	\textbackslash f &
+	\emph{form feed} -- move the text cursor one row down
+	\\
+		
+	\textbackslash n &
+	\emph{newline} -- move the text cursor to the beginning of the next line
+	\\
+		
+	\textbackslash r &
+	\emph{carriage return} -- move the text cursor to the beginning of the current line
+	\\
+	
+	\textbackslash t &
+	\emph{horizontal tab} -- move the text cursor to the next tab stop to the right
+	\\
+	
+	\textbackslash v &
+	\emph{vertical tab} -- move the text cursor down to the next vertical tab stop 
+	\\
+		
+	\textbackslash \textbackslash  &
+	\emph{backslash} -- the character \texttt{\textbackslash} itself
+	\\
+		
+	\textbackslash '' &
+	\emph{double quote} -- the character \texttt{''} itself
+	\\
+		
+	\textbackslash x\texttt{hh} &
+	\emph{ASCII character} -- inserts the character with ASCII code \texttt{0xhh}, where \texttt{hh}
+							  is a hexadecimal value between \texttt{00} and \texttt{FF}
+	\\
+		
+	\textbackslash u\texttt{hhhh} &
+	\emph{unicode character} -- inserts the character with code point \texttt{0xhhhh}, where \texttt{hhhh}
+							  is a hexadecimal value between \texttt{0000} and \texttt{FFFF}
+	\\
+		
+	\textbackslash U\texttt{hhhhhhhh} &
+	\emph{unicode character} -- nserts the character with code point \texttt{0xhhhhhhhh} where \texttt{hhhhhhhh}
+							  is a hexadecimal value between \texttt{00000000} and \texttt{FFFFFFFF}
+	\\
+	
+	\bottomrule[1.5pt]
+\end{tabularx}
+\captionof{table}{Escape-Sequences according to ISO/IEC 9899:TC3}
+\label{tab:Escape}
+}
+See page 19 in \url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf}
+
+
+\section{Format Strings}
+The format codes presented in table \ref{tab:FormatStringBase} work with all of \texttt{printf}, \texttt{sprintf}, \texttt{snprintf}, and \texttt{fprintf}, as well as \texttt{scanf}, \texttt{sscanf}, \texttt{snscanf}, and \texttt{fscanf}.
+
+{
+\newcolumntype{C}{>{\centering\ttfamily\arraybackslash}m{.15\linewidth}}
+\newcolumntype{M}{>{\centering         \arraybackslash}m{.40\textwidth}}
+\newcolumntype{E}{>{\centering\ttfamily\arraybackslash}m{.36\textwidth}}
+
+\begin{tabularx}
+	{\linewidth}
+	{CME}
 	\toprule[1.5pt]
 
 	\normalfont	\bfseries Symbol &
 				\bfseries Effect &
-				\bfseries Example
-	\tabcrlf
-\end{tabularx}
-
-\vspace{6pt}
-\textbf{Floating Point Numbers}
-
-\rowcolors{1}{tabhighlight}{white}
-\begin{tabularx}
-	{\linewidth}
-	{CMX}
-	
-	\makecell{
-		\%f
-	} &
-		Decimal notation (usual human notation) with six decimal places precision.
-	&
-	\makecell{
-		\texttt{0.700000} \\
-	 	\texttt{1234567890123456768.000000}
-	} \\
-	
-	\makecell{
-		\%e, \%E
-	} &
-		Scientific notation (Mantissa and Exponent).
-	&
-	\makecell{
-		\texttt{7.000000e-01} or \texttt{7.000000E-01} \\
-		\texttt{1.234568e+18} or \texttt{1.234568E+18}
-	} \\
-	
-	\makecell{
-		\%g, \%G
-	} &
-		\enquote{Most convenient notation}, either decimal or scientific notation
-	&
-	\makecell{
-		\texttt{0.700000} \\
-		\texttt{1.234568e+18} or \texttt{1.234568E+18}
-	} \\
-	
-	\makecell{
-		\%a, \%A
-	} &
-		Hexadecimal notation
-	&
-	\makecell{
-		\texttt{0x1.6666666666666p-1} \\
-		\texttt{0X1.12210F47DE981P+60}
-	} \\
-	
-	\makecell{
-		\%lf, \\
-		\%le, \%lE, \\
-		\%lg, \%lG, \\
-		\%la, \%lA
-	} &
-	Same as above, but expects \texttt{double} expressions rather than \texttt{float}
-	&
-	\\
-	
-	\makecell{
-		\%Lf, \\
-		\%Le, \%LE, \\
-		\%Lg, \%LG, \\
-		\%La, \%LA
-	} &
-	Same as above, but expects \texttt{long double} expressions rather than \texttt{float}
-	&
-	\\
-\end{tabularx}
-
-\begin{tabularx}
-	{\linewidth}
-	{CMX}
-
-	\normalfont	\bfseries Symbol &
-				\bfseries Effect &
-				\bfseries Example
+	\normalfont	\bfseries Example
 	\tabcrlf
 \end{tabularx}
 
@@ -848,9 +893,9 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 \rowcolors{1}{tabhighlight}{white}
 \begin{tabularx}
 	{\linewidth}
-	{CMX}
+	{CME}
 	
-	\makecell{\%d, \%i}
+	\%d, \%i
 	&
 	Decimal representation (base 10, usual human notation)
 	&
@@ -859,7 +904,7 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		\texttt{2147483647}
 	} \\
 	
-	\makecell{\%u}
+	\%u
 	&
 	Decimal representation (base 10, usual human notation), interpretation as unsigned value
 	&
@@ -868,7 +913,7 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		\texttt{2147483647}
 	} \\
 	
-	\makecell{\%o}
+	\%o
 	&
 	Octal (base 8) notation, interpretation as unsigned value
 	&
@@ -877,7 +922,7 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		\texttt{17777777777}
 	} \\
 	
-	\makecell{\%x, \%X}
+	\%x, \%X
 	&
 	Hexadecimal (base 16) notation, interpretation as unsigned value
 	&
@@ -886,7 +931,7 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		\texttt{7fffffff} or \texttt{7FFFFFFF}
 	} \\
 	
-	\makecell{\%c}
+	\%c
 	&
 	Output as character (ASCII representation modulo 256)
 	&
@@ -937,16 +982,83 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 	\\
 \end{tabularx}
 
-\vspace{6pt}
-\textbf{Pointers}
+\vspace{12pt}
+\textbf{Floating Point Numbers}
 
-\rowcolors{1}{tabhighlight}{white}
+\rowcolors{1}{white}{tabhighlight}
 \begin{tabularx}
 	{\linewidth}
-	{CMX}
+	{CME}
 	
-	\makecell{\%s}
+	\%f &
+	Decimal notation (usual human notation) \texttt{float}s with six decimal places precision. &
+	\makecell{
+		\texttt{0.700000} \\
+	 	\texttt{1234567890123456768.000000}
+	} \\
+	
+	\%e, \%E &
+	Scientific notation (Mantissa and Exponent). &
+	\makecell{
+		\texttt{7.000000e-01} or \texttt{7.000000E-01} \\
+		\texttt{1.234568e+18} or \texttt{1.234568E+18}
+	} \\
+	
+	\%g, \%G &
+	\enquote{Most convenient notation}, either decimal or scientific notation &
+	\makecell{
+		\texttt{0.700000} \\
+		\texttt{1.234568e+18} or \texttt{1.234568E+18}
+	} \\
+	
+	\%a, \%A &
+	Hexadecimal notation &
+	\makecell{
+		\texttt{0x1.6666666666666p-1} \\
+		\texttt{0X1.12210F47DE981P+60}
+	} \\
+	
+	\makecell{
+		\%lf, \\
+		\%le, \%lE, \\
+		\%lg, \%lG, \\
+		\%la, \%lA
+	} &
+	Same as above, but expects \texttt{double} expressions rather than \texttt{float}
 	&
+	\\
+	
+	\makecell{
+		\%Lf, \\
+		\%Le, \%LE, \\
+		\%Lg, \%LG, \\
+		\%La, \%LA
+	} &
+	Same as above, but expects \texttt{long double} expressions rather than \texttt{float}
+	&
+	\\
+\end{tabularx}
+
+\newpage
+\rowcolors{1}{white}{tabhighlight}
+\begin{tabularx}
+	{\linewidth}
+	{CME}
+
+	\normalfont	\bfseries Symbol &
+				\bfseries Effect &
+	\normalfont	\bfseries Example
+	\tabcrlf
+\end{tabularx}
+
+\textbf{Pointers}
+
+\rowcolors{1}{white}{tabhighlight}
+\begin{tabularx}
+	{\linewidth}
+	{CME}
+	
+	\%s &
 	\makecell{
 		Output as text, up to the first \\
 		\texttt{NULL} character\\
@@ -954,11 +1066,10 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 		 \texttt{char[]} or a \texttt{unsigned char[]}
 	}
 	&
-	\makecell{\texttt{abcdefg}}
+	abcdefg
 	\\
 	
-	\makecell{\%p}
-	&
+	\%p &
 	\makecell{
 		Output as hexadecimal number,\\
 		special output for nullptr (\texttt{(nil)})\\
@@ -978,14 +1089,10 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 \rowcolors{1}{tabhighlight}{white}
 \begin{tabularx}
 	{\linewidth}
-	{CMX}
+	{CME}
 	
-	\makecell{\%\%}
-	&
-	\makecell{
-		Literal Percent Sign
-	}
-	&
+	\%\% &
+	Literal Percent Sign &
 	\%
 	\\
 	
@@ -996,21 +1103,22 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 }
 
 \vspace{12pt}
-
+The below codes in table \ref{tab:FormatStringModifiers} refer to format strings for \texttt{printf} and its related functions for output on other devices. Only the \texttt{\%N} version may also be used with \texttt{scanf} and its sibling functions. Consequently, the contents of the \emph{example} column are meant to be \texttt{printf} arguments.\\
+Greyed out are the percent sign which occurs in any format string and the type code (\eg \texttt{d}), because these modifiers can be applied to more than one type code.
 {
-\newcolumntype{C}{>{\ttfamily\arraybackslash}m{.13\linewidth}}
-\newcolumntype{M}{                           m{.4 \textwidth}}
-\newcolumntype{X}{>{\ttfamily\arraybackslash}m{.135\textwidth}}
+\newcolumntype{C}{>{\ttfamily\centering\arraybackslash}m{.13\linewidth}}
+\newcolumntype{M}{>{         \centering\arraybackslash}m{.40\textwidth}}
+\newcolumntype{E}{>{\ttfamily\centering\arraybackslash}m{.18\textwidth}}
 
 \begin{tabularx}
 	{\linewidth}
-	{CMXX}
+	{CMEE}
 	\toprule[1.5pt]
 
 	\normalfont	\bfseries Modifier &
 				\bfseries Effect &
-				\bfseries Example &
-				\bfseries Result
+	\normalfont	\bfseries Example &
+	\normalfont	\bfseries Result
 	\tabcrlf
 \end{tabularx}
 
@@ -1019,7 +1127,7 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 \rowcolors{1}{tabhighlight}{white}
 \begin{tabularx}
 	{\linewidth}
-	{CMXX}
+	{CMEE}
 	
 	{\color{grey}\%}N{\color{grey}d}
 	&
@@ -1068,19 +1176,7 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 	
 \end{tabularx}
 
-\newpage
-\rowcolors{1}{white}{tabhighlight}
-\begin{tabularx}
-	{\linewidth}
-	{CMXX}
-
-	\normalfont	\bfseries Modifier &
-				\bfseries Effect &
-				\bfseries Example &
-				\bfseries Result
-	\tabcrlf
-\end{tabularx}
-
+\vspace{12pt}
 \textbf{Leading Characters}
 
 \rowcolors{1}{tabhighlight}{white}
@@ -1141,6 +1237,9 @@ and \url{http://en.cppreference.com/w/c/io/fscanf}.
 
 \captionof{table}{Format Strings, Modifier Symbols} \label{tab:FormatStringModifiers}
 }
+
+See also \url{http://en.cppreference.com/w/c/io/fprintf} \\
+and \url{http://en.cppreference.com/w/c/io/fscanf}.
 
 \newcommand*{\tabsec}{\\ \cline{2-4}}
 \newcommand*{\SLASH}{\char`\\}
