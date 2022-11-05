@@ -423,7 +423,7 @@ It's nice that we can make the computer do computations for us. But up to now, a
 printf(formatString, commaSeparetedListOfExpressions);
 \end{codebox}
 
-In this, ...\vspace{-12pt}
+In this, ...
 \begin{itemize}
 \setlength\itemsep{0pt}
 \item \texttt{formatString} is a string (\ie text between \texttt{"}double quotes\texttt{"}) that tells the computer what to print where. Essentially, it is regular text with special
@@ -483,6 +483,7 @@ If you need to print a percent sign, you can do so by putting a double percent s
 will give you an output like:\\
 \texttt{The result is 49.570000\%.}
 \end{hintbox}
+\vfill
 
 \begin{warnbox}[Matching Data Types]
 Always make sure that the data types in the format string match the data types of the actual expressions! That is, if you type \texttt{\%d} in your format string, you had better provide an \inC{int} value for that place holder. Likewise, make sure the number of expressions and their order matches that of the placeholders. If you disregard this rule, ...

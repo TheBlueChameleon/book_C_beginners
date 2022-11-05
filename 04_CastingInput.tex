@@ -9,8 +9,9 @@ The command \texttt{scanf} instructs the computer to let the user type some text
 We are by now very familiar with the fact that the same information can be interpreted in different ways. In the previous chapter, when we learned about \texttt{printf}, we were concerned with the converision rules from binary (information in memroy) to text (information on screen). In a way, \texttt{scanf} is the counterpart to \texttt{printf}: it takes text information from the user and converts it into a bitpattern. With this preface, you will not be surprised to hear that the format strings we already know about make a comeback\footnote{Also maybe you remember that the \texttt{f} in \texttt{printf} stands for \emph{formatted}. It means the same in \texttt{scanf}.}.
 
 \subsection{Simple Usage}
-The simplest way to use the command is the following:
+To use the command \texttt{scanf}, we first need to \texttt{\#include} the header \texttt{<stdio.h>}, like with \texttt{printf}.
 
+The most simple way to use the command is the following:
 \begin{codebox}[Syntax: \texttt{scanf}]
 scanf(formatString, pointerToVariable)
 \end{codebox}
@@ -424,9 +425,9 @@ We don't even get the chance to enter a second number. The reason behind this is
 \newcolumntype{N}{>{\ttfamily\centering\arraybackslash} p{.25\linewidth}}
 \newcolumntype{R}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
 \begin{center}
-\rowcolors{1}{tabhighlight}{white}
+\rowcolors{1}{white}{tabhighlight}
 \begin{tabularx}
-	{.45\linewidth}
+	{.453\linewidth}
 	{NR}
 \toprule[1.5pt]
 
@@ -513,7 +514,7 @@ int main () {
 \end{codebox}
 \end{hintbox}
 
-\begin{defbox}[Main Takeaways for this section]
+\begin{defbox}[Main Takeaways for this section about the keyboard buffer]
 To put the results of our deep dive in this section into a nutshell:
 \begin{itemize}
 \item \texttt{scanf} delegates text input to the operating sytem (OS) and only interprets values from a keyboard buffer.
@@ -1049,134 +1050,352 @@ The reason for this warning is that we usually don't want to mess around with th
 \subsubsection{Void Pointers}
 If we've learned anything so far, then the fact that data types are very important for computers. Consequently, the C compiler is very strict: if a construct in the language requires a certain data type, the compiler will usually not be content if you provide anything but that data type. The warning you get from implicit pointer type casts would be one example for that.
 
-However, there are situations where it actually does not matter what kind of information can be found behind some pointer. When you tell the computer to copy 2000 bytes from one address to another, it does not matter if these 2000 bytes encode 500 \inC{int}s or 250 \inC{double}s. Only the addresses themselves (and the number 2000) are important. For situations like this, a dedicated data type exists: the \inC{void*}. You can think of this as an address \emph{without} rules of interpretation. You cannot dereference a \inC{void*} because there is no data type \inC{void}\footnote{but there is the keyword \inC{void}, which we will get to know better in chapter \ref{chp:funcs}}.
+However, there are situations where it actually does not matter what kind of information can be found behind some pointer. When you tell the computer to copy 2000 bytes from one address to another, it does not matter if these 2000 bytes encode 500 \inC{int}s or 250 \inC{double}s. Only the addresses themselves (and the number 2000) are important. For situations like this, a dedicated data type exists: the \inC{void*}. You can think of this as an address \emph{without} rules of interpretation. You cannot dereference a \inC{void*} because there is no data type \inC{void}\footnote{but there is the keyword \inC{void}, which we will get to know better in chapter \ref{chp:funcs}}. But you can put any pointer in the place of a \inC{void*} and you can implicitly cast a \inC{void*} to any other kind of pointer without getting a warning. In a way, they are made to signify: \emph{I know what I'm doing, this typecast is fine}.
 
-%TODO does not participate in type checks:
 \begin{codebox}[Example: voidPointer.c]
 \begin{minted}[linenos]{c}
+#include <stdio.h>
+
 int main () {
     int   value = 259;
     int*  intPointer = &value;
+    
     char* charPointer = intPointer;    // causes warning
     
     void* voidPointer = intPointer;    // does not cause warning
     int* otherPointer = voidPointer;   // does not cause warning either
+    
+    // printf("%d\n", *voidPointer);   // won't even compile, cant dereference
 }
 \end{minted}
 \captionof{code}{Implicit type casts with void pointers}
 \end{codebox}
 
-%TODO use with printf @ %p
+In the last chapter we've encountered \inC{void*} in a warning: when we output an address with the \texttt{\%p} format string element, we got a warning that a \inC{void*} was expected. Here, the C compiler is overly strict; in any case, we can get rid of the warning by explicitly casting to \inC{void*}:
+
+\begin{codebox}[Example: printAddress.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int value = 259;
+    printf("The address of 'value' is %p\n", (void*) (&value));
+}
+\end{minted}
+\captionof{code}{Printing an address without warning}
+\end{codebox}
+
 
 \section{Bitwise Operations}
+We are living by the dogma \emph{everything is numbers}, because numbers are the building blocks from which we can construct all information. However, this doesn't really go down to the true root of things: the most fundamental unit of information for a computer is the bit, usually realized as high or low voltage on a microscopic wire. We know that we can represent this high/low or on/off state with the digits 1 and 0 and that we can interpret strings of bits as numbers, texts, pictures, ...
 
-%TODO
-% C4 becomes: casting, promotion, scanf, bit magic
+But we can also take the bits at their face value: as an isolated piece of information, signifying \enquote{on} or \enquote{off}. This is actually not an uncommon task: maybe we want a computer to control some device, say a printer. To do so, it has to flip switches, turn individual components of the printer on and off. One of the many wires in a printer controls the motor that draws paper into the cursed box that transforms pristine sheets of paper into blotchy CVs and misaligned presentation handouts\footnote{We all know that printers know exactly when you simply need them to work the most and that they take delight in letting you down in exactly these moments. I've seen one of these boxes drive a former girlfriend to the brink of a nervous breakdown, and by the time we broke apart she was staunchly convinced hers was possessed by a demon from hell.}.
 
-% Exo: ask user for two int: number and bit ID; tell if set or not
+That means, the printer driver -- the piece of software that \enquote{talks to} the printer and controls how it works -- is capable of setting and erasing individual bits. Oddly enough, a processor cannot handle individual bits, but must always process at least whole bytes worth of information, \ie groups of at least eight bits. This section aims to introduce new operations and how to use them to arrive at our goal at turning on the black ink dispenser without simultaneously dispensing magenta ink as well\footnote{a feat that many printer manufacturers have not solved up to this day}.
 
-% exo when doing cppref: write function that rounds with arbitrary precision, i.e. round_to_decimal_places(x, n)
+A very simple solution is to be wasteful. If you can't handle smaller chunks that eight bytes, then so be it -- take a \inC{char} variable and store \inC{1} if the motor should be on and \inC{0} if it should be off, and ignore the fact that the variable could also store the value \inC{107} or \inC{-42}. This is half as bad when we only have to control one single switch, but becomes more expensive when we need more than one switch.
 
-% ----------------------------------
+There are three operations that take two \emph{integer} numbers (say \texttt{a} and \texttt{b}) as inputs and forms pairs of the individual bits. The first pair will be the first bit of \texttt{a} with the first bit of \texttt{b}, the second pair is made from the second bit of \texttt{a} with the second bit of \texttt{b}, and so forth. The bits in the result will be computed from these pairs. These operations are called \emph{and}, \emph{or} and \emph{xor}.
 
-%\section{Bitweise Logik und Bit-Shifting} \label{sec:BitwiseOperator}
-%Für Elektronik-Anwendungen ist es oft nötig, einzelne Schalter an- oder auszuschalten. Meist geschieht dies über eine Zustandsvariable, die an einen \emph{Port} (ein Anschluss, über den Daten fließen können) gesendet wird. Diese Zustandsvariable ist dann \idR eine Ganzzahl-Variable, in der jedes Bit für einen eigenen Schalter steht. Wir benötigen also Mittel, um einzelne Bits zu manipulieren.
-%
-%Dazu stehen uns die Operatoren \texttt{\~}, \texttt{\&}, \texttt{|}, \texttt{\^}, \texttt{<{}<} und \texttt{>{}>} zur Verfügung.
-%
-%Die \emph{bitweise Negation} (NOT, auch \emph{1er Komplement} genannt) \texttt{\~} kehrt jedes Bit um. Betrachten wir die vorzeichenlose 8-Bit-Zahl \texttt{42} (\texttt{00101010}). Das Ergebnis der Negation ist der Wert \texttt{213} (Binärzahl \texttt{11010101}). Als Code lässt sich das wie folgt umsetzen:
-%\begin{codebox}[Beispiel: Bitweise Negation]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   unsigned char source = 42;
-%   unsigned char result = ~source;
-%}
-%\end{minted}
-%\end{codebox}
-%
-%Das \emph{bitweise und} (AND) \texttt{\&} vergleicht die Bits von zwei Werten und setzt das Bit im Ergebnis nur, wenn beide Bits in den Vergleichswerten gesetzt waren (\ie den Wert 1 hatten).
-%
-%Beim \emph{bitweisen oder} (OR) \texttt{|} werden ebenfalls die Bits von zwei Werten verglichen. Das entsprechende Bit im Ergebnis wird jedoch bereits gesetzt, wenn mindestens eines der Vergleichsbits gesetzt war.
-%
-%Das \emph{bitweise ausschließliche oder} (XOR) \texttt{\^} arbeitet genauso wie das OR, setzt das Ergebnis-Bit jedoch nur, wenn \emph{genau} eines der Vergleichsbits gesetzt war.
-%
-%All dies lässt sich in den folgenden Wahrheits-Tabellen ausdrücken:
-%\begin{codebox}[Wahrheitstabellen: Bitweise Operatoren]
-%\begin{minted}{text}
-%     1 1 0 0   12       1 1 0 0   12       1 1 0 0   12
-%     1 0 1 0   10       1 0 1 0   10       1 0 1 0   10
-%     - AND -   --       -- OR -   --       - XOR -   --
-%     1 0 0 0    8       1 1 1 0   14       0 1 1 0    6
-%\end{minted}
-%\end{codebox}
-%
-%Als Code lässt sich das wie folgt umsetzen:
-%\begin{codebox}[Beispiel: Bitweise Operatoren]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   unsigned char lhs = 12, rhs = 10,
-%                 and, or, xor;
-%   and = lhs & rhs;    // =  8
-%   or  = lhs | rhs;    // = 14
-%   xor = lhs ^ rhs;    // =  6
-%}
-%\end{minted}
-%\end{codebox}
-%
-%Die Negation benötigt nur ein \emph{Argument} (Wert, mit dem gearbeitet wird), und wird daher \emph{unärer Operator} genannt. Für AND, OR und XOR sind zwei Werte nötig, weswegen diese als \emph{binäre Operatoren} bezeichnet werden. Die Argumente können auch komplexe Ausdrücke sein, also Ergebnisse von Berechnungen:
-%\begin{codebox}[Beispiel: Bitweise Operatoren]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   unsigned char result = ~(2 + 7 * (18 & 5));
-%}
-%\end{minted}
-%\end{codebox}
-%
-%Bitmuster können als ganzes nach links oder rechts verschoben werden. Hierzu dienen die Operatoren \texttt{<{}<} und \texttt{>{}>}.
-%\begin{codebox}[Beispiel: Bitweise Operatoren]
-%\begin{minted}[linenos]{c}
-%int main () {
-%   unsigned char toLeft  = 170 << 1;
-%   unsigned char toRight =  85 >> 1;
-%}
-%\end{minted}
-%\end{codebox}
-%Dies löst folgende Veränderung aus:
-%\begin{codebox}[Bitshift nach links bzw. nach rechts um jeweils eine Stelle]
-%\begin{minted}{text}
-%     1 0 1 0 1 0 1 0   170       0 1 0 1 0 1 0 1    85
-%     ----- << 1 ----   ---       ----- >> 1 ----   ---
-%     0 1 0 1 0 1 0 0    84       0 0 1 0 1 0 1 0    42
-%\end{minted}
-%\end{codebox}
-%Bei einem Bitshift nach links werden die Bits am rechten Ende des Bitmusters mit nullen aufgefüllt.
-%%Stellen, die am linken Ende über die Registerbreite der aufnehmenden Variable hinaus verschoben werden, gehen verloren.
-%Stellen, die über das linke Ende hinaus verschoben werden, gehen verloren.
-%Alles eben gesagte gilt analog für den Bitshift nach rechts.
-%
-%\begin{hintbox}[Multiplikation mit Zweierpotenzen]
-%Ein Bitshift um \texttt{n} Stellen nach links entspricht der Multiplikation mit der Zahl $2^{n}$.
-%Ein Bitshift um \texttt{n} Stellen nach rechts entspricht der Division durch die Zahl $2^{n}$ (Bei Ergebnissen mit Nachkommastelle wird abgerundet). Bitshifts werden schneller durchgeführt als Multiplikationen mit \texttt{*}.
-%
-%Dies gilt nur für Ganzzahlen, nicht aber für Fließkommazahlen.
-%\end{hintbox}
-%
+In the \emph{and} operation, the result bit will only be set (equal to 1, or \emph{true}) if both bits of the pair were set, too. If either of them or both were erased (equal to 0 or \emph{false}), the result bit will be erased, too. In code, this \emph{and} operation is denoted by an ampersand \texttt{\&}.
 
-%\begin{hintbox}[Farben als Hexadezimal-Werte]
-%In der Computertechnik werden Farben häufig mit \emph{Hex-Codes} beschrieben. Dies sind sechsstellige Kombinationen aus Ziffern und den Buchstaben A bis F. Tatsächlich sind diese Codes drei aneinander gereihte Hexadezimalzahlen. Diese beschreiben jeweils den Rot-, Grün- und Blau-Anteil einer Farbe. Der Dezimalwert 255 (bzw. die Hexadezimalzahl \texttt{0xFF}) beschreibt dabei \enquote{volle Intensität}, 0 (oder \texttt{0x00} dagegen sagt aus, von der Teilfarbe kommt kein Beitrag. Damit kann die Farbe Orange dann ausgedrückt werden als \texttt{0xFF7F00}: Volle Intensität Rot (\texttt{FF}), halbe Intensität Grün (\texttt{7F}) und Blau-Anteil 0 (\texttt{00}).
+The \emph{or} operation sets the result bit, if either bit in the operand pair was set or if both of them were set. Only if both operand bits were false, the result bit will be erased, too. In code, the \emph{or} operator is denoted by a vertical bar \texttt{|}.
+
+The \emph{xor} or \emph{exclusive or} operation sets the result bit only if either \emph{but not both} bits in the operand pair were set. If both of them are true or if both of them are false, the result will be false. In code, the \emph{xor} operator is denoted by a caret \texttt{\textasciicircum}.
+
+To top this of, there is also the \emph{unary}\footnote{\ie taking only \emph{one} operand, as opposed to the \emph{binary} operations like \emph{and} or \emph{+}.} operation \emph{not}, which simply flips all bits: \emph{true} becomes \emph{false} and \emph{false} becomes \emph{true}.
+
+We can summarize the behaviour of these \emph{boolean} operators (named after George Boole, an English mathematician and pioneer of algebraic logic) in truth tables:
+\begin{defbox}[Truth Tables]
+\begin{minted}{text}
+               bits   decimal    bits   decimal    bits   decimal   bits  decimal
+operand a    1 1 0 0    12     1 1 0 0    12     1 1 0 0    12      1 0      2
+operand b    1 0 1 0    10     1 0 1 0    10     1 0 1 0    10
+operator      - AND -   --     -- OR -    --     - XOR -    --      NOT     --
+result       1 0 0 0     8     1 1 1 0    14     0 1 1 0     6      0 1      1
+\end{minted}
+\captionof{table}{Boolean Logic}
+\end{defbox}
+
+A piece of code that reproduces these results looks like this:
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
+\begin{codebox}[Example: bitwiseOps.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    char a = 12, b = 10;
+    
+    printf("a and b = %d\n", a & b);
+    printf("a  or b = %d\n", a | b);
+    printf("a xor b = %d\n", a ^ b);
+    printf("  not a = %d\n", ~a);
+}
+\end{minted}
+\captionof{code}{Bitwise Operators}
+\end{codebox}
 %
-%Siehe auch \url{https://de.wikipedia.org/wiki/Additive_Farbmischung}
-%\end{hintbox}
+\begin{cmdbox}[Output: bitwiseOps.c]
+\begin{minted}{text}
+a and b = 8
+a  or b = 14
+a xor b = 6
+  not a = -13
+\end{minted}
+\end{cmdbox}
+\end{tcbraster}
+Note that a \inC{char} is a \emph{signed eight bit variable}. So \texttt{a = 0000 1100$_2$} and \texttt{\textasciitilde a = 1111 0011$_2$ = -13}.
+
+How does this help us with our switches? Let's assume, we requested the state of the printer and got an \inC{int} variable \texttt{status}, containing the state of all the switches in the device. We may know that the third bit correspons to the state of the motor we are interested in. To find out whether it is on or off, we can use the bitwise \emph{and}: we prepare a second \inC{int} variable \texttt{mask}, in which all bits are set to \emph{false} except for the third bit which is \emph{true}. The nature of the \emph{and} operator tells us that most of the bits in the result will be \emph{false}; only the third bit has a chance of being \emph{true}, and this is the case exactly when the third bit of \texttt{status} was set, \ie when the motor was on. In other words, the result will be either zero if the motor was off, or nonzero if it was on.
+
+To turn on the motor, we can use the same mask, but use the \emph{or} operator. We know that \emph{something or 0 = something} and \emph{something or 1 = 1}. So wherever the \texttt{mask} has a zero bit, we simply copy the old \texttt{state} of the printer, and where a \texttt{mask} bit is set, we force the result to \emph{true}.
+
+Lastly, convince yourself that with the same \texttt{mask}, the \emph{xor} operator can be used to flip a given bit, regardless whether it was \emph{true} or \emph{false} before.
+
+Masks can be computed easily with the \emph{bitshift to the left} and \emph{bitshift to the right} operators \texttt{<{}<} and \texttt{>{}>}. These binary operators take a variable, and shift its bit pattern \texttt{n} bits to the left or right. If in this operation there is an \emph{overflow} or \emph{underflow} (a bit is shifted out of the width of the containing variable), it is simply forgotten. The bits \emph{shifted into} the result are always zero.
+
+\begin{defbox}[Bitshift to the left by one and bitshift to the right by one]
+\begin{minted}{text}
+      bits      decimal           bits      decimal
+1 1 1 0 0 0 1 1   227       1 1 0 0 0 1 1 1   199
+----- << 1 ----   ---       ----- >> 1 ----   ---
+1 1 0 0 0 1 1 0   198       0 1 1 0 0 0 1 1    99
+\end{minted}
+\captionof{table}{Bitshifting Operators on unsigned eight bit values}
+\end{defbox}
+
+\begin{hintbox}[Overloaded notation: Ampersand]
+Like the asterisk (\texttt{*}), the ampersand (\texttt{\&}), too, has an overloaded notation: it signifies both, the \emph{get address of} operator and the bitwise \emph{and}. The former is a unary operator, \ie it takes only one argument; there can be no operand before the \emph{get address of} operator. The latter is a binary operator and always stands between two arguments.
+
+To make it easier to see at one glance whether the binary or unary operator is meant, I recommend again to use whitespaces: in case of the bitwise \emph{and}, there will be a whitespace before and after the ampersand; for the \emph{get address of} operator, there will be no whitespace between it and its operand. Consequently, I apply the same rule for the bitwise negation (\texttt{\textasciitilde}): as a unary operator, I leave no whitespace between it and its operand.
+\end{hintbox}
+
+Now, if we know that the value \inC{1} has the binary representation \texttt{0..01$_2$}, we can easily create a mask with the $n^{\text{th}}$ bit set by simply shifting \inC{1} by \texttt{n}. This works for all integer types, \ie for \inC{char}, \inC{short}, \inC{int}, \inC{long} and \inC{long long}, 
+
+\begin{hintbox}[Multiplication with Powers of two]
+Multiplying an integer by the value $2^n$ is equivalent to shifting its bit representation by $n$ to the left. Likewise, division by that value can be realized by a bitshift to the right (however, this might loose the fractional part of the division). The bitshift operators work significantly faster than the regular multiplication (\texttt{*}) or division (\texttt{/}). However, this trick only works with integer types, not with floating point numbers.
+\end{hintbox}
+
+For all binary operators, there also is a shorthand update version: \texttt{value = value \& mask} can be abbreviated to \texttt{value \&= mask}. The same holds for or, xor and the two bitshift operators.
+
+\section{Main Takeaways}
+\begin{defbox}[You should remember...]
+\textbf{Input with \texttt{scanf}}
+\begin{itemize}
+\item Interprets text from user input according to a format string
+\item Syntax similar to \texttt{printf}
+\item Requires the \emph{addresses} of the variables which should be overwritten
+\item Returns number of successfully interpreted values
+\item Uses an OS-provided \emph{keyboard buffer}
+\end{itemize}
+
+\textbf{Type Casting}
+\begin{itemize}
+\item Convert numbers from one binary representation to another
+\item Explicit form \texttt{(datatype) (expression)}
+\item Happens implicitly in mixed type expressions according to a hierarchy of promotions
+\item Pointer type cast changes rules of interpretation but not the representation of the value itself
+\end{itemize}
+\end{defbox}
 %
-%\begin{hintbox}[Zweier-Potenzen in der Computerwelt]
-%\emph{Alles} in der Computertechnik ist um Potenzen der Zahl 2 aufgebaut.
-%%Wir finden 32-bit und 64-bit-Betriebssysteme, USB-Sticks mit 2, 4, 8 oder 16 GB, oder sogar Bildschirmauflösungen wie 1024x768 Pixel.
-%Diese Zahlen kommen derartig häufig vor, dass sie von TechnikerInnen bereits als \enquote{runde Zahlen} wahrgenommen werden. So feierte beispielsweise Randall Munroe, Author des Webcomics \href{https://www.xkcd.com/}{xkcd} seinen eintausendsten Strip mit dieser Veröffentlichung:
-%
-%\begin{center}
-%\includegraphics[width=.9\linewidth]{./gfx/xkcd-1000}
-%\end{center}
-%\captionof{figure}
-%	[Dezimale und binäre runde Zahlen]
-%	{Dezimale und binäre runde Zahlen. Quelle: \url{https://www.xkcd.com/1000/}}
-%\end{hintbox}
+\begin{defbox}[]
+\textbf{Bitwise Operations}
+\begin{itemize}
+\item Operations \emph{and} (\texttt{\&}), \emph{or} (\texttt{|}) and \emph{xor} (\texttt{\textasciicircum})
+	\begin{itemize}
+	\item Compare individual bits of their operands and set or erase them in the target
+	\item Work according to \emph{truth tables}
+	\item Can be used to earse, set or flip individual bits when used with a \emph{mask}
+	\end{itemize}
+\item Operation \emph{not} (\texttt{\textasciitilde})
+	\begin{itemize}
+	\item Flips each bit in its operand
+	\end{itemize}
+\item Operstions \emph{bitshift to the left} (\texttt{<{}<}) and \emph{bitshift to the right} (\texttt{>{}>})
+	\begin{itemize}
+	\item Shifts a bit pattern to the left or right by <operand> places
+	\item Bits shifted out of the width of a variable are forgotten
+	\item Bits shifted in are always zeros
+	\item Useful to create masks
+	\end{itemize}
+\end{itemize}
+\end{defbox}
+
+
+\newpage
+\section{Exercises and Solutions}
+\subsection*{Quotient of User Inputs}
+Write a program that asks the user for two numbers and print the ratio of the two numbers on screen.
+
+\subsection*{Quotient of Integers}
+Modify your program from before to ask the user for two \emph{integers}. Make sure that the program still correctly computes the ratio, including the fractional part.
+
+\subsection*{Bit Testing}
+Write a program that asks the user for two integers \texttt{value} and \texttt{position}. Make it so that the program will print \texttt{0} if the \texttt{position}$^\text{th}$ bit of \texttt{value} is false, or a nonzero value otherwise.
+
+\emph{Bonus Challenge}: Can you modify your code such that it works when \emph{value} is of type \inC{double}?
+
+\subsection*{Evaluation}
+Predict the output of this code:
+\begin{codebox}[exo4-4.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int value = -1;   // 1...1 1111 1111 in binary
+
+    int mask0 = 1;
+    int mask1 = 1 << 2;
+    int mask2 = 1 << 4;
+    int mask3 = mask2 << 2;
+
+    value = value ^ (mask0 | mask1 | mask2 | mask3);
+    value = ~value;
+    value >>= (mask1 >> 1);
+    value <<= 1;
+    printf("%+3d\n", value);
+}
+\end{minted}
+\end{codebox}
+
+
+\rule{\linewidth}{0.1mm}
+
+
+\subsection*{Solution: Quotient of User Inputs}
+\begin{codebox}[exo4-1.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    double dividend, divisor, ratio;
+    
+    printf("Please enter the number to be divided:\n");
+    scanf("%lf", &dividend);
+    
+    printf("Please enter the number to divide by:\n");
+    scanf("%lf", &divisor);
+    
+    ratio = dividend / divisor;
+    
+    printf("the ratio is %lf / %lf = %lf:\n", dividend, divisor, ratio);
+}
+\end{minted}
+\end{codebox}
+
+
+\subsection*{Solution: Quotient of Integers}
+\begin{codebox}[exo4-2.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int    dividend, divisor;
+    double ratio;
+    
+    printf("Please enter the number to be divided:\n");
+    scanf("%d", &dividend);
+    
+    printf("Please enter the number to divide by:\n");
+    scanf("%d", &divisor);
+    
+    ratio = (double) dividend / divisor;
+    
+    printf("the ratio is %d / %d = %lf:\n", dividend, divisor, ratio);
+}
+\end{minted}
+\end{codebox}
+
+Changes were made in ...
+\begin{itemize}
+\item line 4: the variables \texttt{dividend} and \texttt{divisor} are of type \inC{int} now.
+\item line 8 and 11: the format string for \texttt{printf} now needs to be \texttt{\%d} rather than \texttt{\%lf}.
+\item line 13: a type cast to \inC{double} is necessary. Note that the cast only applies to \texttt{dividend};
+	the variable \texttt{divisor} is implicitly cast to \inC{double} as well, because this now is a mixed type expression.
+	Putting parentheses around \texttt{dividend / divisor} would be wrong here, because then the division would be evaluated with integer algebra, 
+	\ie the fractional part of the result would be truncated \emph{before} the cast to \inC{double}.
+\item line 15: the parts of the format string pertaining to \texttt{dividend} and \texttt{divisor} need to be changed to \texttt{\%d}
+\end{itemize}
+
+\subsection*{Solution: Bit Testing}
+\begin{codebox}[exo4-3.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int    value, position;
+    printf("Please enter an integer:\n");
+    scanf("%d", &value);
+    
+    printf("Please enter the number of the bit to test, starting at zero:\n");
+    scanf("%d", &position);
+    
+    int mask = 1 << position;
+    
+    printf("If the bit in position %d is set, you will see a nonzero value\n",
+           position);
+    printf("%d\n", value & mask);
+}
+\end{minted}
+\end{codebox}
+
+\newpage
+\textbf{Bonus Challenge:}
+\begin{codebox}[exo4-3-bounus.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    double value;
+    int    position;
+    printf("Please enter a value:\n");
+    scanf("%lf", &value);
+
+    printf("Please enter the number of the bit to test, starting at zero:\n");
+    scanf("%d", &position);
+
+    long long int mask = 1ll << position;
+
+    printf("If the bit in position %d is set, you will see a nonzero value\n",
+           position);
+    printf("%lld\n", *(long long int*)(&value) & mask);
+}
+\end{minted}
+\end{codebox}
+
+Changes were made in ...
+\begin{itemize}
+\item line 4: \texttt{value} is now of type \inC{double}
+\item line 7: the format string is now \texttt{\%lf}
+\item line 12: the variable \texttt{mask} is now of type \inC{long long int}. The reason behind this is as following:\\
+	A \inC{double} value has 64 bits or 8 bytes (cf. table \ref{tab:DatatypesStd}), so we need a \texttt{mask} that has equally many bits.
+	The table from the appendix tells us that the types \inC{long int}, \inC{long long int} and their \inC{unsigned} counterparts satisfy this criterion.
+	We can select either of the four types for the deed. However, \inC{long long int} is preferable, because it is guaranteed to be 64 bits wide on all plattforms.
+\item line 16: \texttt{value} needs to be re-interpreted as an integer type, since bitwise operations are not defined on floating point values.
+	The same reasoning as for \texttt{mask} applies for choosing the type we cast into.\\
+\end{itemize}
+
+Mark also how line 16 is evaluated:\\
+First, the parenthesis \texttt{(\&value)} is evaluated, giving the address of \texttt{value}.
+Then the type cast to \inC{long long int*} is performed, since this operation is higher up in the operator hierarchy than the bitwise and (cf. table \ref{tab:OperatorPrecedence}).
+Then the re-cast pointer is dereferenced. Dereference and type-cast have the same precendence, but only this order of operations makes sense: 
+the defererence operator \texttt{*} applies to whatever pointer is to the right of it, and this pointer happens to be the expression \inC{(long long int*) (&value)}.
+Only after that, the low priority operation \emph{bitwise and} is performed.
+
+\subsection*{Solution: Evaluation}
+The final result is \inC{42}.
+
+\begin{itemize}
+\item line  6: \texttt{mask0 = 0..0 0000 0001$_2$ =  1}
+\item line  7: \texttt{mask1 = 0..0 0000 0100$_2$ =  4}
+\item line  8: \texttt{mask2 = 0..0 0001 0000$_2$ = 16}
+\item line  9: \texttt{mask3 = 0..0 0100 0000$_2$ = 64}
+\item line 11: \texttt{mask0 | mask1 | mask2 | mask3 = 0..0 00101 0101$_2$ = +85}
+\item line 11: \texttt{value = 1..1 1010 1010$_2$ = -86}
+\item line 12: \texttt{value = 0..0 0101 0101$_2$ = +85}
+\item line 13: \texttt{value = 0..0 0001 0101$_2$ = +21}
+\item line 13: \texttt{value = 0..0 0010 1010$_2$ = +42}
+\end{itemize}
