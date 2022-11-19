@@ -101,7 +101,6 @@ To use variables in our code, we first have to \emph{declare} them. That means w
 
 \texttt{variableName} is an arbitrary identifyer we can choose, like \texttt{nameOfPlayer1}. It must abide to these rules: \vspace{-9pt}
 \begin{itemize}
-\setlength\itemsep{0pt}
 \item Must only comprise of the characters \texttt{a..z}, \texttt{A..Z}, \texttt{0..9} or \texttt{\_}
 \item The first character must not be a digit
 \item Must have at most 40 characters
@@ -128,8 +127,8 @@ Multiple variables \emph{of the same type} can be declared in a single statement
 \begin{codebox}[declarations.c]
 \begin{minted}[linenos]{c}
 int main () {
-   int    count;
-   double positionX, positionY;
+    int    count;
+    double positionX, positionY;
 }
 \end{minted}
 \captionof{code}{Declaration of variables} \label{code:declaringVars}
@@ -153,7 +152,6 @@ int main () {
 \end{codebox}
 The problems are: \vspace{-6pt}
 \begin{itemize}
-\setlength\itemsep{-0pt}
 \item Line 3: the variable \texttt{x} already exists (line 2) and cannot be re-typed to \inC{double}.
 \item Line 4: again, the variable \texttt{x} already exists; even repeating an identical declaration is not allowed.
 \end{itemize}
@@ -298,7 +296,6 @@ As you've seen in example \ref{code:simpleComputations}, you can also use parent
 In the programming world, we make a distinction between \emph{expressions}, \emph{statements} and \emph{declarations}.
 
 \begin{itemize}
-\setlength\itemsep{0pt}
 \item An \emph{expression} is anything that can be \emph{evaluated}, \ie condensed into a single value. Examples for statements are \inC{5 + 3} (evaluated to \inC{8}) 
 	or \inC{count - 3} (evaluation depends on the current value of the variable \texttt{count}).
 \item A \emph{statement}, on the other hand, is one single complete line of code that changes the \emph{state of the machine}, \ie changes some values in memory\footnote{well... actually,
@@ -357,7 +354,6 @@ int main () {
 
 In listing \ref{code:divisions} we'll find the following results:\vspace{-9pt}
 \begin{itemize}
-\setlength\itemsep{-6pt}
 \item \texttt{result\_1} will be computed from an integer division, since both operands are integers. Hence the \enquote{mathematically correct} result $1.5$ will be rounded down to 
 	the nearest integer, which is \inC{1}.
 \item All of \texttt{result\_2} through \texttt{result\_4} trigger floating point division, since at least one operand is a \inC{double}. Hence, these three variables all store the 
@@ -425,7 +421,6 @@ printf(formatString, commaSeparetedListOfExpressions);
 
 In this, ...
 \begin{itemize}
-\setlength\itemsep{0pt}
 \item \texttt{formatString} is a string (\ie text between \texttt{"}double quotes\texttt{"}) that tells the computer what to print where. Essentially, it is regular text with special
 	characters that act as placeholders; the value of one or more variables will be substituted for these placeholders. Placeholders begin with a percent sign (\texttt{\%}) and will be
 	explained in more detail below.
@@ -460,7 +455,7 @@ In the appendix, tables \ref{tab:FormatOutNum} and \ref{tab:FormatOutSpc} you'll
 \newcolumntype{N}{>{         \centering\arraybackslash} p{.25\linewidth}}
 \newcolumntype{R}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
 \begin{center}
-\rowcolors{1}{tabhighlight}{white}
+\rowcolors{1}{white}{tabhighlight}
 \begin{tabularx}
 	{.907\linewidth}
 	{NR|NR}
@@ -488,7 +483,6 @@ will give you an output like:\\
 \begin{warnbox}[Matching Data Types]
 Always make sure that the data types in the format string match the data types of the actual expressions! That is, if you type \texttt{\%d} in your format string, you had better provide an \inC{int} value for that place holder. Likewise, make sure the number of expressions and their order matches that of the placeholders. If you disregard this rule, ...
 \begin{itemize}
-\setlength\itemsep{0pt}
 \item you'll get a compiler warning\footnote{only if you compile with the \texttt{-Wall} compiler option} (which is the nicer part of the outcome)
 \item you'll find utter BS on screen.
 \end{itemize}
@@ -613,19 +607,19 @@ instructs the computer to print a string (\texttt{\%s}) that is right aligned an
 
 To produce a left-aligned string, one can simply flip the sign of the width information:
 \vspace{-9pt}
-\mint{c}{printf("%20s: ...", "France");}
+\mint{c}{printf("%-20s: ...", "France");}
 \vspace{-9pt}
 will produce the output "\texttt{France~~~~~~~~~~~~~~: ...}"
 
 The same modifier can also be applied to numbers:
 \vspace{-9pt}
-\mint{c}{printf("%20s: %10lf", "France", percentFrance);}
+\mint{c}{printf("%-20s: %10lf", "France", percentFrance);}
 \vspace{-9pt}
 results in the output "\texttt{France~~~~~~~~~~~~~~: ~7.300000\%}"
 
 This is already enough to produce nice tabular output; but maybe you don't like the fact that floating point numbers will always be printed with 6 digits after the decimal point. To change this behaviour, we can add an additional \emph{precision modifier} to the format string\footnote{of course, this only works for \inC{double} and \inC{float} values, not for \inC{int}s, strings or other data types}. This means, you can add a dot and another integer in the format string, after the field width information:
 \vspace{-9pt}
-\mint{c}{printf("%20s: %4.1lf", "France", percentFrance);}
+\mint{c}{printf("%-20s: %4.1lf", "France", percentFrance);}
 \vspace{-9pt}
 produces "\texttt{France~~~~~~~~~~~~~~: ~7.3\%}"
 
@@ -852,7 +846,6 @@ As the name suggests, this is simply the value \inC{0}, but in a layout that is 
 \begin{hintbox}[Overloaded Syntax]
 By now we've encountered the asterisk to mean three different things:
 \begin{itemize}
-\setlength\itemsep{0pt}
 \item Multiplication
 \item Part of a data type
 \item Dereferencing
@@ -860,7 +853,6 @@ By now we've encountered the asterisk to mean three different things:
 
 With some practice, you will have no problem figuring out the meaning of the symbol from given context. Try to remember these contexts:
 \begin{itemize}
-\setlength\itemsep{0pt}
 \item Multiplication only happens between \enquote{normal} values, \ie regular, non-pointer variables or constants
 \item To be part of a data type, the asterisk needs to appear in a \emph{declaration}, \ie directly after a data type name such as \inC{int}.
 \item Dereferencing can only be done to pointers
@@ -868,11 +860,68 @@ With some practice, you will have no problem figuring out the meaning of the sym
 
 To help with discerning the context, I advise you to use whitespaces in the following way:
 \begin{itemize}
-\setlength\itemsep{0pt}
 \item For multiplications, put a whitespace on both sides of the asterisk: \texttt{a * b}
 \item When declaring a pointer variable, leave no whitespace between the base type name and the pointer symbol: \inC{int* ptr;}
 \item For dereferencing, leave no whitespace between the operator and the pointer: \texttt{*ptr}
 \end{itemize}
+\end{hintbox}
+
+\begin{hintbox}[One declaration per line]
+In the C programming language, each single character conveys meaning. This means we have to be very careful when reading code, which becomes tiresome after a while. Because of that, some coding patterns are discouraged; declaring more than one variable per line is one of them.
+
+For example, in code \ref{code:divisions}, we could in principle get away with two lines of code: one for the \inC{int}s and one for the \texttt{double}s. However, it is commonly regarded preferable to stick with the one declaration per line rule. Here, line means the entire protion of code between two semicolons. So code like
+
+\begin{warnbox}[Two Declarations in one line, leftupper=7mm]
+\begin{minted}[linenos]{c}
+int main () {
+    int foo = 1,
+        bar = 2;
+}
+\end{minted}
+\end{warnbox}
+would still be considered two declarations in one line.
+\end{hintbox}
+%
+\begin{hintbox}[]
+One reason for shunning this style is that the terminal comma and semicolon look too similar, introducing an easy to avoid source of errors. More grave is that when declaring pointer variables, the asterisk does not in fact apply to all variables in a comma separated list, but only to the one direct behind it:
+
+\vspace{6pt}
+\begin{warnbox}[Spurious declaration of pointers, leftupper=7mm]
+\begin{minted}[linenos]{c}
+int main () {
+    int* foo, bar;
+}
+\end{minted}
+\end{warnbox}
+
+We would expect here that both, \texttt{foo} and \texttt{bar} are of type \inC{int*}. In fact, this only holds for \texttt{foo}; \texttt{bar} will actually be of type \inC{int}, \ie no pointer. If we want both of them to be pointers, we need to type:
+\begin{warnbox}[Spurious declaration of pointers, leftupper=7mm]
+\begin{minted}[linenos]{c}
+int main () {
+    int* foo, *bar;
+}
+\end{minted}
+\end{warnbox}
+
+but this makes it much harder to read for human eyes. So, much better is the form:
+\begin{codebox}[Spurious declaration of pointers]
+\begin{minted}[linenos]{c}
+int main () {
+    int* foo;
+    int* bar;
+}
+\end{minted}
+\end{codebox}
+
+I usually follow this rule. In this book, sometimes I am also bound by layout concerns; putting code and explanation on the same page without weird braks seemed woth bending the rules to me; I think learning will be easier for you in the cases where I did that. I hope you forgive me taking the liberty.
+\end{hintbox}
+
+\begin{hintbox}[Foo Bar]
+In examples, both in this book, other authors' works and online forums you will often find variables named \texttt{foobar}, \texttt{foo}, \texttt{bar} and \texttt{baz}. These words are not supposed to mean anything in particular, but are stand-ins for more concrete names where the context of teaching does not allow finding such a name. For example, I may be talking about variables in general, so I will talk about \emph{some integer}. In your projects, they may refer to \texttt{numberOfCupsOfCoffee} or \texttt{valueOfLivingWithADog}, but that would be specific to your projects. Since I have to use \emph{some} names, I often resort to these \emph{conventional names for examples}.
+
+They are both short enough to quickly type, yet long enough to be easily recognizable as entities by our brain patterns, so they still are better variable names in our examples than \texttt{a}, \texttt{b}, ...
+
+Legend has it\footnote{\url{https://en.wikipedia.org/wiki/Foobar}} that \texttt{foobar} originated from the slang term \texttt{FUBAR}, which is an acronym meaning \emph{fucked up beyond repair} or \emph{fucked up beyond recognition}. Make of that as you will.
 \end{hintbox}
 
 \begin{plusbox}[Generic Pointer Type]
@@ -894,8 +943,7 @@ dereferenceOperator.c:7:44: warning: format ‘%p’
 \end{cmdbox}
 
 We will learn in the next chapter how to avoid this warning. Still, we can already understand what this warning means:
-\end{plusbox}
-\begin{plusbox}[]
+
 The compiler tells us that the format string is mismatched for the variable we want to print: \texttt{myPointer} is of type \inC{int*}, while \texttt{\%p} expects an expression of type \inC{void*}. So far, we haven't encountered the type \inC{void} because it, well, isn't really a data type. In the context of pointers, it is used for \enquote{raw pointers}, with no added information. In other words, it is a pointer without base type. This was added to the language to allow constructs where the kind of pointer does not matter -- like here. Printing the address only requires knowing that it is a sort of number; there is no inherent difference between an \inC{int*} and a \inC{double*}. However, the C compiler is sometimes more strict than it needs to be and demands matching data types in every possible situation.
 
 Now that we understand where the warning comes from and that it does not really constitute a mistake, we can safely ignore it. This is, of course, still \emph{not a good practice}. Good code should never produce any warnings. So be looking forward to chapter \ref{chp:casting} where we learn to fix this problem.
@@ -903,7 +951,7 @@ Now that we understand where the warning comes from and that it does not really 
 
 
 \subsection{Pointer Arithmetics}
-As mentioned before, pointers are but a special form of integers. Treating them as such allowed the inventors\footnote{Ken Thompson and Dennis Ritchie, if you wondered what their names are} of the C programming language to implement \enquote{alternative rules for doing maths with them}. For one, multiplication and  division simply do not exist with pointers. This freed up the asterisk symbol to mean dereference of pointers. The main reason, however, is that a product of pointers would virtually never have a practically meaningful result. Remember that pointers are the numbers of cells in memory; they tell you where some piece of information is found. Now, if you know where to find some number, what good would it be to double that address? It is very unlikely that you would find a memory cell that you \enquote{own} (\ie that you have allocated) at the address given by a product, let alone useful information therein. The same goes for division.
+As mentioned before, pointers are but a special form of integers. Treating them as such allowed the inventors of the C programming language\footnote{Ken Thompson and Dennis Ritchie, if you wondered what their names are} to implement \enquote{alternative rules for doing maths with them}. For one, multiplication and  division simply do not exist with pointers. This freed up the asterisk symbol to mean dereference of pointers. The main reason, however, is that a product of pointers would virtually never have a practically meaningful result. Remember that pointers are the numbers of cells in memory; they tell you where some piece of information is found. Now, if you know where to find some number, what good would it be to double that address? It is very unlikely that you would find a memory cell that you \enquote{own} (\ie that you have allocated) at the address given by a product, let alone useful information therein. The same goes for division.
 
 For the same reason, the addition between two pointers is undefined. Adding an address to an address is the same as multiplying it by two, which we already found to yield no reasonable value.
 
@@ -1013,19 +1061,19 @@ The same holds for subtractions between pointers and integers: in expressions of
 
 Finally, the subtraction between \emph{two pointers of the same base type} is well defined. This operation implicitly divides the difference of the addresses by the width of the base type. In other words, it tells you how many values fit \enquote{between} the boundaries given by the pointers. For historical reasons, the result data type is \inC{long}, which by now is just another name for an \inC{int}. The proper format string code for \inC{long} expressions is \texttt{\%ld}:
 
-\begin{tcbraster}[raster columns=2,
-                  raster equal height,
-                  nobeforeafter,
-                  raster column skip=0.2cm]
+%\begin{tcbraster}[raster columns=2,
+%                  raster equal height,
+%                  nobeforeafter,
+%                  raster column skip=0.2cm]
 \begin{codebox}[pointerDifference.c]
 \begin{minted}[linenos]{c}
 #include <stdio.h>
 
 int main () {
-    int i1 = 0;
-    int i2 = 0;
+    int foo = 0;
+    int bar = 0;
 
-    printf("&i - &c: %ld\n", &i - &c);
+    printf("&bar - &foo: %ld\n", &bar - &foo);
 }
 \end{minted}
 \captionof{code}{Subtracting two pointers}
@@ -1036,7 +1084,7 @@ int main () {
 1
 \end{minted}
 \end{cmdbox}
-\end{tcbraster}
+%\end{tcbraster}
 
 
 \section{Shorthands} \label{sec:Shorthands}
@@ -1171,7 +1219,9 @@ In context of the above, I recommend you not to do chain assignments or to incre
 \item can be updated with new variables.
 \item can be used in expressions.
 \end{itemize}
-
+\end{defbox}
+%
+\begin{defbox}[]
 \textbf{Expressions}
 \begin{itemize}
 \item can be evaluated to a single value.
@@ -1198,7 +1248,6 @@ In context of the above, I recommend you not to do chain assignments or to incre
 \subsection*{Declarations}
 Write a program that ...
 \begin{itemize}
-\setlength{\itemsep}{0pt}
 \item contains a variable storing the value \inC{3.141592654}
 \item contains a pointer to that value
 \item prints that variable's value using the pointer
@@ -1274,7 +1323,7 @@ int main () {
 \end{codebox}
 
 
-\rule{\linewidth}{0.1mm}
+\newpage
 
 \subsection*{Solution: Declarations}
 \begin{codebox}[exo3-1.c]

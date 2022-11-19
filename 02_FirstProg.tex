@@ -76,7 +76,7 @@ As a rule of thumb, you should add a level of indentation for every opening brac
 
 It is up to you, how many whitespaces (or tabs) you add; only you should stay consistent throughout your code. Commonly, one indentation level means four white spaces, but also two or eight whitespaces are not unheard of. Many code editors can be configured to automatically indent to the next multiple of two, four or eight whitespaces on the press of the tabulator key.
 
-In this book I'll do my best to stay consistent in my indentation style. You may take this as inspiration for your own code.
+In this book I'll do my best to stay consistent in my indentation style. You may (and should!) take this as inspiration for your own code.
 \end{hintbox}
 
 The gcc reads the code \enquote{from top to bottom}. This means that the order of statements is of great importance. If, for example, you move the \texttt{\#include} statement from line 1 to the end of the code, you'd get an error message. The reason behind this is that the command \texttt{printf} is only declared in the fine \texttt{stdio.h}; before this declaration, the compiler \enquote{doesn't know} what \texttt{printf} even means.
@@ -87,7 +87,6 @@ Albeit sounding unintuitive, computer code (like our C code) is meant for \emph{
 
 To that end, the C programming language allows to leave blocks of text that are simply ignored by the compiler. Adding such \emph{comments} to the code can be done in one of two ways: \vspace{-9pt}
 \begin{itemize}
-\setlength\itemsep{0pt}
 \item By opening the comment with the characters \texttt{/*} and closing them with \texttt{*/}. Any text in between these two markers will be ignored, even if they are not in the same line.
 	This form is often called a \emph{block quote}.
 \item By introducing the comment with the characters \texttt{//}. The entire rest of the line will be ignored. You can think of the line break as the close-comment marker in this form.
@@ -114,9 +113,9 @@ Regard this example:
 // "proper code".
 
 int main() {
-   printf("Hello World!\n" /* the asterisk form can be interspersed
+    printf("Hello World!\n" /* the asterisk form can be interspersed
                               with regular code! */ );
-   printf("/* This is NOT a comment! Quotation marks have higher priority */");
+    printf("/* This is NOT a comment! Quotation marks have higher priority */");
 }
 \end{minted}
 \captionof{code}{Comments} \label{code:comments}
@@ -179,7 +178,7 @@ To double down on this recommendation, let me quote here the conversation in whi
 \begin{defbox}[You should remember...]
 \textbf{The \texttt{\#include} directive(s)}
 \begin{itemize}
-\setlength\itemsep{0pt}
+\setlength{\itemsep}{0pt}
 \item loads definitions from other files
 \item should make up the first line(s) of your code
 \item loads \texttt{<stdio.h>} in almost all of our programs
@@ -188,7 +187,7 @@ To double down on this recommendation, let me quote here the conversation in whi
 \textbf{The \texttt{main} function}
 \vspace{-6pt}
 \begin{itemize}
-\setlength\itemsep{0pt}
+\setlength{\itemsep}{0pt}
 \item is enclosed by \texttt{\{}curly braces\texttt{\}}
 \item contains the actually executed code
 \item needs to be introduced by the text \texttt{int main} (case sensitive!)
@@ -197,16 +196,13 @@ To double down on this recommendation, let me quote here the conversation in whi
 \textbf{The command \texttt{printf}}
 \vspace{-6pt}
 \begin{itemize}
-\setlength\itemsep{0pt}
+\setlength{\itemsep}{0pt}
 \item takes \emph{arguments}, which are mentioned in parentheses
 \item needs strings to be in \texttt{"}double quotes\texttt{"}
 \item interpretes the substring \texttt{\textbackslash n} as a line break
 \item needs to be terminated by a semicolon (\texttt{;})
 \end{itemize}
 
-%\end{defbox}
-%%
-%\begin{defbox}[]
 \textbf{Comments}
 \begin{itemize}
 \vspace{-6pt}
@@ -216,19 +212,20 @@ To double down on this recommendation, let me quote here the conversation in whi
 \end{itemize}
 \end{defbox}
 
-\newpage
+
 \section{Exercises and Solutions}
 Find the mistakes in the following code:
 \begin{codebox}[exo2-1.c]
 \begin{minted}[linenos]{c}
 int Main {
-   print('Hello World!\n' // \n means a line break )
-   #inculde {stdio.c}
+    print('Hello World!\n' // \n means a line break )
+    #inculde {stdio.c}
 }
 \end{minted}
 \end{codebox}
 
-\rule{\linewidth}{0.1mm}
+\newpage
+
 \subsection*{Solution}
 \begin{itemize}
 \item Line 1:

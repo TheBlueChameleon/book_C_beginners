@@ -158,9 +158,9 @@ We say that \texttt{scanf} is a function. This name comes from the fact that it 
 int main () {
     double number = -1.0;
     int returnValue = -1;
+    
     printf("Please enter a number: ");
     returnValue = scanf("%lf", &number);
-    
     printf("You entered: %lf\nThe return value was: %d\n", number, returnValue);
 }
 \end{minted}
@@ -425,7 +425,7 @@ We don't even get the chance to enter a second number. The reason behind this is
 \newcolumntype{N}{>{\ttfamily\centering\arraybackslash} p{.25\linewidth}}
 \newcolumntype{R}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
 \begin{center}
-\rowcolors{1}{white}{tabhighlight}
+\rowcolors{1}{tabhighlight}{white}
 \begin{tabularx}
 	{.453\linewidth}
 	{NR}
@@ -868,7 +868,7 @@ To do type casting, we need two things: a value (or expression) to cast into a n
 In which \texttt{dataType} is any data type as we've encountered them in chapter \ref{chp:expressions}, \eg \inC{int} or \inC{double*}, and \texttt{expression} is anything that can be evaluated.
 
 Let's look at an example:
-\begin{codebox}[Example: typecast.c]
+\begin{codebox}[typecast.c]
 \begin{minted}[linenos]{c}
 int main () {
     int    n = 7;
@@ -884,7 +884,7 @@ Note that in line 4, parentheses around the expression are necessary, since type
 
 While a type cast will leave as much information intact as possible, you may loose information in the process. Casting a \inC{double} into an \inC{int} can obviously not retain the fractional part of the number. Instead, the number is \emph{truncated} (rounded towards zero; the fractional part is simply forgotten):
 
-\begin{codebox}[Example: typecastPrecisionLoss.c]
+\begin{codebox}[typecastPrecisionLoss.c]
 \begin{minted}[linenos]{c}
 int main () {
     double x = +7.9,
@@ -901,7 +901,7 @@ As you see, this is different from rounding. We will see in chapter \ref{chp:mat
 
 In a similar fashing, numbers that require more bits than the target type are truncated: Let's say we want to cast the \inC{int 257} to a \inC{char}. An \inC{int} can store 32 bits, so the value $257_{10} = 1~0000~0001_2$ with its nine bits fits snuggly into the provided space. A \inC{char} on the other hand only has space for eight bits. So anything to the left of the eighth bit is simply truncated. We get:
 
-\begin{codebox}[Example: typecastOverflow.c]
+\begin{codebox}[typecastOverflow.c]
 \begin{minted}[linenos]{c}
 int main () {
     char data = (char) 257; // data = 1
@@ -925,7 +925,7 @@ In the case of mixed type expressions, the C compiler again tries to retain as m
 \end{center}
 
 For example, ...
-\begin{codebox}[Example: promotion.c]
+\begin{codebox}[promotion.c]
 \begin{minted}[linenos]{c}
 int main () {
     double x = 8 / 5.0;
@@ -953,7 +953,7 @@ Floating point values \emph{always} come with a rounding error. It is small enou
 We know pointers to be special integers, representing the number of a memory cell, together with an attached rule how to read the data there. Essentially being numbers, we can type-cast them, too. This of course only affects the pointer, not the information pointed to. Another way of explaining a pointer type cast is: changing the rules for how to read memory content.
 
 Let's look at an example:
-\begin{codebox}[Example: pointerCast.c]
+\begin{codebox}[pointerCast.c]
 \begin{minted}[linenos]{c}
 #include <stdio.h>
 
@@ -1052,7 +1052,7 @@ If we've learned anything so far, then the fact that data types are very importa
 
 However, there are situations where it actually does not matter what kind of information can be found behind some pointer. When you tell the computer to copy 2000 bytes from one address to another, it does not matter if these 2000 bytes encode 500 \inC{int}s or 250 \inC{double}s. Only the addresses themselves (and the number 2000) are important. For situations like this, a dedicated data type exists: the \inC{void*}. You can think of this as an address \emph{without} rules of interpretation. You cannot dereference a \inC{void*} because there is no data type \inC{void}\footnote{but there is the keyword \inC{void}, which we will get to know better in chapter \ref{chp:funcs}}. But you can put any pointer in the place of a \inC{void*} and you can implicitly cast a \inC{void*} to any other kind of pointer without getting a warning. In a way, they are made to signify: \emph{I know what I'm doing, this typecast is fine}.
 
-\begin{codebox}[Example: voidPointer.c]
+\begin{codebox}[voidPointer.c]
 \begin{minted}[linenos]{c}
 #include <stdio.h>
 
@@ -1073,7 +1073,7 @@ int main () {
 
 In the last chapter we've encountered \inC{void*} in a warning: when we output an address with the \texttt{\%p} format string element, we got a warning that a \inC{void*} was expected. Here, the C compiler is overly strict; in any case, we can get rid of the warning by explicitly casting to \inC{void*}:
 
-\begin{codebox}[Example: printAddress.c]
+\begin{codebox}[printAddress.c]
 \begin{minted}[linenos]{c}
 #include <stdio.h>
 
@@ -1114,7 +1114,7 @@ operand b    1 0 1 0    10     1 0 1 0    10     1 0 1 0    10
 operator      - AND -   --     -- OR -    --     - XOR -    --      NOT     --
 result       1 0 0 0     8     1 1 1 0    14     0 1 1 0     6      0 1      1
 \end{minted}
-\captionof{table}{Boolean Logic}
+\captionof{table}{Boolean Logic} \label{tab:booleanLogic}
 \end{defbox}
 
 A piece of code that reproduces these results looks like this:
@@ -1122,7 +1122,7 @@ A piece of code that reproduces these results looks like this:
                   raster equal height,
                   nobeforeafter,
                   raster column skip=0.2cm]
-\begin{codebox}[Example: bitwiseOps.c]
+\begin{codebox}[bitwiseOps.c]
 \begin{minted}[linenos]{c}
 #include <stdio.h>
 
@@ -1135,7 +1135,7 @@ int main () {
     printf("  not a = %d\n", ~a);
 }
 \end{minted}
-\captionof{code}{Bitwise Operators}
+\captionof{code}{Bitwise operators}
 \end{codebox}
 %
 \begin{cmdbox}[Output: bitwiseOps.c]
@@ -1159,10 +1159,10 @@ Masks can be computed easily with the \emph{bitshift to the left} and \emph{bits
 
 \begin{defbox}[Bitshift to the left by one and bitshift to the right by one]
 \begin{minted}{text}
-      bits      decimal           bits      decimal
-1 1 1 0 0 0 1 1   227       1 1 0 0 0 1 1 1   199
------ << 1 ----   ---       ----- >> 1 ----   ---
-1 1 0 0 0 1 1 0   198       0 1 1 0 0 0 1 1    99
+                  bits      decimal           bits      decimal
+            1 1 1 0 0 0 1 1   227       1 1 0 0 0 1 1 1   199
+            ----- << 1 ----   ---       ----- >> 1 ----   ---
+            1 1 0 0 0 1 1 0   198       0 1 1 0 0 0 1 1    99
 \end{minted}
 \captionof{table}{Bitshifting Operators on unsigned eight bit values}
 \end{defbox}

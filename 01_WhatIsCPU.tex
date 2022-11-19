@@ -270,7 +270,7 @@ One of the oldest such encoding that is still in use is \emph{ASCII} (American S
 Texts -- \ie strings of letters and other symbols -- are simply sequences of numbers that can be interpreted according to this (or another) table. One nice way of seeing ASCII texts as them being one single number, represented in base 128.
 
 \begin{plusbox}[Other Encodings]
-ASCII has been used for a long time, since it can encode most texts with minimal overhead. Especially the \emph{one byte is one character} property means it is easy to work with ASCII text. However, this encoding is rather limiting: there are more than 128 different symbols\citationneeded[https://xkcd.com/1726/]. Of course it is possible to come up with a longer table and list more characters in it. Essentially, this is the main idea behind Unicode. However, longer tables mean bigger numbers and therefore break the \emph{one byte is one character} property. This also requires some extra thought in order not to waste memory, make texts recoverable even when communication between two machines is flawed or when different communication standards are used.
+ASCII has been used for a long time, since it can encode most western-world texts with minimal overhead. Especially the \emph{one byte is one character} property means it is easy to work with ASCII text. However, this encoding is rather limiting: there are more than 128 different symbols\citationneeded[https://xkcd.com/1726/]. Of course it is possible to come up with a longer table and list more characters in it. Essentially, this is the idea behind Unicode. However, longer tables mean bigger numbers and therefore break the \emph{one byte is one character} property. This also requires some extra thought in order not to waste memory, make texts recoverable even when communication between two machines is flawed or when different communication standards are used.
 
 If you are inclined to learn more, feel free to look up the keyword UTF-8, which is one \emph{encoding system under Unicode}.
 \end{plusbox}
@@ -489,7 +489,7 @@ int main (void) {
 \captionof{code}{Show a chameleon}
 \end{codebox}
 
-\rule{\linewidth}{0.1mm}
+\newpage
 
 \subsection*{Solution: Translating Binary}
 \begin{itemize}
@@ -509,11 +509,10 @@ int main (void) {
 	This means the form of the bitpattern and possibly also the number of bytes required to store the information will be different.
 \item 16 bits are 2 bytes; these two bytes can be read from the left to the right or the other way round. One also has to specify a \emph{byte order}.\\
 	The byte order is hard wired into the machine, so this won't have any impact on what we do in this course; however, when communicating with other machines,
-	one has to keep in mind that the other machine might use a different byte order.´
+	one has to keep in mind that the other machine might use a different byte order.
 \end{itemize}
 
 \subsection*{Solution: Phases of Translation}
-A C code file undergoes these phases of translation:
 \begin{description}
 \item[Preprocessing] \hfill \\
 	Replaces parts of the input file with other lines of C-Code.
