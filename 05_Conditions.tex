@@ -151,18 +151,18 @@ It is not uncommon to put an assignment (\texttt{=}) in lieu of a comparision in
 #include <stdio.h>
 
 int main () {
-   unsigned int rowCount = 0;
-   printf("Number of rows:\n");
-   scanf("%u", &rowCount);
+    unsigned int rowCount = 0;
+    printf("Number of rows:\n");
+    scanf("%u", &rowCount);
 
-   if (rowCount = 0) {
-      printf("Error: cannot create empty table\n");
-   }
+    if (rowCount = 0) {
+        printf("Error: cannot create empty table\n");
+    }
 
-   printf("Length of table: %d\n", rowCount);
+    printf("Length of table: %d\n", rowCount);
 }
 \end{minted}
-\captionof{code}{accidental assignment in an \texttt{if} block}
+\captionof{code}{Accidental assignment in an \texttt{if} block}
 \end{warnbox}
 
 This produces the following behaviour:
@@ -430,7 +430,7 @@ int main () {
    }
 }
 \end{minted}
-\captionof{code}{inaccessible code in a multi-case \inC{if} structure}
+\captionof{code}{Inaccessible code in a multi-case \inC{if} structure}
 \end{warnbox}
 
 \begin{cmdbox}[Possible Output: inaccessibleCode.c]
@@ -523,7 +523,7 @@ Sometimes, execution of a piece of code should depend on more than one condition
     
     // ...
 \end{minted}
-\captionof{code}{Nested \inC{if} to realize a logical and}
+\captionof{code}{Nested \inC{if} to realize a logical \emph{and}}
 \end{codebox}
 
 But I am pretty sure, you already noticed that we could also collapse this into a single \inC{if} statement by using the \emph{and} operation from the previous chapter. A comparison like \texttt{<} or \texttt{>} produces an integer, which is either 1 or zero. We can join several ones and zeros with the bitwise operators \texttt{\&}, \texttt{|} and \texttt{\textasciicircum}. Thus, the same result is achieved by this code:
@@ -639,7 +639,7 @@ int main () {
     }
 }
 \end{minted}
-\captionof{code}{logical not to test for zero values}
+\captionof{code}{Logical \emph{not} to test for zero values}
 \end{codebox}
 \end{hintbox}
 
@@ -711,206 +711,591 @@ Whenever you feel like copy-pasting your code, always think twice whether there 
 \end{hintbox}
 
 \section{Many cases: \inC{switch}}
+The command \inC{switch} can be understood as a short-form of the \inC{if} statement that is useful when there are many different values one expression has to be compared to. Below you will find the syntax of the \inC{switch} statement and its (almost\footnote{an \texttt{expression} can have side effects. An example is \texttt{variable++}, in which incrementing \texttt{variable} is a side effect. In the \inC{switch} form, \texttt{expression} is evaluated only once, which means that the side effects occur only once}. With \inC{if}, on the other hand, each \texttt{expression} up to the first one that yields \emph{true} is evaluated, which implies effecting multiple side effects) equivalent \inC{if} form:
 
-
-\rule{\textwidth}{2pt}
-\newpage
-%TODO
-
-%exos:
-% - why is 5 & 2 false?
-% - which of these are equivalent ~> modus tollens; !!x and (x != 0)
-
-\section{Fallunterscheidungen: \inC{switch}}
-Das Schlüsselwort \inC{switch} wird benutzt, um Fallunterscheidungen mit vielen einzelnen Fällen umzusetzen. Die Form von \inC{switch}-Blöcken lautet:
-
+\begin{tcbraster}[raster columns=2,
+                  raster equal height,
+                  nobeforeafter,
+                  raster column skip=0.2cm]
 \begin{codebox}[Syntax: \texttt{switch}]
 \begin{minted}{c}
-switch (Ausdruck) {
-   case Wert1 :
-      Anweisungen;
-      break;
-   case Wert2 :
-      Anweisungen;
-      break;
-   ...
-   default:
-      Anweisungen;
-      break;
+switch (expression) {
+    case value_1 :
+        statements_1;
+        break;
+    case value_2 :
+        statements_2;
+        break;
+    ...
+    default:
+        statements_else;
 }
 \end{minted}
 \end{codebox}
+%
+\begin{codebox}[Syntax pendant: \texttt{if}]
+\begin{minted}{c}
+if        (expression == value_1) {
 
-\texttt{Ausdruck} ist dabei ein beliebiger Ausdruck, der zu einer \emph{Ganzzahl} ausgewertet werden kann. Fließkommawerte oder andere Datentypen werden von \inC{switch} leider nicht unterstützt. Dasselbe gilt für \texttt{Wert1}, \texttt{Wert2}, \ldots; jedoch müssen diese Ausdrücke bereits zur \emph{Compile-Zeit} feststehen. Das bedeutet, dass \texttt{Wert1}, \texttt{Wert2}, \ldots keine Variablen oder Elemente enthalten dürfen, die erst bei Ausführung des Programms (zur \emph{Laufzeit}) feststehen.
+    statements_1;
+    
+} else if (expression == value_2) {
+    statements_2;
+    
+...
+} else {
+    statements_else;
+}
+\end{minted}
+\end{codebox}
+\end{tcbraster}
 
-Wenn die Aussage \texttt{Ausdruck == Wert1} wahr ist, wird der Code unter der entsprechenden \inC{case}-Zeile ausgeführt. Entsprechendes gilt für \texttt{Wert2}, \ldots. Gilt für keinen der angegebenen Werte Gleichheit, so werden die Anweisungen unter \inC{default} ausgeführt.
+So, syntactically, \inC{switch} allows omitting to type \texttt{expression} again and again, which in practice can be quite handy and often improves code legibility.
 
-In der Anwendung kann dies so aussehen:
+Like the \inC{else} clause in an \inC{if} block, the \inC{default} label is optional.
 
-\begin{codebox}[Beispiel: Menü mit \texttt{switch}]
+You surely noticed the \inC{break} statement in the \inC{switch} syntax. This statement leaves the current block, \ie jumps to the statement after the closing brace (\texttt{\}}) of the \inC{switch} block. It is allowed to not use a \inC{break} statement at the end of a \inC{case} section; the effect of this is that the statements of the subsequent \inC{case} section(s) are executed as well, up to the point where the first \inC{break} statement is hit or where the \inC{switch} block ends, regardless of whether \texttt{expression} actually equals the values of the subsequent \inC{case} labels. We say, we cann \emph{fall through} a \inC{switch case}.
+
+Albeit very similar in the function it performs, a \inC{switch} command is translated into machine language in a very different fashion from a \inC{if} block. This results in several differences:
+\begin{itemize}
+\item \inC{switch} can only be used with integer-like expressions (\ie \texttt{expression} has to evaluate to an \inC{int}, \inC{short int}, \inC{unsigned char}, ..., 
+	but not to a \inC{float}, \inC{double}, ... or any pointer.)
+\item The values that \texttt{expression} is compared to must be \emph{compile time constants}. That means they must have a fixed value when they are compiled and may not variables 
+	(but can be formulated as a result of operations). For example, \inC{7}, or \inC{99 + 1} are valid expressions for the \inC{case} \emph{labels}, but \inC{x + 1} is not.
+\item These restrictions allow for greater optimization: going through a \inC{switch} statement can be significantly faster than going through its \inC{if} counterpart.
+\item The values in the \inC{case} labels must be unique; it is not allowed to have one label testing for the value \inC{7} and another one testing for \inC{6 + 1}. 
+	(In its \inC{if} counterpart, multiple cases with the same value are allowed, but meaningless, as only the first block meeting a condition is exectued.)
+\item Fallthrough behaviour is only possible in \inC{switch} statements, but not  in \inC{if} blocks. Using \inC{break} outside of a \inC{switch} block (or a \inC{for}- or \inC{while} loop which we will only learn about in chapter \ref{chp:loops}) constitutes a syntax error.
+\end{itemize}
+
+An example for a \inC{switch} block might look like this:
+\begin{codebox}[menu.c]
 \begin{minted}[linenos]{c}
 #include <stdio.h>
 
 int main () {
    int selection = -1;
 
-   printf("Bitte wählen Sie einen Menüpunkt:\n");
-   printf("  1) Spiel starten\n");
-   printf("  2) Optionen\n");
-   printf("  3) Highscore zeigen\n");
-   printf("  0) Beenden\n");
+   printf("Please enter your choice:\n");
+   printf("  1) Start game\n");
+   printf("  2) Options\n");
+   printf("  3) Highscore\n");
+   printf("  0) Quit\n");
 
    scanf("%d", &selection);
-
    switch (selection) {
       case 1 :
-         // Code für: Spiel Starten
+         // code for start game ...
          break;
       case 2 :
-         // Code für: Optionen
+         // code for options ...
          break;
       case 3 :
-         // Code für: Highscore
+         // code for show highscore ...
          break;
       case 0 :
-         // Code für: Beenden
+         // code for quit game
          break;
       default:
-         printf("Ungültige Eingabe!\n");
+         printf("invalid choice!\n");
          break;
    }
 }
 \end{minted}
+\captionof{code}{A menu with \inC{switch}}
 \end{codebox}
 
-Der \inC{default}-Teil ist optional. Lässt man diesen weg und trifft keine der \inC{case}-Klauseln zu, so wird nichts ausgeführt -- die Ausführung des Codes wird am Ende des \inC{switch}-Blocks fortgesetzt.
+Like with \inC{if}, you can nest \texttt{switch} statements. More so, you can have \texttt{if} blocks within \inC{switch} blocks and vice versa, up to (virtually) arbitrary depth.
 
-Die Werte zu den \inC{case}-Klauseln dürfen im selben \inC{case}-Block nur jeweils ein einziges Mal vorkommen.
-
-Man kann sich \inC{switch}-Blocks als Kurzform für \inC{if}-Blocks vorstellen\footnote{Die tatsächliche Umsetzung ist etwas komplexer und enthält einige Optimerungsschritte, die hier nicht besprochen werden können. Diese interne Umsetzung ist der Grund, weswegen \inC{switch} nur mit Ganzzahlen funktioniert.}. Das vorige Beispiel lässt sich auch so programmieren:
-
-\begin{codebox}[Beispiel: Menü mit \texttt{if}]
-\begin{minted}[linenos]{c}
-#include <stdio.h>
-
-int main () {
-   int selection = -1;
-
-   printf("Bitte wählen Sie einen Menüpunkt:\n");
-   printf("  1) Spiel starten\n");
-   printf("  2) Optionen\n");
-   printf("  3) Highscore zeigen\n");
-   printf("  0) Beenden\n");
-
-   scanf("%d", &selection);
-
-   if        (selection == 1) {
-      // Code für: Spiel Starten
-   } else if (selection == 2) {
-      // Code für: Optionen
-   } else if (selection == 3) {
-      // Code für: Highscore
-   } else if (selection == 0) {
-      // Code für: Beenden
-   } else {
-      printf("Ungültige Eingabe!\n");
-   }
+The most common scenario where one would drop the \inC{break} statement is when multiple values should trigger the same response, \ie the equivalent form of:
+\mint{c}{if (expression == value_1 || expression == value_2 || ...) {statements;}}
+The corresponding \inC{switch} block then comprises a list of empty \inC{case} sections and the actual treatment in the last section:
+\begin{minted}{c}
+switch(expression) {
+    case value_1:
+    case value_2:
+    ...
+    case value_n:    
+         statements;
 }
 \end{minted}
+
+Another scenario where leaving out the \inC{break} statement can be useful is when a variable defines a \enquote{level of escalation}: multiple tactics to handle a problem can be deployed, and each level builds on the previous one. Instead of a complex chain of \inC{else if}s with logical \emph{or}s, the \inC{switch} command allows to handle the scenario as in the following scenario
+\footnote{Note that the line numbers in this fictional example are in the thousands. This is absolutely not uncommon. Even medium sized projects can easily grow into the tens of thousands of lines of code, and bigger projects can comprise millions of lines of code. Consequently, it is very important to follow the best practices laid out in this book in order to not get lost in your own code.}:
+\begin{codebox}[levelOfAccuracy.c, leftupper=9mm]
+\begin{minted}[linenos, firstnumber=1337]{c}
+    // ...
+    
+    switch (levelOfAccuracy) {
+        case 3:
+            printf("Considering quantum effects\n");
+            // ...
+        
+        case 2:
+            printf("Loading general relativity module\n");
+            // ...
+            
+        case 1:
+            printf("Enabling dynamic adjustment of grid resolution\n");
+            // ...
+            break;
+            
+        default:
+            printf("Invalid choice\n");
+    }
+    
+    // ...
+\end{minted}
+\captionof{code}{Activating successive refinement levels with \inC{switch}} \label{code:levelsOfAccuracy}
 \end{codebox}
 
-Wichtig ist das Schlüsselwort \inC{break}. Mit diesem Befehl wird eine Kontrollstruktur wie ein \inC{switch}-Block verlassen und die Codeausführung wird hinter dem aktuellen Block fortgesetzt. Betrachten Sie das folgende Beispiel:
+Note that there still is a \inC{break} statement in line 1351. Only the cases \texttt{1..3} are connected in that way.
 
-\begin{warnbox}[Beispiel: \texttt{switch} ohne \texttt{break}, leftupper=7mm]
-\begin{minted}[linenos]{c}
-#include <stdio.h>
+\begin{hintbox}[Comment intentional fall through]
+We now understand that omitting the \inC{break} triggers fallthrough behaviour. This is sometimes intentional, but often a bug. For that reason, the compiler utters a warning when a fallthrough situation is found and the compiler flag \texttt{-Wextra} is active. Code listing \ref{code:levelsOfAccuracy} will therefore produce a compiler output like the following:
 
-int main () {
-   int x = 1;
-
-   switch (x) {
-      case 0 :
-         printf("0\n");
-      case 1 :
-         printf("1\n");
-      case 2 :
-         printf("2\n");
-      case 3 :
-         printf("3\n");
-      default :
-         printf("d\n");
-   }
-}
-\end{minted}
-\end{warnbox}
-
-Das Ergebnis dieses Codes ist:
-\begin{cmdbox}[Ausführungsbeispiel: \texttt{switch} ohne \texttt{break}]
+\vspace{6pt}
+\begin{cmdbox}[Compiler Warning: Fallthrough]
 \begin{minted}{text}
-1
-2
-3
-d
-\end{minted}
-\end{cmdbox}
-
-Wie zu erwarten springt die Ausführung mit \inC{switch} von Zeile 6 nach Zeile 9. Da hier aber keine \inC{break}s gesetzt wurden, \enquote{fällt die Ausführung durch die \inC{case}-Klauseln}. Das bedeutet, dass am Ende der \inC{case}-Klausel \texttt{1} die Code-Ausführung in Zeile 11 fortgesetzt wird, und somit alle \texttt{printf}-Anweisungen ausgeführt werden. Wird der Compiler mit der Option \texttt{-Wimplicit-fallthrough} gestartet, so finden Sie in der Compiler Ausgabe eine entsprechende Warnung:
-
-\begin{cmdbox}[Compiler-Warnung: \texttt{switch} ohne \texttt{break}]
-\begin{minted}{text}
-myProgram.c: In function ‘main’:
-myProgram.c:8:7: warning: this statement may fall through
-[-Wimplicit-fallthrough=]
-       printf("0\n");
-       ^~~~~~~~~~~~~
-myProgram.c:10:5: note: here
-     case 1 :
-     ^~~~
+fallthrough.c: In function ‘main’:
+fallthrough.c:8:10: warning: this statement may fall through 
+    [-Wimplicit-fallthrough=]
+ 1341 |          printf("Considering quantum effects\n");
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+fallthrough.c:11:7: note: here
+ 1344 |       case 2:
+      |       ^~~~
 ...
 \end{minted}
 \end{cmdbox}
 
-Kontrollstrukturen wie \inC{switch} und \inC{if} können (nahezu) beliebig tief ineinander verschachtelt werden.
+To mark the fallthrough behaviour as intentional (to both, the compiler and a future human reader), you should put a comment containing the word \texttt{fallthrough} at the end of the \inC{case} label without a \inC{break} statement. In the case of code listing \ref{code:levelsOfAccuracy}, putting \inC{// fallthrough} in lines 1343 and 1347 suppresses the compiler warning and tells a later reader of the code that this was in fact intentional.
 
-\section{Kombinierte Fallunterscheidung und Wertzuweisung -- der Ternäre Operator \texttt{?}}
-Nicht selten soll der Wert einer Variablen von einer Bedingung abhängen. Wir kennen bisher die Form
+Even better is of course adding a reason for why the fall through is intentional:\\
+\inC{// fallthrough: quantum effect correction is much smaller than that of GR}
+\end{hintbox}
 
-\begin{codebox}[Beispiel: Bedingte Wertzuweisung mit \texttt{if}]
+\section{Conditional Assignment of Values -- the Ternary Operator \texttt{?}}
+Frequently, one of two values must be assigned to a variable, depending on a condition. We can now solve this with the pattern:
+\begin{codebox}[conditionalAssignmentIf.c]
 \begin{minted}[linenos]{c}
-int main () {
-   int Bedingung = 1, Variable;
+    // ...
+   
+    if (condition) {
+        variable = value_1;
+    } else {
+        variable = value_2;
+    }
+    
+    // ...
+\end{minted}
+\captionof{code}{Conditional assignment of a value with \inC{if}}
+\end{codebox}
 
-   if (Bedingung) {
-      Variable = 1;
-   } else {
-      Variable = 2;
-   }
+The same can be achieved with the \emph{ternary operator} (so called because it takes \emph{three} operands):
+\begin{codebox}[conditionalAssignmentTernaryOperator.c]
+\begin{minted}[linenos]{c}
+    // ...
+    
+    variable = condition ? value_1 : value_2;
+    
+    // ...
+\end{minted}
+\captionof{code}{Conditional assignment of a value with the ternary operator}
+\end{codebox}
+
+If \texttt{condition} is \emph{true}, this operator evaluates to \texttt{value\_1}, otherwise it yields \texttt{value\_2}. Note that this needs not even appear in an assignment, but can be part of another expression. For example, the mathematical expression:
+\[ |x| \cdot |y| + 7 \]
+can be transscribed into code like this:
+\begin{center}
+	\inC{(x > 0 ? x : -x) * (y > 0 ? y : -y) + 7}
+\end{center}
+
+Another common use is conditionally passing one of two arguments to a function, like in the following example to \texttt{printf}:
+\begin{codebox}[conditionalString.c]
+\begin{minted}[linenos]{c}
+    // ...
+    
+    int temperature = /* code that measures the current air temperature */
+    
+    printf("Today it is %s\n",
+           temperature > 20 ? "warm enough" : "too cold"
+    );
+    
+    // ...
+\end{minted}
+\captionof{code}{Number-to-text conversion with the ternary operator}
+\end{codebox}
+
+
+\section{Main Takeaways}
+\begin{defbox}[You should remember...]
+\begin{itemize}
+\item Truth values are integers that represent the idea of \emph{true} if nonzero or \emph{false} otherwise.
+	They are obtained by evaluating expressions containing comparison operators.
+\item Logical operators take multiple values, treat them as truth values and compute a new truth value from them.
+	The operators are \emph{and} (\texttt{\&\&}), \emph{or} (\texttt{||}) and \emph{not} (\texttt{!}).
+	The logical \emph{xor} can be implemented with the inequality comparison operator (\texttt{!=}).
+\item A truth value can be used in an \inC{if} statement. The code tied to it will only be executed if the truth value was \emph{true}
+\item Optionally, an \inC{if} statement may have an \inC{else} clause. Code in this clause will only be executed if the truth value was \emph{false}.
+\item Multi-case \inC{if} statement can be constructed with the \inC{else if} pattern.
+	Even if multiple conditions are met, only the code pertaining to the first matching condition will be executed, though.
+\item The \inC{switch} statement is a more compact, better legible and more optimized form of the multi-case \inC{if}.
+	It only works on \emph{integers} with \emph{compile time} cases, but allows fallthrough constructions.
+\item The \inC{break} statement prevents fallthrough constructions.
+\item The ternary operator returns one of two values, depending on a condition.
+\end{itemize}
+\end{defbox}
+
+
+\newpage
+\section{Exercises and Solutions}
+\subsection*{Discriminant}
+Write a program that asks the user for the three parameters $a, b, c$ of a parabola. Then compute the discriminant and print on screen whether there are no, one or two real-valued roots to the parabola.
+
+Why can't this task be solved with a \inC{switch} statement?
+
+\emph{Remember:}\\
+A parabola is given by the equation:
+\[ y = ax^2 + bx + c \]
+The roots are the values for $x$ where $y = 0$. These roots can be found from the expression
+\[ x_{\pm} = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]
+The portion under the root, \ie the expression
+\[ b^2 - 4ac \]
+is called the \emph{discriminant}. Depending on its relation to zero (less than, equal to or greater than) there are no, one or two solutions to this equation.
+
+\subsection*{Biggest number}
+Write a program that asks the user for three numbers. Find the biggest number among these.
+
+\subsection*{Logical vs. Bitwise Operator}
+Convince yourself that \inC{5 & 2} evaluates to \emph{false} while \inC{5 && 2} evaluates to \emph{true}. Do you understand why that is?
+
+\subsection*{Equivalence}
+Which of these expressions give the same results? (The variables \texttt{x}, \texttt{y} and \texttt{z} are of type \inC{int} with unknown value)
+\begin{itemize}
+\item \texttt{x > 0} and \texttt{!(x < 0)}
+\item \texttt{!!x} and \texttt{x != 0}
+\item \texttt{x || !x} and \texttt{1}
+\item \texttt{!(x || y)} and \texttt{(!x) \&\& (!y)}
+\item \texttt{!(x \&\& y)} and \texttt{!x \&\& !y}
+\item \texttt{x || (y \&\& z)} and \texttt{(x || y) \&\& (x || z)}
+\end{itemize}
+\vfill
+
+\subsection*{Non-Equivalent \inC{switch}/\inC{if} constructs}
+First regard the following code, and convince yourself that the output on screen will be \texttt{one}:
+\begin{codebox}[exo5-5a.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+   int var = 0;
+
+   switch (++var) {
+        case 0:
+            printf("zero\n");
+            break;
+
+        case 1:
+            printf("one\n");
+            break;
+
+        case 2:
+            printf("two\n");
+            break;
+
+        default:
+            printf("other\n");
+    }
 }
 \end{minted}
 \end{codebox}
 
-Diese von einer Bedingung abhängige Wertzuweisung kann auch kompakt in einer einzelnen Zeile geschrieben werden. Mit dem \emph{ternären Operator}\footnote{von \emph{ternär}: das Dritte. Dieser Operator braucht drei \emph{Argumente}. Die Addition \texttt{+} ist beispielsweise ein \emph{binärer} Operator, da sie zwei Argumente braucht -- eben die beiden Zahlen, die addiert werden sollen.} \texttt{?} lässt sich dieser Code auch schreiben als:
-
-\begin{codebox}[Beispiel: Bedingte Wertzuweisung mit dem ternären Operator]
+Now look at the following code which seems to be the equivalent \inC{if}-form of the above code. What output will it produce? Why is it not the same as above?
+\begin{codebox}[exo5-5b.c]
 \begin{minted}[linenos]{c}
-int main () {
-   int Bedingung = 1, Variable;
+#include <stdio.h>
 
-   Variable = Bedingung ? 1 : 2;
+int main () {
+    int var = 0;
+
+    if        (++var == 0) {
+        printf("zero\n");
+    } else if (++var == 1) {
+        printf("one\n");
+    } else if (++var == 2) {
+        printf("two\n");
+    } else {
+        printf("other\n");
+    }
+}
+\end{minted}
+\end{codebox}
+\vfill
+
+\subsection*{Refactory}
+Refactor the following code (\ie rewrite it in a better fashion) as to avoid the redundancy and make it more compact:
+\begin{codebox}[exo5-6.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int var = /* some value */;
+
+    if (var % 2 == 1) {
+        if (var >= 5) {
+            printf("%d is odd and between 5 and 10.\n", var);
+        }
+        
+        if (var <= 10) {
+            printf("%d is odd and between 5 and 10.\n", var);
+        }
+    }
 }
 \end{minted}
 \end{codebox}
 
-Wie bereits bei \inC{if} ist \texttt{Bedingung} ein Ausdruck, dem ein Wahrheitswert zugeordnet werden kann. Ist \texttt{Bedingung} erfüllt, so wird der Ausdruck direkt hinter dem \texttt{?} ausgewertet und zugewiesen. Andernfalls wird der Ausdruck hinter dem \texttt{:} verwendet.
-
-Variablen, die in \texttt{Bedingung} vorkommen, können auch in den Rückgabewerten vorkommen. So lässt sich beispielsweise die Betragsfunktion folgendermaßen implementieren:
-
-\begin{codebox}[Beispiel: Betrag einer Zahl  mit dem ternären Operator]
+Can you also come up with a shorter form of this piece of code:
+\begin{codebox}[exo5-6-bonus.c]
 \begin{minted}[linenos]{c}
-int main () {
-   int x = -42;
+#include <stdio.h>
 
-   x = x >= 0 ? x : -x;
+int main () {
+    int var = /* some value */;
+
+    if (var % 2 == 1) {
+        if (var % 5 == 1) {
+            printf("The last digit of %d is 1.\n", var);
+        }
+    }
+}
+\end{minted}
+\end{codebox}
+
+
+\newpage
+
+
+\subsection*{Solution: Discriminant}
+\begin{codebox}[exo5-1.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    double a, b, c;
+    double discriminant;
+    
+    printf("Please enter parameter a: ");
+    scanf("%lf", &a);
+    printf("Please enter parameter b: ");
+    scanf("%lf", &b);
+    printf("Please enter parameter c: ");
+    scanf("%lf", &c);
+    
+    discriminant = b * b - 4 * a * c;
+    
+    if      (discriminant < 0) {printf("no solution\n");}
+    else if (discriminant < 0) {printf("one solution\n");}
+    else                       {printf("two solutions\n");}
+}
+\end{minted}
+\end{codebox}
+
+
+\subsection*{Solution: Biggest Number}
+A version with nested \texttt{if}s:
+\begin{codebox}[exo5-2a.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    double a, b, c;
+    
+    printf("Please enter a first value: ");
+    scanf("%lf", &a);
+    printf("Please enter a second value: ");
+    scanf("%lf", &b);
+    printf("Please enter a third value: ");
+    scanf("%lf", &c);
+    
+    if (a > b) {
+        if (a > c) {
+            printf("The biggest value is %lf\n", a);
+        } else {
+            printf("The biggest value is %lf\n", c);
+        }
+    } else {
+        if (b > c) {
+            printf("The biggest value is %lf\n", b);
+        } else {
+            printf("The biggest value is %lf\n", c);
+        }
+    }
+}
+\end{minted}
+\end{codebox}
+
+And one with an auxilliary variable:
+\begin{codebox}[exo5-2b.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    double a, b, c;
+    double maximum;
+    
+    printf("Please enter a first value: ");
+    scanf("%lf", &a);
+    printf("Please enter a second value: ");
+    scanf("%lf", &b);
+    printf("Please enter a third value: ");
+    scanf("%lf", &c);
+    
+    if (a > b) {
+        maximum = a;
+    } else {
+        maximum = b;
+    }
+    
+    if (maximum < c) {
+        maximum = c;
+    }
+    
+    printf("The biggest value is %lf\n", maximum);
+}
+\end{minted}
+\end{codebox}
+
+
+\subsection*{Solution: Logical vs. Bitwise Operator}
+For the bitwise operator \texttt{\&}:\\
+\texttt{5 == 101$_2$} and \texttt{2 == 010$_2$}. Since the bits in the same position are never both set, the result is zero or \emph{false}.
+
+For the logical operator \texttt{\&\&}:\\
+Both, \texttt{5} and \texttt{2} are nonzero and therefore count as \emph{true}. \emph{true and true} yields \emph{true}.
+
+
+\subsection*{Solution: Equivalence}
+\begin{itemize}
+\item \texttt{x > 0} and \texttt{!(x < 0)} are \emph{NOT equivalent}.\\
+	Since \texttt{x} can be \emph{equal to zero}, the negated equivalent would be \texttt{!(x <= 0)}.
+
+\item \texttt{!!x} and \texttt{x != 0} are \emph{EQUIVALENT}.\\
+	Note that the expression \texttt{!!x} is a \emph{double} negation. In the chapter we encountered the fact that \texttt{!x} is equivalent to \texttt{x == 0}.
+	The negation of this is the claimed equivalence.
+
+\item \texttt{x || !x} and \texttt{1} are \emph{EQUIVALENT}.\\
+	Boolean logic is a \emph{binary logic}, \ie there are only \emph{true} and \emph{false}. Than means that either \texttt{x} or \texttt{!x} have to be true.
+	The logical \emph{or} of two boolean values of which at least one is guaranteed to be \emph{true} will also be \emph{true}, which is represented by the value \texttt{1}.
+	
+\item \texttt{!(x || y)} and \texttt{(!x) \&\& (!y)} are \emph{EQUIVALENT}.\\
+	This is known as \emph{De Morgan's law} and can be proven with a \emph{truth table}:\\
+	{
+		\newcolumntype{N}{>{\ttfamily\centering\arraybackslash} p{.05\linewidth}}
+		\newcolumntype{W}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
+		\rowcolors{1}{white}{tabhighlight}
+		\begin{tabularx}
+			{.51\linewidth}
+			{NN|WW}
+			x & y &  !(x || y) & (!x) \&\& (!y) \tabcrlf
+			
+			T & T &          F & F \\
+			T & F &          F & F \\
+			F & T &          F & F \\
+			F & F &          T & T \\
+			
+		\end{tabularx}
+	}
+	
+	The two right hand side columns of this table agree, so the two expressions are equivalent.
+	
+	Note that De Morgan's law also states that \texttt{!(x \&\& y)} and \texttt{!x || !y} are equivalent (see next bullet point)
+	
+\item \texttt{!(x \&\& y)} and \texttt{!x \&\& !y} are \emph{NOT equivalent}.\\
+	Again, we can regard the following truth table, which for completeness also contains the corrected form:\\
+	{
+		\newcolumntype{N}{>{\ttfamily\centering\arraybackslash} p{.05\linewidth}}
+		\newcolumntype{W}{>{\ttfamily\centering\arraybackslash} p{.15\linewidth}}
+		\rowcolors{1}{white}{tabhighlight}
+		\begin{tabularx}
+			{.69\linewidth}
+			{NN|WW|W}
+			x & y &  !(x \&\& y) & (!x) \&\& (!y) & (!x) || (!y) \tabcrlf
+			
+			T & T &            F & F              & F \\
+			T & F &            T & F              & T \\
+			F & T &            T & F              & T \\
+			F & F &            T & T              & T \\
+			
+		\end{tabularx}
+	}
+
+	The third and fourth column do not agree which shows that the expressions are not equivalent.
+
+\item \texttt{x || (y \&\& z)} and \texttt{(x || y) \&\& (x || z)} are \emph{EQUIVALENT}.\\
+	This is the \emph{or} form of the \emph{boolean distributive law}. Again, it can be shown with a truth table:\\
+	{
+		\newcolumntype{N}{>{\ttfamily\centering\arraybackslash} p{.05\linewidth}}
+		\newcolumntype{W}{>{\ttfamily\centering\arraybackslash} p{.25\linewidth}}
+		\rowcolors{1}{white}{tabhighlight}
+		\begin{tabularx}
+			{.79\linewidth}
+			{NNN|WW}
+			x & y & z & x || (y \&\& z) & (x || y) \&\& (x || z) \tabcrlf
+			
+			T & T & T &               T & T \\
+			T & T & F &               T & T \\
+			T & F & T &               T & T \\
+			T & F & F &               T & T \\
+			F & T & T &               T & T \\
+			F & T & F &               F & F \\
+			F & F & T &               F & F \\
+			F & F & F &               F & F \\
+			
+		\end{tabularx}
+	}
+	
+	There is also an \emph{and} form of the \emph{boolean distributive law}, which states that\\
+	\texttt{x \&\& (y || z)} and \texttt{(x \&\& y) || (x \&\& z)} are equivalent.
+	
+\end{itemize}
+
+
+\subsection*{Solution: Non-Equivalent \inC{switch}/\inC{if} constructs}
+The second code will output \texttt{other}. 
+
+In the \inC{switch} example, the expression \texttt{++var} is evaluated only once. The value of \texttt{var} is set to \inC{1}, which is also the result of the expression. Consequently, we jump into the branch \inC{case 1} and output \texttt{one} as expected.
+
+In the \inC{if} example, on the other hand, each \inC{if} statement newly evaluates the expression \texttt{++var}. Thus, \texttt{var} is updated before every comparison. Since none of the constants match the current value of \texttt{var}, we arrive in the \inC{else} clause.
+
+This task aimed at showing you why it is a bad idea to put expressions with side effects into \inC{if} or \inC{switch} statements. Even if the result of a statement with side effects must be at the core of a condition, it is better to store this result in an auxiliary variable. If you preface the \inC{if} or \inC{switch} statements with the line \inC{int aux = ++var;} and make \texttt{aux} the subject of the comparisons (\inC{if (aux == 0) ...}, you will find both versions of the code to yield the same result.
+
+
+\subsection*{Solution: Refactory}
+\begin{codebox}[exo5-6.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int var = /* some value */;
+
+    if ((var % 2) && (var >= 5) && (var <= 10)) {
+        printf("%d is odd and between 5 and 10.\n", var);
+    }
+}
+\end{minted}
+\end{codebox}
+
+\begin{codebox}[exo5-6-bonus.c]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+
+int main () {
+    int var = /* some value */;
+
+    if (var % 10 == 1) {
+        printf("The last digit of %d is 1.\n", var);
+    }
 }
 \end{minted}
 \end{codebox}
