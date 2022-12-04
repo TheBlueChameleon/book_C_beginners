@@ -64,11 +64,11 @@ In this example, the three parentheses are evaluated one after another, yielding
 This is actually a thing we rarely ever do; but understanding helps us develloping a deep understanding how decision making works in a computer.
 
 \begin{warnbox}[Symbols \texttt{true} and \texttt{false}]
-In principle, you are free to use variables named \texttt{true} or \emph{false}. However, I strongly recommend against it. There are plenty of libraries (extensions to the C language) that define these symbols to mean \inC{1} or \inC{0}, respectively. They do so because expressions like \texttt{motorIsTurnedOn() == true} are just easier on human eyes than \texttt{motorIsTurnedOn() == 1}.
+In principle, you are free to use variables named \texttt{true} or \texttt{false}. However, I strongly recommend against it. There are plenty of libraries (extensions to the C language) that define these symbols to mean \inC{1} or \inC{0}, respectively. They do so because expressions like \texttt{motorIsTurnedOn() == true} are just easier on human eyes than \texttt{motorIsTurnedOn() == 1}.
 
 Defining the symbols to be constants with exactly these values is so common that when programmers see a piece of code with either of these symbols in it, they don't look up the definition, but simply assume that the symbols \emph{abide by the convention}. Going against this convention is a great way of confusing and annoying fellow coders.
 
-While C does allow you to assign any value to the symbols \texttt{true} and \texttt{false}, most other programming languages don't. In C++, C\#, Java, Groovy and Python\footnote{In Python, the symbols actually are \texttt{True} and \texttt{False}, with a captial as a first letter. Still, The two words have a very strict definition in the programming community.}, they are \emph{reserved keywords}, \ie they are hard coded into the language itself. This is just one more reason not to adapt an unhealthy habit.
+While C does allow you to assign any value to the symbols \texttt{true} and \texttt{false}, most other programming languages don't. In C++, C\#, Java, Groovy and Python\footnote{In Python, the symbols actually are \texttt{True} and \texttt{False}, with a captialized letter. Still, The two words have a very strict definition in the programming community.}, they are \emph{reserved keywords}, \ie they are hard coded into the language itself. This is just one more reason not to adapt an unhealthy habit.
 \end{warnbox}
 
 \section{Conditional Execution of Code: \inC{if}}
@@ -582,17 +582,25 @@ In day-to-day life, the principal reason is semantics: using a logical operator 
                   raster column skip=0.2cm]
 \begin{codebox}[nonzeroLogicalAnd.c]
 \begin{minted}[linenos, firstnumber=69]{c}
+// ...
+
 if (x && y) {
   printf("Both x and y are nonzero.");
 }
+
+// ...
 \end{minted}
 \end{codebox}
 %
 \begin{codebox}[nonzeroBitwiseAnd.c]
 \begin{minted}[linenos, firstnumber=69]{c}
+// ...
+
 if ((x != 0) & (y != 0)) {
   printf("Both x and y are nonzero.");
 }
+
+// ...
 \end{minted}
 \end{codebox}
 \end{tcbraster}
@@ -604,9 +612,13 @@ The left example using the logical and works in this shortened form no matter wh
 Another major difference is the fact that the bitwise \emph{and} and \emph{or} are \emph{short circuited}. This means that the computer tries to save some time by evaluating the second operand only when this is necessary. You know that for an \emph{and}, both operands need to be \emph{true}. If the left hand side operand is already known to be \emph{false}, we automatically know that the result of the \emph{and} will always be \emph{false}, no matter what comes to the right of it. This can be used to prevent nonsensical operations:
 \begin{codebox}[Example: preventDivByZero.c]
 \begin{minted}[linenos, firstnumber=69]{c}
+// ...
+
 if (x && (y / x > 5)) {
     printf("Treshold surpassed");
 }
+
+// ...
 \end{minted}
 \captionof{code}{Short circuiting}
 \end{codebox}
@@ -733,11 +745,11 @@ switch (expression) {
 \end{minted}
 \end{codebox}
 %
-\begin{codebox}[Syntax pendant: \texttt{if}]
+\begin{codebox}[Syntax equivalent: \texttt{if}]
 \begin{minted}{c}
-if        (expression == value_1) {
-
+if (expression == value_1) {
     statements_1;
+    
     
 } else if (expression == value_2) {
     statements_2;
@@ -971,13 +983,13 @@ Write a program that asks the user for three numbers. Find the biggest number am
 Convince yourself that \inC{5 & 2} evaluates to \emph{false} while \inC{5 && 2} evaluates to \emph{true}. Do you understand why that is?
 
 \subsection*{Equivalence}
-Which of these expressions give the same results? (The variables \texttt{x}, \texttt{y} and \texttt{z} are of type \inC{int} with unknown value)
+Which of these expressions give the same results? (The variables \texttt{x}, \texttt{y} and \texttt{z} are of type \inC{int} with unknown but constant value)
 \begin{itemize}
 \item \texttt{x > 0} and \texttt{!(x < 0)}
 \item \texttt{!!x} and \texttt{x != 0}
 \item \texttt{x || !x} and \texttt{1}
 \item \texttt{!(x || y)} and \texttt{(!x) \&\& (!y)}
-\item \texttt{!(x \&\& y)} and \texttt{!x \&\& !y}
+\item \texttt{!(x \&\& y)} and \texttt{(!x) \&\& (!y)}
 \item \texttt{x || (y \&\& z)} and \texttt{(x || y) \&\& (x || z)}
 \end{itemize}
 \vfill
@@ -1055,7 +1067,7 @@ int main () {
 \end{minted}
 \end{codebox}
 
-Can you also come up with a shorter form of this piece of code:
+Can you also come up with a shorter form of this piece of code?
 \begin{codebox}[exo5-6-bonus.c]
 \begin{minted}[linenos]{c}
 #include <stdio.h>
@@ -1094,9 +1106,9 @@ int main () {
     
     discriminant = b * b - 4 * a * c;
     
-    if      (discriminant < 0) {printf("no solution\n");}
-    else if (discriminant < 0) {printf("one solution\n");}
-    else                       {printf("two solutions\n");}
+    if      (discriminant <  0) {printf("no solution\n");}
+    else if (discriminant == 0) {printf("one solution\n");}
+    else                        {printf("two solutions\n");}
 }
 \end{minted}
 \end{codebox}
@@ -1268,7 +1280,7 @@ In the \inC{switch} example, the expression \texttt{++var} is evaluated only onc
 
 In the \inC{if} example, on the other hand, each \inC{if} statement newly evaluates the expression \texttt{++var}. Thus, \texttt{var} is updated before every comparison. Since none of the constants match the current value of \texttt{var}, we arrive in the \inC{else} clause.
 
-This task aimed at showing you why it is a bad idea to put expressions with side effects into \inC{if} or \inC{switch} statements. Even if the result of a statement with side effects must be at the core of a condition, it is better to store this result in an auxiliary variable. If you preface the \inC{if} or \inC{switch} statements with the line \inC{int aux = ++var;} and make \texttt{aux} the subject of the comparisons (\inC{if (aux == 0) ...}, you will find both versions of the code to yield the same result.
+This task aimed at showing you why it is a bad idea to put expressions with side effects into \inC{if} or \inC{switch} statements. Even if the result of a statement with side effects must be at the core of a condition, it is better to store this result in an auxiliary variable. If you preface the \inC{if} or \inC{switch} statements with the line \inC{int aux = ++var;} and make \texttt{aux} the subject of the comparisons (\inC{switch (aux)} or \inC{if (aux == 0) ...}, respectively), you will find both versions of the code to yield the same result.
 
 
 \subsection*{Solution: Refactory}

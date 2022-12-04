@@ -1,0 +1,266 @@
+\chapter{Modulare Programmierung}\label{chp:modules}
+\epigraph{Everything is awesome!}{Emmet Brickowski}
+
+Für besonders große Projekte bietet es sich an, den Code auf mehrere Dateien zu verteilen, und diese nach Aufgaben zu sortieren. Dies erlaubt es, eine \enquote{übergeordnete} Kapselung umzusetzen, die ähnlich funktioniert wie schon bei den Funktionen besprochen wurde (siehe Kapitel \ref{chp:funcs}), und die den Einfluss begrenzt, den die einzelnen Programmkomponenten aufeinander haben.
+
+Ein \emph{Modul} ist eine C-Code-Datei, die nur \enquote{ihre eigenen} Variablen und Funktionen \enquote{sieht}. Innerhalb eines Moduls müssen alle Namen (von Variablen, Funktionen, Sprung-Labels, ...) eindeutig sein, \ie dürfen nicht doppelt vergeben werden (es sei denn, sie \enquote{leben} jeweils in ihrem eigenen Scope). Ein Modul erzeugt allerdings wiederum einen umfassenden Scope; daher dürfen in zwei getrennten Modulen dieselben Namen vorkommen.
+
+Verbunden werden Module über \emph{Header}-Dateien, die lediglich Definitionen enthalten. Diese Definitionen teilen gewissermaßen mit, welche Funktionen, Variablen, ... geteilt werden, also über die Modulgrenzen hinaus sichtbar sein sollen.
+
+\section{Trennung von Header- und Modul-Code}
+Wir haben Header schon im Kontext von Libraries kennen gelernt: mittels \mintinline{c}{#include}-Zeilen laden wir die nötigen Definitionen, die wir benötigen, um die Funktionen der Libraries zu benutzen. Dem Compiler haben wir mit Kommandozeilenoptionen wie \texttt{-lm} mitgeteilt, dass die im Header definierten Funktionen in einem vorkompilierten Modul zu finden sind. Stellen Sie sich im Folgenden vor, der Befehl \mintinline{c}{#include} würde per Copy\&Paste den Inhalt der includierten Datei in Ihren Code einfügen.
+
+Die Organisation eines Projekts in Module geschieht mit derselben Mechanik; jedoch bieten wir hier zum \emph{Linken} keine vorkompilierte Bibliothek, sondern tatsächlichen C-Code. Der Header definiert also eine Schnittstelle zwischen den einzelnen Komponenten.
+
+Eine Header-Datei endet auf die Erweiterung \texttt{.h} und darf prinzipiell beliebigen C-Code enthalten. Sinnvoll ist es jedoch, hier nur \emph{Definitionen} zu setzen, also Anweisungen, die keinen Einfluss auf die Speicherstruktur haben. Definitionen sind \eg Funktions-Signaturen (siehe Abschnitt \ref{sec:forwardDeclaration}), \mintinline{c}{struct}s und \mintinline{c}{typedef}s (siehe Kapitel \ref{chp:structs}). Deklarationen von \emph{Variablen} dagegen dürfen im Header nicht vorkommen, da die Deklaration auch eine Speicherstelle reserviert, \ie die Speicherstruktur verändert.
+
+Bislang haben wir nur \mintinline{c}{#include}-Zeilen gesehen, bei denen der Header-Name von <spitzen Klammern> eingefasst war. Dies teilt dem Compiler mit, dass die Header-Datei in einem Standard-Verzeichnis zu finden ist, das bei der Installation des Compilers angelegt wird. Da sich unsere Header \idR im selben Verzeichnis befinden wie unser Code, fassen wir diese stattdessen mit \texttt{"}doppelten Anführungszeichen\texttt{"} ein.
+
+Als Beispiel wollen wir uns vorstellen, wir wollen eine eigene library anlegen, die den Umgang mit 2D-Punkten erleichtert. Wir definieren zuerst im Header \texttt{vector2D.h} einen Datentypen und \enquote{machen die Funktionen des Moduls sichtbar}:
+
+\begin{codebox}[Beispiel: Header \texttt{vector2D.h}]
+\begin{minted}[linenos]{c}
+typedef struct {
+  double x;
+  double y;
+} vector2D;
+
+vector2D v2_sum     (vector2D a, vector2D b);
+vector2D v2_inv     (vector2D v);
+vector2D v2_scale   (vector2D v, double f);
+double   v2_dotProd (vector2D a, vector2D b);
+double   v2_length  (vector2D v);
+\end{minted}
+\end{codebox}
+
+Die \emph{Implementierung} hierzu speichern wir in der Datei \texttt{vector2D.c}:
+
+\begin{codebox}[Beispiel: Modulcode \texttt{vector2D.c}]
+\begin{minted}[linenos]{c}
+#include "vector2D.h"
+#include <math.h>
+
+vector2D v2_sum     (vector2D a, vector2D b) {
+  vector2D reVal = {a.x + b.x, a.y + b.y};
+  return reVal;
+}
+
+vector2D v2_inv     (vector2D v)             {
+  vector2D reVal = {-v.x, -v.y};
+  return reVal;
+}
+
+vector2D v2_scale   (vector2D v, double f)   {
+  vector2D reVal = {f * v.x, f * v.y};
+  return reVal;
+}
+
+double   v2_dotProd (vector2D a, vector2D b) {return a.x * b.x + a.y * b.y;}
+double   v2_length  (vector2D v)             {return hypot(v.x, v.y);}
+\end{minted}
+\end{codebox}
+
+Da in diesem Modul mit der Definition des Typs \texttt{vector2D} gearbeitet wird, muss diese Definition auch \enquote{sichtbar} sein. Daher laden wir in den Modulcode den Header mittels \mintinline{c}{#include} (Zeile 1). Weiter benutzen wir die Funktion \texttt{hypot} (berechnet den Wert $\sqrt{x^{2} + y^{2}}$, also die Länge eines Vektors $\begin{pmatrix}
+x \\ y
+\end{pmatrix}$). Diese Funktion ist im Header \texttt{<math.h>} definiert, weswegen dieser ebenfalls geladen wird. Während \texttt{vector2D.h} in unserem Arbeitsverzeichnis liegt und daher mit \texttt{"}doppelten Anführungszeichen\texttt{"} eingefasst wird, findet sich \texttt{math.h} in einem Standard-Verzeichnis, und ist deswegen durch \texttt{<}spitze Klammern\texttt{>} eingefasst.
+
+Achtung: Die Datei \texttt{vector2D.c} besitzt \emph{keine} Funktion \texttt{main}! Sie kann vom Compiler zu \emph{Object-Code} umgesetzt werden, \ie in Maschinensprache übersetzt werden; Linken zu einem \emph{ausführbaren Programm} ist mit diesem Code alleine jedoch nicht möglich.
+
+Das \emph{Hauptmodul} findet sich in einer eigenen Datei \texttt{myProgram.c}:
+
+\begin{codebox}[Beispiel: Hauptmodulcode \texttt{myProgram.c}]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+#include "vector2D.h"
+
+int main () {
+  vector2D v = {1,1}, w = {2, 3};
+
+  printf("%lf\n", v2_length(v2_sum(v, w)));
+}
+\end{minted}
+\end{codebox}
+
+Hier stehen nun alle \enquote{Befehle} zur Verfügung, die wir im Header \texttt{vector2D.h} deklariert haben. Wir müssen hier nicht explizit die Bibliothek \texttt{<math.h>} einbinden, da keine Funktion aus der math-library im Hauptmodul explizit benutzt wird.
+
+Unser Projekt besteht also aus zwei Modulen, die über einen gemeinsamen Header verbunden sind. Diese beiden Module müssen beim Aufruf des Compilers aufgeführt werden:
+
+\begin{cmdbox}[Compileraufruf: Projekt aus zwei Modulen]
+gcc -std=c11 -Wall -Wextra -Wpedantic myProgram.c vector2D.c -lm -o myProgram
+\end{cmdbox}
+
+Achtung: der hier gezeigte Aufruf besteht nur aus einer \emph{einzigen Zeile}. Wenn Sie diesen Aufruf eintippen bedarf es \emph{keines} Zeilenumbruchs nach \texttt{-lm}. Beachten Sie weiter auch, dass im Compiler-Aufruf der Header \emph{nicht} erwähnt wird!
+
+Wie üblich findet das Kompilieren über den \texttt{gcc} statt. Wir listen zunächst einige Optionen auf (C-Standard von 2011, Anzeigen aller relevanten Warnungen) und nennen dann unsere beiden Module (\texttt{myProgram.c} und \texttt{vector2D.c}). Den Zusatz \texttt{-lm} kennen wir als Compiler Option um die Math-Library einzubinden. Wir können dies als ein \emph{drittes} Modul auffassen, das in unserem Projekt verwendet wird. Schließlich nennen wir mit \texttt{-o myProgram} den Namen der ausführbaren Datei, die aus unserem Code erzeugt werden soll.
+
+
+\section{Speicherklasse \mintinline{c}{extern}}
+Wo globale Variablen über Modulgrenzen hinaus zur Verfügung stehen sollen, kommt das Schlüsselwort \mintinline{c}{extern} zum Einsatz. Es wird einer Variablen-Deklaration vorangestellt, und teilt dem Compiler mit dass an einer anderen Stelle eine Variable mit diesem Namen deklariert wird, und dass diese Variable im aktuellen Modul sichtbar sein soll. Mit einer \mintinline{c}{extern}-Deklaration wird also \emph{keine Speicherstelle} reserviert!
+
+Betrachten Sie folgende drei Dateien:
+
+\begin{codebox}[Beispiel: Hauptmodulcode \texttt{myProg.c}]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+#include "definitions.h"
+
+int main () {
+  printf("Globale Variable 'global' = %lf\n", global);
+}
+\end{minted}
+\end{codebox}
+
+\begin{codebox}[Beispiel: Header \texttt{definitions.h}]
+\begin{minted}[linenos]{c}
+extern double global;
+\end{minted}
+\end{codebox}
+
+\begin{codebox}[Beispiel: Modul \texttt{module.c}]
+\begin{minted}[linenos]{c}
+#include "definitions.h"
+
+double global = 5.0;
+\end{minted}
+\end{codebox}
+
+Im Hauptmodul \texttt{myProg.c} wird in Zeile 5 Bezug auf eine Variable \texttt{global} genommen. Dass eine solche Variable existiert wird über den Header \texttt{definitions.h} mitgeteilt. Die dortige Zeile \mintinline{c}{extern double global;} legt aber noch nicht die Variable an, sondern teilt dem Compiler nur mit, dass es ein Objekt mit dem Namen \texttt{global} gibt. Dieses Objekt wird schließlich im Modul \texttt{module.c} angelegt und erhält dort in Zeile 3 den Wert \texttt{5.0}.
+
+\begin{warnbox}[\texttt{extern}-Anweisungen sind reine Definitionen]
+\mintinline{c}{extern}-Zeilen legen keine Speicherstellen an; sie reservieren lediglich ein Symbol. Zu jedem \mintinline{c}{extern} muss es ein Gegenstück geben, das tatsächlichen Speicher belegt. Dieses Gegenstück muss \emph{eindeutig} sein, \ie es darf nur eine einzige \enquote{echte} Variable geben, die den Namen trägt, der in der \mintinline{c}{extern}-Zeile referenziert wird.
+
+Da \mintinline{c}{extern} nur ein Symbol benennt, schreiben wir diesen Befehl in die Header-Dateien. Die zugehörige Speicherstelle \enquote{lebt} in (genau) einem Modul.
+\end{warnbox}
+
+Wozu dieser Aufwand? Sollte es nicht genügen, eine Variable direkt in einem Header zu deklarieren?
+
+Betrachten Sie dazu folgendes Codebeispiel:
+\begin{codebox}[Beispiel: Hauptmodulcode \texttt{myProg.c}]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+#include "definitions.h"
+
+int main () {
+  printf("Globale Variable 'global' = %lf\n", global);
+}
+\end{minted}
+\end{codebox}
+
+\begin{codebox}[Beispiel: Header \texttt{definitions.h}]
+\begin{minted}[linenos]{c}
+double global = 5;
+
+void setGlobalToSeven();
+\end{minted}
+\end{codebox}
+
+\begin{codebox}[Beispiel: Modul \texttt{module.c}]
+\begin{minted}[linenos]{c}
+#include "definitions.h"
+
+void setGlobalToSeven() {
+  global = 7;
+}
+\end{minted}
+\end{codebox}
+
+Dieses Dateipaket lässt sich nicht kompilieren. Der Linker (\ie der \texttt{gcc}) gibt folgende  Fehlermeldung aus:
+
+\begin{cmdbox}[Fehlermeldung des Linkers]
+/tmp/cccuG8Y5.o:(.data+0x0): Mehrfachdefinition von »global«
+/tmp/cc3AiH0L.o:(.data+0x0): hier zuerst definiert
+collect2: error: ld returned 1 exit status
+\end{cmdbox}
+
+Wieso ist das so?
+
+Der Header \texttt{definitions.h} wird von beiden Modulen (\texttt{myProg.c} und \texttt{module.c}) benötigt, da die Variable \texttt{global} in beiden zur Verfügung stehen soll. Daher enthalten beide Module auch die Zeile \mintinline{c}{#include "definition.h"}. Der Header-Code wird also in beiden Dateien \enquote{eingefügt}. Diese Header-Code enthält aber auch die \emph{Deklaration} von \texttt{global}. Effektiv wird die Variable also zweimal deklariert! Der Compiler kann nicht entscheiden, welche der beiden Deklarationen \enquote{die Richtige} ist; daher bricht der Linking-Vorgang ab.
+
+\begin{warnbox}[Keine Deklarationen in Headern]
+Wie bereits erwähnt sollen in Headern nur Definitionen stehen, \ie \mintinline{c}{struct}s, \mintinline{c}{union}s, \mintinline{c}{enum}s \mintinline{c}{typedef}s, \mintinline{c}{extern}s und Funktions-Prototypen. Bei all diesen Anweisungen werden noch keine Speicher-Stellen reserviert, sondern lediglich \enquote{Formen} definiert.
+
+Da Header den Zweck haben, mehrere Module miteinander zu verbinden, werden sie in mindestens zwei Dateien inkludiert. Eine Deklaration in einem Header wird also naturgemäß zu doppelten Deklarationen führen. Aus diesem Grund schreiben wir in einen Header \emph{ausschließlich} Definitionen. Alle Anweisungen, die die Struktur des Speichers verändern, \enquote{leben} in Modulen.
+\end{warnbox}
+
+\section{Funktionen mit eingeschränkter Sichtbarkeit: \mintinline{c}{static}}
+Wir kennen das Schlüsselwort \mintinline{c}{static} bereits aus dem Kontext von Funktionen: Variablen, die mit diesem Modifier deklariert werden, verbleiben im Speicher, selbst wenn ihr Symbol durch verlassen des Scopes nicht mehr gültig ist. (Siehe Abschnitt \ref{sec:staticVar}.)
+
+Im Kontext Module hat das Schlüsselwort \mintinline{c}{static} jedoch noch eine zweite Bedeutung:
+
+Selbst, wenn Funktionen nur innerhalb eines Moduls gebraucht werden und nicht im Header \enquote{sichtbar gemacht werden}, müssen ihre Namen über das gesamte Projekt hinweg eindeutig sein, dürfen also nicht doppelt vorkommen. Soll diese Regel aufgehoben werden, kann eine Funktion mit dem Schlüsselwort \mintinline{c}{static} als außerhalb der Modulgrenzen \enquote{unsichtbar} markiert werden.
+
+Betrachten Sie hierzu folgende Dateistruktur\footnote{Wie tatsächlich Zufallszahlen generiert werden können, wird im Abschnitt \ref{sec:RandomNums} besprochen.}:
+
+\begin{codebox}[Beispiel: Hauptmodulcode \texttt{myProg.c}]
+\begin{minted}[linenos]{c}
+#include <stdio.h>
+#include "definitions.h"
+\end{minted}
+\end{codebox}
+%
+\begin{codebox}[]
+\begin{minted}[linenos, firstnumber=last]{c}
+// https://xkcd.com/221/
+static int getRandomNumber () {
+  return 4;   // chosen by a fair dice roll.
+              // guaranteed to be random.
+}
+
+int main () {
+  printf("Random Number %d\n", getRandomNumber());
+  printf("Random Event: %s\n", getRandomEvent ());
+}
+\end{minted}
+\end{codebox}
+
+\begin{codebox}[Beispiel: Header \texttt{definitions.h}]
+\begin{minted}[linenos]{c}
+char * getRandomEvent ();
+\end{minted}
+\end{codebox}
+
+\begin{codebox}[Beispiel: Modul \texttt{module.c}]
+\begin{minted}[linenos]{c}
+#include <stdlib.h>
+
+static int getRandomNumber() {return rand() % 3;}
+
+char * getRandomEvent () {
+  switch (getRandomNumber()) {
+    case 0 :
+      return "Zeppelin!";      // https://xkcd.com/73/
+    case 1 :
+      return "Wild Ratata!";
+    case 2 :
+      return "Tree-Powers, activate!";
+  }
+  return "The inexonerable passage of time";
+}
+\end{minted}
+\end{codebox}
+
+Hier haben sowohl \texttt{myProg.c} als auch \texttt{module.c} eine Funktion mit Namen \texttt{getRandomNumber}. Da aber beide als \mintinline{c}{static} ausgezeichnet sind, \enquote{kommen sie sich nicht in die Queere}. Wird bei nur einer der beiden das Schlüsselwort \mintinline{c}{static} entfernt, ergeben sich ebenfalls noch keine Probleme: Die Situation hier ist grob vergleichbar mit zwei sich umschließenden Scopes. Wenn aber beide Instanzen von \texttt{getRandomNumber} ohne die Auszeichnung \mintinline{c}{static} im Code auftauchen, meldet der Linker eine doppelte Definition:
+
+\begin{cmdbox}[Fehlermeldung des Linkers: Mehrfachdefinition von \texttt{getRandomNumber}]
+\begin{minted}{text}
+/tmp/ccXCopXE.o: In Funktion »getRandomNumber«:
+module.c:(.text+0x0): Mehrfachdefinition von »getRandomNumber«
+/tmp/cc3SiANo.o:myProgram.c:(.text+0x0): hier zuerst definiert
+collect2: error: ld returned 1 exit status
+\end{minted}
+\end{cmdbox}
+
+\section{Weitere Speicherklassen und Modifier}
+Die folgenden Typen-Modifier sind hier nur der Vollständigkeit halber aufgeführt und können z.\,T. nur mit vertieften Kenntnissen über Prozessorarchitektur wirklich verstanden werden.
+\begin{description}
+\item[auto] Die Speicherklasse \mintinline{c}{auto} ist die Standard-Speicherklasse und wird überall
+	dort verwendet, wo nicht explizit \mintinline{c}{static} oder \mintinline{c}{extern} gesetzt wird.
+\item[register] wird für Werte, die sehr häufig gelesen oder geändert werden und die daher aus
+	Performance-Gründen \enquote{im Prozessorspeicher} behalten werden sollten.
+\item[volatile] zeichnet Variablen aus, die nicht nur vom laufenden Programm geändert werden können,
+	sondern beispielsweise den Zustand eines laufenden Geräts widerspiegeln.  \mintinline{c}{volatile} teilt dem Compiler mit, dass die Variable nicht in den Registern des Prozessors gehalten werden soll, sondern immer ein Zugriff auf die Speicherstelle erfolgen muss (\mintinline{c}{volatile} entspricht in etwa dem Gegenteil von \mintinline{c}{register}).
+\item[const] markiert Werte, die nach der ersten Zuweisung nicht mehr geändert werden dürfen. Zum einen
+	überprüft der Compiler, ob diese Regel eingehalten wird, bietet also eine Sicherheitsprüfung des
+	Codes gegen unbemerkte Fehler. Zum anderen erlaubt das Wissen, dass sich ein Variablen-Wert nicht ändert dem Compiler zusätzliche Optimierungsmöglichkeiten.
+\item[restrict] wird im Kontext von Pointern benutzt, und ist Ihr \enquote{Versprechen} an den Compiler, dass der entsprechende Speicherbereich nicht auch über einen anderen Pointer addressierbar ist (d.h. entsprechende Speicherbereiche \enquote{überlappen} garantiert nicht). Dies gibt dem Compiler diverse Möglichkeiten den Code zu optimieren.
+\end{description}

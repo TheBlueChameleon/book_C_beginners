@@ -55,7 +55,7 @@ helloworld.c:4:29: error: expected ‘;’ before ‘}’ token
 \end{minted}
 \end{cmdbox}
 
-The numbers in the error message (\texttt{helloworld.c:4:29: ...}) tell you where in your code the error was found: line 4, column 29. Especially in larger projects, this is an essential piece of information for finding the location that caused the problem\footnote{Projects a single person manages easily grow to some ten or hundred thousand lines of code. Teams of coders can build projects with millions of lines of code.}.
+The numbers in the error message (\texttt{helloworld.c:4:29: ...}) tell you where in your code the error was found: line 4, column 29. Especially in larger projects, this is an essential piece of information for finding the location that caused the problem\footnote{Projects a single person manages easily grow to some tens or hundreds of thousand lines of code. Teams of coders can build projects with millions of lines of code.}.
 
 This is because (unlike literal strings) statements can be spread over multiple lines. Similarly, there can be more than one statement in a single line. As programmers, this gives us some liberty in formatting the code such that it can be read more easily. Also, we can add or remove whitespaces (or tabs) pretty much anywhere, as long as we keep \enquote{words} together. The following code produces the same output as code \ref{code:helloworld}:
 \begin{codebox}[whitespaces.c]
@@ -208,7 +208,7 @@ To double down on this recommendation, let me quote here the conversation in whi
 \vspace{-6pt}
 \setlength\itemsep{0pt}
 \item come as block comments (\texttt{/* comment */})
-\item or as single-line comemnts (\texttt{// comment}
+\item or as single-line comemnts (\texttt{// comment})
 \end{itemize}
 \end{defbox}
 
