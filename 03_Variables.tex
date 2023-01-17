@@ -580,7 +580,7 @@ United Kingdom      : 25.2%
 \end{tcbraster}
 
 I think you will agree that the right hand side output looks nicer and allows for easier comparison and interpretation of the data by an end user. Of course we can achieve this look by putting an according number of white spaces into the format string in the \texttt{printf} statement:
-\begin{codebox}[manuallyAlignedOutput.c]
+\begin{warnbox}[manuallyAlignedOutput.c, leftupper=7mm]
 \begin{minted}[linenos]{c}
     ...
 
@@ -595,7 +595,7 @@ I think you will agree that the right hand side output looks nicer and allows fo
     printf("%s      : %lf%%\n", "United Kingdom", percentUK);
 \end{minted}
 \captionof{code}{Manually aligned output}
-\end{codebox}
+\end{warnbox}
 
 But you will agree that this piece of code doesn't look very nice. Much worse, if we want to display the same table for a different year, we have to tediously re-align the output. Rather than that, we can leave the \emph{padding with whitespaces} to be done automatically by the inner workings of \texttt{printf}.
 
